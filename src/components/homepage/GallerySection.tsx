@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 const images = [
   {
@@ -206,11 +207,12 @@ const GallerySection = () => {
           {/* Thumbnails */}
           <div className="flex justify-center space-x-2">
             {visibleThumbnailIndices.map((index) => (
-              <button
+              <Button
                 key={index}
                 ref={(el) => { thumbnailsRef.current[index] = el; }}
                 onClick={() => handleThumbnailClick(index)}
-                className={`relative w-[100px] md:w-[140px] aspect-[16/9] rounded-md overflow-hidden transition ${index === activeIndex ? 'ring-2 ring-[#D6950B]' : 'opacity-70 hover:opacity-100'}`}
+                variant="ghost"
+                className={`relative w-[100px] md:w-[140px] aspect-[16/9] rounded-md overflow-hidden transition p-0 ${index === activeIndex ? 'ring-2 ring-[#D6950B]' : 'opacity-70 hover:opacity-100'}`}
               >
                 <Image
                   src={images[index].url}
@@ -219,7 +221,7 @@ const GallerySection = () => {
                   sizes="(max-width: 768px) 60px, 80px"
                   className="object-cover"
                 />
-              </button>
+              </Button>
             ))}
           </div>
         </motion.div>

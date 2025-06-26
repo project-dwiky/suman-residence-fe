@@ -1,8 +1,10 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export interface RoomTypeProps {
+  id?: number;
   title: string;
   size: string;
   price: string;
@@ -15,6 +17,7 @@ export interface RoomTypeProps {
 }
 
 const RoomTypeCard: React.FC<RoomTypeProps> = ({
+  id,
   title,
   size,
   price,
@@ -43,8 +46,7 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
     <motion.div 
       className="overflow-hidden rounded-2xl bg-white shadow-lg group h-full flex flex-col"
       initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Header Image - Fixed Height */}
@@ -106,9 +108,12 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
           <div className="text-sm text-muted-foreground">
             <span className="font-medium">{units} Unit</span> tersedia
           </div>
-          <button className="bg-primary hover:bg-primary/90 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium">
+          <Link 
+            href={id ? `/kamar/${id}` : '/kamar'}
+            className="bg-primary hover:bg-primary/90 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
             Lihat Detail
-          </button>
+          </Link>
         </div>
       </div>
     </motion.div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 export interface RentalOptionProps {
   title: string;
@@ -53,7 +54,7 @@ const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, re
         </div>
 
         {/* Button - Fixed Height */}
-        <button 
+        <Button 
           className={`w-full py-3 rounded-lg font-medium transition-colors ${
             recommended 
               ? 'bg-primary text-white hover:bg-primary/90' 
@@ -61,7 +62,7 @@ const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, re
           }`}
         >
           Pilih {title}
-        </button>
+        </Button>
       </div>
     </motion.div>
   );
