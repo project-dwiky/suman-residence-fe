@@ -1,11 +1,11 @@
 import React from 'react';
-import HeroSection from './HeroSection';
-import FacilitySection from './FacilitySection';
-import GallerySection from './GallerySection';
-import MapSection from './MapSection';
-import CTASection from './CTASection';
+import HeroSection from './sections/HeroSection';
+import GallerySection from './sections/GallerySection';
+import MapSection from './sections/MapSection';
+import CTASection from './sections/CTASection';
 import Navbar from '../core/Navbar';
 import Footer from '../core/Footer';
+import FacilitySection from './sections/FacilitySection';
 
 const Homepage = () => {
     return (

@@ -3,13 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import AmenityCard from './facilities/AmenityCard';
-import RoomTypeCard, { RoomTypeProps } from './facilities/RoomTypeCard';
+import { IconWifi, IconWater, IconParking, IconLounge, IconKitchen, IconLaundry, IconBalcony, IconSecurity } from './facilities/FacilityIcons';
 import RentalOption from './facilities/RentalOption';
-import {
-  IconWifi, IconWater, IconParking, IconLounge, 
-  IconKitchen, IconLaundry, IconBalcony, IconSecurity,
-  IconAC, IconBed, IconWardrobe, IconArea
-} from './facilities/FacilityIcons';
+import RoomTypeCard, { RoomTypeProps } from './facilities/RoomTypeCard';
+
 
 const FacilitySection = () => {
   // Room types data
