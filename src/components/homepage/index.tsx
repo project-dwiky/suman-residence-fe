@@ -9,9 +9,9 @@ import Footer from '../core/Footer';
 
 const Homepage = () => {
     return (
-        <div className="min-h-screen overflow-x-hidden">
+        <div className="min-h-screen">
             <Navbar />
-            <div className="pt-8 md:pt-12">
+            <div>
                 <HeroSection />
                 <GallerySection />
                 <MapSection />
