@@ -23,9 +23,9 @@ async function UserDashboardPage() {
     return (
       <div className="min-h-screen overflow-x-hidden bg-[#FAFAFA]">
         <Navbar />
-        <div className="pt-8 md:pt-12">
+        <div className="pt-8">
           {/* Hero section dengan background gradient */}
-          <div className="bg-gradient-to-r from-primary to-primary/90 text-white">
+          <div className="bg-primary text-white">
             <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Dashboard Penghuni</h1>
               <p className="text-white/80">Kelola properti Anda di Suman Residence</p>
@@ -63,8 +63,8 @@ async function UserDashboardPage() {
       <Navbar />
       
       {/* Hero section premium - Improved for mobile */}
-      <div className="pt-16 md:pt-20"> {/* Increased padding top for mobile to prevent navbar overlap */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 text-white relative overflow-hidden">
+      <div className=""> {/* Increased padding top for mobile to prevent navbar overlap */}
+        <div className="bg-primary text-white relative overflow-hidden">
           {/* Decorative elements - adjusted for better mobile display */}
           <div className="absolute top-0 right-0 w-32 md:w-64 h-32 md:h-64 bg-secondary/10 rounded-full -translate-y-1/3 translate-x-1/4 blur-2xl md:blur-3xl"></div>
           <div className="absolute bottom-0 left-1/4 w-24 md:w-48 h-24 md:h-48 bg-secondary/10 rounded-full translate-y-1/3 md:translate-y-1/2 blur-xl md:blur-2xl"></div>
@@ -79,9 +79,9 @@ async function UserDashboardPage() {
               
               <Link 
                 href="/booking" 
-                className="flex items-center justify-center md:justify-start px-4 md:px-5 py-2 md:py-2.5 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition shadow-md hover:shadow-lg group w-full md:w-auto"
+                className="flex items-center justify-center  px-4 md:px-5 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition shadow-md hover:shadow-lg group w-full md:w-auto"
               >
-                <span className="text-sm md:text-base">Sewa Properti Baru</span>
+                <span className="text-sm text-center">Sewa Properti Baru</span>
                 <svg className="w-4 h-4 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

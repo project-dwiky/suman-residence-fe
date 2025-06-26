@@ -3,10 +3,10 @@
 import React from 'react';
 import Navbar from "../core/Navbar";
 import Footer from "../core/Footer";
-import RoomTypeCard from "../homepage/facilities/RoomTypeCard";
 import { motion } from 'framer-motion';
 import { Search, Filter, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import RoomTypeCard from '../homepage/sections/facilities/RoomTypeCard';
 
 // Sample room data
 const roomData = [

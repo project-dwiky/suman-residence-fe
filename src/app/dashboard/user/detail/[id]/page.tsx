@@ -13,7 +13,7 @@ export default async function RentalDetailView({ params }: DetailPageProps) {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50 pt-16 pb-20">
+      <main className="min-h-screen bg-gray-50">
         <RentalDetailPage rentalId={params.id} />
       </main>
       <Footer />

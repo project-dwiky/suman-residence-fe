@@ -127,9 +127,9 @@ const GallerySection = () => {
           </p>
         </motion.div>
 
-        {/* Main carousel */}
+        {/* Main carousel with proper aspect ratio */}
         <motion.div 
-          className="relative w-full h-[500px] mb-4 rounded-xl overflow-hidden bg-gray-100" 
+          className="relative w-full mb-4 rounded-xl overflow-hidden bg-gray-100 aspect-[16/9]" 
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           initial={{ opacity: 0, y: 20 }}
@@ -205,20 +205,20 @@ const GallerySection = () => {
           viewport={{ once: true }}
         >
           {/* Thumbnails */}
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center gap-2 px-2 sm:px-0">
             {visibleThumbnailIndices.map((index) => (
               <Button
                 key={index}
                 ref={(el) => { thumbnailsRef.current[index] = el; }}
                 onClick={() => handleThumbnailClick(index)}
                 variant="ghost"
-                className={`relative w-[100px] md:w-[140px] aspect-[16/9] rounded-md overflow-hidden transition p-0 ${index === activeIndex ? 'ring-2 ring-[#D6950B]' : 'opacity-70 hover:opacity-100'}`}
+                className={`relative w-[80px] sm:w-[100px] md:w-[140px] aspect-[4/3] rounded-md overflow-hidden transition p-0 ${index === activeIndex ? 'ring-2 ring-[#D6950B]' : 'opacity-70 hover:opacity-100'}`}
               >
                 <Image
                   src={images[index].url}
                   alt={`Thumbnail ${index + 1}`}
                   fill
-                  sizes="(max-width: 768px) 60px, 80px"
+                  sizes="(max-width: 640px) 80px, (max-width: 768px) 100px, 140px"
                   className="object-cover"
                 />
               </Button>
