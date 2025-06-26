@@ -4,11 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Menu, X, ChevronRight } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const [scroll, setScroll] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [activeSection, setActiveSection] = useState<string>('hero-section');
+  const pathname = usePathname();
 
   // Navigation links
   const navLinks = [
@@ -22,6 +24,14 @@ const Navbar = () => {
   // Function to scroll to sections
   const scrollToSection = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    
+    // If we're on the kamar page, navigate to home first
+    if (pathname === '/kamar') {
+      // Navigate to home page with hash
+      window.location.href = `/#${id}`;
+      return;
+    }
+    
     const section = document.getElementById(id);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
@@ -32,6 +42,14 @@ const Navbar = () => {
   // Function to scroll to CTA section
   const scrollToCTA = (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    // If we're on the kamar page, navigate to home first
+    if (pathname === '/kamar') {
+      // Navigate to home page with CTA hash
+      window.location.href = '/#cta-section';
+      return;
+    }
+    
     const ctaSection = document.getElementById('cta-section');
     if (ctaSection) {
       ctaSection.scrollIntoView({ behavior: 'smooth' });
@@ -41,6 +59,12 @@ const Navbar = () => {
 
   // Handle Scroll Event and Active Section
   useEffect(() => {
+    // Set active section based on current page
+    if (pathname === '/kamar') {
+      setActiveSection('kamar-page');
+      return; // Don't run scroll logic on kamar page
+    }
+
     const handleScroll = () => {
       // Handle navbar background
       if (window.scrollY > 50) {
@@ -77,11 +101,11 @@ const Navbar = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
+      className={`sticky top-0 w-full z-50 transition-all duration-300 ${
         scroll 
           ? 'bg-white/95 backdrop-blur-md shadow-md py-2' 
           : 'bg-white/90 backdrop-blur-sm py-4'
@@ -120,10 +144,10 @@ const Navbar = () => {
                 <Link 
                   key={link.name}
                   href={link.href}
-                  className="text-primary hover:text-secondary font-medium text-sm transition-colors relative group"
+                  className={`text-primary hover:text-secondary font-medium text-sm transition-colors relative group ${pathname === link.href ? 'text-secondary font-bold' : ''}`}
                 >
                   {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary transition-all duration-300 group-hover:w-full"></span>
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-secondary transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                 </Link>
               )
             ))}
@@ -141,16 +165,18 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-primary p-2"
+              className="text-primary"
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -177,10 +203,11 @@ const Navbar = () => {
               <Link
                 key={link.name}
                 href={link.href}
-                className="block text-primary hover:text-secondary font-medium py-2 text-sm"
+                className={`block text-primary hover:text-secondary font-medium py-2 text-sm ${pathname === link.href ? 'text-secondary font-bold' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
+                {pathname === link.href && <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>}
               </Link>
             )
           ))}
