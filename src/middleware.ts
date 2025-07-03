@@ -4,12 +4,13 @@ import { NextRequest, NextResponse } from 'next/server';
 const PROTECTED_PATHS = [
   '/dashboard', 
   '/profile',
-  '/booking'
+  '/booking',
+  '/admin'
 ];
 
 // Paths that require admin role
 const ADMIN_PATHS = [
-  '/dashboard/admin'
+  '/admin'
 ];
 
 // API paths that should be excluded from middleware
