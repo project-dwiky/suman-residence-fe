@@ -6,6 +6,7 @@ import { Mail, Lock, User, Phone, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { formatPhoneNumber } from '@/utils/format-phonenumber';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -23,34 +24,18 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const formatPhoneNumber = (phone: string): string => {
-    // Remove all non-digit characters first
-    let digits = phone.replace(/\D/g, '');
-    
-    // Handle Indonesian numbers
-    if (digits.startsWith('62')) {
-      return `+${digits}`; // Already has country code, just add +
-    } else if (digits.startsWith('0')) {
-      return `+62${digits.substring(1)}`; // Convert 08xx to +628xx
-    } else if (!phone.startsWith('+')) {
-      return `+62${digits}`; // Assume it's an Indonesian number without prefix
-    }
-    
-    // If it already has a plus sign, keep the original input
-    return phone;
-  };
-  
+ 
   const validatePhoneNumber = (phone: string): boolean => {
     // Basic validation for Indonesian numbers
     const cleanPhone = phone.replace(/\D/g, '');
     
-    // Check if it's a valid Indonesian number (minimum length after country code)
-    if (phone.startsWith('+62') && cleanPhone.length >= 10 && cleanPhone.length <= 14) {
+    // Check if it's a valid Indonesian number with country code
+    if (cleanPhone.startsWith('62') && cleanPhone.length >= 10 && cleanPhone.length <= 14) {
       return true;
     }
     
     // If starts with 0, it should have 10-12 digits (including the leading 0)
-    if (phone.startsWith('0') && cleanPhone.length >= 10 && cleanPhone.length <= 12) {
+    if (cleanPhone.startsWith('0') && cleanPhone.length >= 10 && cleanPhone.length <= 12) {
       return true;
     }
     
@@ -179,7 +164,7 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
           required
         />
         <p className="text-xs text-muted-foreground ml-1">
-          Format: 08xx or +62xx (will be formatted as +62xxx...)
+          Format: 08xx or 62xx (will be formatted as 62xxx...)
         </p>
       </div>
       

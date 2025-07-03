@@ -40,6 +40,12 @@ export function AdminSidebar() {
       description: "Status pembayaran"
     },
     {
+      name: "WhatsApp",
+      href: "/admin/dashboard/whatsapp",
+      icon: "💬",
+      description: "Pengaturan WhatsApp"
+    },
+    {
       name: "Laporan",
       href: "/admin/dashboard/reports",
       icon: "📊",

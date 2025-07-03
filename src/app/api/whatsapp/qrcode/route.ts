@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/services/auth.service";
+import whatsAppService from "@/services/whatsapp.service";
+
+export async function GET(request: NextRequest) {
+  try {
+    // Verify authentication
+    const user = await getCurrentUser(request);
+    
+    // If no user found, return unauthorized
+    if (!user) {
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        message: 'You are not logged in or your session has expired'
+      }, { status: 401 });
+    }
+    
+    // Only allow admin or staff to access WhatsApp API
+    if (user.role !== 'admin') {
+      return NextResponse.json({
+        error: 'Forbidden',
+        message: 'You do not have permission to access WhatsApp features'
+      }, { status: 403 });
+    }
+    
+    // Get QR code from service
+    const qrCode = await whatsAppService.getQRCode();
+    
+    if (!qrCode) {
+      return NextResponse.json({
+        qrCode: null,
+        message: 'QR code not available. WhatsApp might be already connected or experiencing issues.'
+      });
+    }
+    
+    // Return QR code
+    return NextResponse.json({
+      qrCode: qrCode
+    });
+    
+  } catch (error) {
+    console.error('Error in WhatsApp QR code API:', error);
+    return NextResponse.json({ 
+      error: 'Server Error',
+      message: error instanceof Error ? error.message : 'An unknown error occurred'
+    }, { status: 500 });
+  }
+}

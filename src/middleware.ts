@@ -5,7 +5,6 @@ const PROTECTED_PATHS = [
   '/dashboard', 
   '/profile',
   '/booking',
-  '/admin'
 ];
 
 // Paths that require admin role
@@ -77,6 +76,7 @@ export async function middleware(request: NextRequest) {
       headers: {
         'Cookie': request.headers.get('cookie') || '',
       },
+      credentials: 'include',
     });
     
     // Copy all cookies from the refresh response to our response
@@ -103,6 +103,7 @@ export async function middleware(request: NextRequest) {
           // Use the new cookies from the refresh response
           'Cookie': refreshCookies || request.headers.get('cookie') || '',
         },
+        credentials: 'include',
       });
 
       if (!meResponse.ok) {
