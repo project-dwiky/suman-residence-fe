@@ -72,16 +72,6 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
       
       {/* Content - Flex Grow */}
       <div className="p-6 flex-grow flex flex-col">
-        {/* Price and Availability - Fixed Height */}
-        <div className="flex justify-between items-center mb-4 h-[50px]">
-          <div>
-            <p className="text-sm text-muted-foreground">Mulai dari</p>
-            <p className="text-2xl font-bold text-primary">{price}</p>
-          </div>
-          <div className={`border rounded-full px-3 py-1 text-sm ${availabilityStyles[availability]}`}>
-            {availabilityText[availability]}
-          </div>
-        </div>
         
         {/* Description - Fixed Height */}
         <div className="mb-4 min-h-[60px]">
