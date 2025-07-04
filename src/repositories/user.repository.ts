@@ -75,6 +75,28 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   }
 }
 
+export async function findByPhonenum(phonenum: string): Promise<User | null> {
+  try {
+    const snapshot = await userCollection.where("phone", "==", phonenum).get();
+    
+    if (!snapshot.empty) {
+      const docData = snapshot.docs[0];
+      const data = docData.data();
+      return {
+        ...data,
+        id: docData.id,
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate(),
+      } as User;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error finding user by phone number:', error);
+    throw error;
+  }
+}
+
 export async function getAllUsers(): Promise<User[]> {
   try {
     const snapshot = await userCollection.get();

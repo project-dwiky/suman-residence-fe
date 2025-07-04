@@ -1,5 +1,5 @@
 import { auth } from '@/lib/firebase-admin';
-import { getUserById, createUser, getUserByEmail } from '@/repositories/user.repository';
+import { getUserById, createUser, getUserByEmail, findByPhonenum } from '@/repositories/user.repository';
 import { RegisterData, RegisterResponse, User, UserCredentials } from '@/types/user';
 import { setCookie, deleteCookie, getCookie } from 'cookies-next';
 import { NextRequest, NextResponse } from 'next/server';
@@ -62,17 +62,38 @@ const removeAuthCookies = (res: NextResponse): void => {
 };
 
 
+// Check if phone number is already registered
+export async function isPhonenumAlreadyRegistered(phonenum: string): Promise<boolean> {
+  try {
+    const user = await findByPhonenum(phonenum);
+    return !!user; // Returns true if user exists, false otherwise
+  } catch (error) {
+    console.error('Error checking phone number:', error);
+    throw error;
+  }
+}
+
 // Main authentication functions
 export async function registerUser(userData: RegisterData): Promise<RegisterResponse> {
   try {
-
+    // Check if email already exists
     const user = await getUserByEmail(userData.email);
     if(user) {
       return {
         status: 'error',
-        message: 'User already exists'
+        message: 'Email already registered'
       };
     }
+    
+    // Check if phone number already exists
+    const isPhoneRegistered = await isPhonenumAlreadyRegistered(userData.phone);
+    if(isPhoneRegistered) {
+      return {
+        status: 'error',
+        message: 'Phone number already registered'
+      };
+    }
+    
     // Create Firebase user with Admin SDK
     const userRecord = await auth.createUser({
       email: userData.email,
@@ -176,8 +197,8 @@ export async function verifyAuthToken(token: string): Promise<User | null> {
 // Cookie-based authentication check
 export async function checkAuthFromCookie(req: NextRequest): Promise<User | null> {
   // Try using access token first
-  const accessToken = getCookie(ACCESS_TOKEN_COOKIE, { req }) as string | undefined;
-  
+  const accessToken = await getCookie(ACCESS_TOKEN_COOKIE, { req }) as string | undefined;
+  console.log('[Auth Service checkAuthFromCookie] Access Token Cookie:', accessToken);
   if (accessToken) {
     try {
       return await verifyAuthToken(accessToken);
@@ -195,7 +216,7 @@ export async function checkAuthFromCookie(req: NextRequest): Promise<User | null
 export async function getCurrentUser(req: NextRequest): Promise<User | null> {
   // Try to get user from access token first
   const user = await checkAuthFromCookie(req);
-  
+  console.log('[Auth Service] Current user:', user);
   if (user) {
     return user;
   }

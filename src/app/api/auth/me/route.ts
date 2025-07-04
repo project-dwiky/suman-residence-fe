@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
     try {
+        console.log("[Me Route] GET request received");
+        console.log("[Me Route] Access Token Cookie:", request.cookies.get('access_token')?.value);
+        console.log("[Me Route] Refresh Token Cookie:", request.cookies.get('refresh_token')?.value);
         // Get user from current token - middleware already handles refresh
         const user = await getCurrentUser(request);
         
