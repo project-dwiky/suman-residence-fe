@@ -5,237 +5,297 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
-const images = [
+const galleryItems = [
     {
+        id: 1,
         url: "/galeri/g3.jpg",
-        alt: "Interior living room with modern design",
+        title: "Living Room Modern",
+        description: "Ruang tamu dengan desain modern dan nyaman",
+        category: "Interior",
     },
     {
+        id: 2,
         url: "/galeri/g4.jpg",
-        alt: "Bedroom with comfortable bed and natural light",
+        title: "Kamar Tidur Deluxe",
+        description: "Kamar tidur dengan pencahayaan alami",
+        category: "Bedroom",
     },
-    {   
+    {
+        id: 3,
         url: "/galeri/g5.jpg",
-        alt: "Modern kitchen with island and appliances",
+        title: "Dapur Modern",
+        description: "Dapur lengkap dengan kitchen island dan peralatan modern",
+        category: "Kitchen",
     },
     {
+        id: 4,
         url: "/galeri/g6.jpg",
-        alt: "Contemporary bathroom with shower and bathtub",
+        title: "Kamar Mandi Premium",
+        description: "Kamar mandi kontemporer dengan shower dan bathtub",
+        category: "Bathroom",
     },
     {
+        id: 5,
         url: "/galeri/g7.jpg",
-        alt: "Cozy dining area with wooden table",
+        title: "Ruang Makan Keluarga",
+        description: "Area makan yang hangat dengan meja kayu alami",
+        category: "Dining",
     },
     {
+        id: 6,
         url: "/galeri/g8.jpg",
-        alt: "Stylish living room with plants and decor",
+        title: "Living Room Stylish",
+        description: "Ruang tamu bergaya dengan tanaman dan dekor menarik",
+        category: "Interior",
     },
     {
+        id: 7,
         url: "/galeri/g9.jpg",
-        alt: "Bright bedroom with minimalist design",
-    },
-    {
-        url: "/galeri/g10.jpg",
-        alt: "Modern apartment with full kitchen",
-    },
-    {
-        url: "/galeri/g11.jpg",
-        alt: "Elegant bathroom with bathtub and vanity",
-    },
-    {
-        url: "/galeri/g12.jpg",
-        alt: "Outdoor patio with seating area",
+        title: "Kamar Tidur Minimalis",
+        description: "Kamar tidur cerah dengan desain minimalis",
+        category: "Bedroom",
     },
 ];
 
-// Always show exactly 3 thumbnails (previous, current, next)
-
 const GallerySection = () => {
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
-    const thumbnailsRef = useRef<(HTMLButtonElement | null)[]>([]);
-    const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [activeCategory, setActiveCategory] = useState("Semua");
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const carouselRef = useRef<HTMLDivElement>(null);
 
-    // Handle next/previous image
-    const handlePrevImage = () => {
-        setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-        resetAutoplayTimer();
+    const categories = [
+        "Semua",
+        "Interior",
+        "Bedroom",
+        "Kitchen",
+        "Bathroom",
+        "Dining",
+    ];
+
+    const filteredItems =
+        activeCategory === "Semua"
+            ? galleryItems
+            : galleryItems.filter((item) => item.category === activeCategory);
+
+    // Responsive items per view
+    const getItemsPerView = () => {
+        if (typeof window !== "undefined") {
+            if (window.innerWidth < 640) return 1; // Mobile: 1 item
+            if (window.innerWidth < 1024) return 2; // Tablet: 2 items
+            return 4; // Desktop: 4 items
+        }
+        return 4; // Default for SSR
     };
 
-    const handleNextImage = useCallback(() => {
-        setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    const [itemsPerView, setItemsPerView] = useState(getItemsPerView);
+    const maxIndex = Math.max(0, filteredItems.length - itemsPerView);
+
+    // Handle window resize
+    useEffect(() => {
+        const handleResize = () => {
+            setItemsPerView(getItemsPerView());
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // Reset autoplay timer when user interacts
-    const resetAutoplayTimer = () => {
-        if (autoplayTimerRef.current) {
-            clearInterval(autoplayTimerRef.current);
-            autoplayTimerRef.current = null;
-        }
+    const handlePrevious = () => {
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
     };
 
-    // Handle thumbnail navigation
-    const handleThumbnailClick = (index: number) => {
-        setActiveIndex(index);
-        resetAutoplayTimer();
+    const handleNext = () => {
+        setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
     };
 
-    // Get the 3 thumbnails to show (previous, current, next)
-    const getVisibleThumbnails = () => {
-        // If we have fewer than 3 images, just return all of them
-        if (images.length <= 3) {
-            return images.map((_, index) => index);
-        }
-
-        // Get indices of previous, current, and next images
-        const prev = activeIndex === 0 ? images.length - 1 : activeIndex - 1;
-        const next = activeIndex === images.length - 1 ? 0 : activeIndex + 1;
-
-        return [prev, activeIndex, next];
-    };
-
-    const visibleThumbnailIndices = getVisibleThumbnails();
-
-    // Setup autoplay
+    // Reset index when category or itemsPerView changes
     useEffect(() => {
-        // Set up autoplay - move to next image every 5 seconds
-        if (!isPaused && !autoplayTimerRef.current) {
-            autoplayTimerRef.current = setInterval(handleNextImage, 5000);
-        }
+        setCurrentIndex(0);
+    }, [activeCategory, itemsPerView]);
 
-        // Clear interval on component unmount
-        return () => {
-            if (autoplayTimerRef.current) {
-                clearInterval(autoplayTimerRef.current);
-            }
-        };
-    }, [isPaused, handleNextImage]);
+    // Auto-scroll functionality
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => {
+                if (prev >= maxIndex) {
+                    return 0;
+                } else {
+                    return prev + 1;
+                }
+            });
+        }, 4000);
+
+        return () => clearInterval(interval);
+    }, [maxIndex]);
 
     return (
-        <section className="py-6 md:py-16 bg-background" id="gallery-section">
+        <section
+            className="py-8 md:py-16 bg-gradient-to-b from-background to-muted/20"
+            id="gallery-section"
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <motion.div
-                    className="mb-10 text-center"
+                    className="mb-12 text-center"
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7 }}
                     viewport={{ once: true }}
                 >
-                    <h2 className="text-4xl font-bold text-primary mb-4">
-                        Galeri
+                    <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+                        Galeri Suman Residence
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Jelajahi keindahan dan kenyamanan Suman Residence
-                        melalui koleksi foto kami. Lihat lebih dekat setiap
-                        detail unit dan fasilitas yang dirancang untuk kehidupan
-                        modern Anda.
+                    <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                        Jelajahi berbagai tipe unit dan fasilitas premium yang
+                        kami tawarkan untuk kenyamanan hidup modern Anda
                     </p>
                 </motion.div>
 
-                {/* Main carousel with proper aspect ratio */}
+                {/* Category Filter */}
                 <motion.div
-                    className="relative w-full max-md:h-[600px] mb-4 rounded-xl bg-black overflow-hidden aspect-[9/16] md:aspect-[16/9]"
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
+                    className="flex flex-wrap justify-center gap-2 mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.2 }}
                     viewport={{ once: true }}
                 >
-                    {/* Main image */}
-                    {images.map((image, index) => (
-                        <div
-                            key={index}
-                            className={`absolute inset-0 transition-opacity duration-300 ${
-                                index === activeIndex
-                                    ? "opacity-100"
-                                    : "opacity-0 pointer-events-none"
+                    {categories.map((category) => (
+                        <Button
+                            key={category}
+                            onClick={() => setActiveCategory(category)}
+                            variant={
+                                activeCategory === category
+                                    ? "default"
+                                    : "outline"
+                            }
+                            className={`px-4 py-2 text-sm transition-all duration-300 ${
+                                activeCategory === category
+                                    ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                                    : "hover:bg-primary/10"
                             }`}
                         >
-                            <Image
-                                src={image.url}
-                                alt={image.alt}
-                                fill
-                                className="object-contain"
-                                priority={index === activeIndex}
-                            />
-                        </div>
+                            {category}
+                        </Button>
                     ))}
-
-                    {/* Carousel navigation buttons */}
-                    <motion.button
-                        className="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white rounded-full p-2 z-10 transition"
-                        onClick={handlePrevImage}
-                        aria-label="Previous image"
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                        viewport={{ once: true }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ChevronLeft size={24} />
-                    </motion.button>
-                    <motion.button
-                        className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white rounded-full p-2 z-10 transition"
-                        onClick={handleNextImage}
-                        aria-label="Next image"
-                        initial={{ opacity: 0, x: 10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.5 }}
-                        viewport={{ once: true }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <ChevronRight size={24} />
-                    </motion.button>
-
-                    {/* Image counter */}
-                    <motion.div
-                        className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm"
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.7 }}
-                        viewport={{ once: true }}
-                    >
-                        {activeIndex + 1} / {images.length}
-                    </motion.div>
                 </motion.div>
 
-                {/* Thumbnails navigation */}
+                {/* Gallery Carousel */}
                 <motion.div
-                    className="mt-4"
-                    initial={{ opacity: 0, y: 20 }}
+                    className="relative"
+                    initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.4 }}
                     viewport={{ once: true }}
                 >
-                    {/* Thumbnails */}
-                    <div className="flex justify-center gap-2 px-2 sm:px-0">
-                        {visibleThumbnailIndices.map((index) => (
-                            <Button
-                                key={index}
-                                ref={(el) => {
-                                    thumbnailsRef.current[index] = el;
-                                }}
-                                onClick={() => handleThumbnailClick(index)}
-                                variant="ghost"
-                                className={`relative w-[80px] sm:w-[100px] md:w-[140px] aspect-[4/3] rounded-md overflow-hidden transition p-0 ${
-                                    index === activeIndex
-                                        ? "ring-2 ring-[#D6950B]"
-                                        : "opacity-70 hover:opacity-100"
-                                }`}
-                            >
-                                <Image
-                                    src={images[index].url}
-                                    alt={`Thumbnail ${index + 1}`}
-                                    fill
-                                    sizes="(max-width: 640px) 80px, (max-width: 768px) 100px, 140px"
-                                    className="object-cover"
-                                />
-                            </Button>
-                        ))}
+                    <div className="overflow-hidden rounded-2xl">
+                        <div
+                            ref={carouselRef}
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{
+                                transform: `translateX(-${
+                                    currentIndex * (100 / itemsPerView)
+                                }%)`,
+                            }}
+                        >
+                            {filteredItems.map((item, index) => (
+                                <motion.div
+                                    key={item.id}
+                                    className="relative group cursor-pointer flex-shrink-0"
+                                    style={{
+                                        width: `${100 / itemsPerView}%`,
+                                    }}
+                                    whileHover={{ y: -8 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <div className="relative h-[300px] md:h-[400px] mx-1 sm:mx-2 rounded-xl overflow-hidden bg-black">
+                                        <Image
+                                            src={item.url}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                        />
+
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                        {/* Content */}
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                    delay: index * 0.1,
+                                                }}
+                                                viewport={{ once: true }}
+                                            >
+                                                <h3 className="text-lg md:text-xl font-bold mb-2 transition-colors">
+                                                    {item.title}
+                                                </h3>
+                                                <p className="text-sm md:text-base text-gray-200 opacity-90 group-hover:opacity-100 transition-opacity">
+                                                    {item.description}
+                                                </p>
+                                                <div className="inline-flex items-center mt-3 text-secondary font-medium">
+                                                    <span className="text-xs tracking-wider uppercase">
+                                                        {item.category}
+                                                    </span>
+                                                </div>
+                                            </motion.div>
+                                        </div>
+
+                                        {/* Hover effect overlay */}
+                                        <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Navigation Arrows */}
+                    {filteredItems.length > itemsPerView && (
+                        <>
+                            <Button
+                                onClick={handlePrevious}
+                                disabled={currentIndex === 0}
+                                variant="outline"
+                                size="icon"
+                                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </Button>
+
+                            <Button
+                                onClick={handleNext}
+                                disabled={currentIndex >= maxIndex}
+                                variant="outline"
+                                size="icon"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight className="h-5 w-5" />
+                            </Button>
+                        </>
+                    )}
+
+                    {/* Dots Indicator */}
+                    {filteredItems.length > itemsPerView && (
+                        <div className="flex justify-center gap-2 mt-6">
+                            {Array.from({ length: maxIndex + 1 }).map(
+                                (_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentIndex(index)}
+                                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                            index === currentIndex
+                                                ? "bg-primary w-8"
+                                                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                                        }`}
+                                    />
+                                )
+                            )}
+                        </div>
+                    )}
                 </motion.div>
             </div>
         </section>

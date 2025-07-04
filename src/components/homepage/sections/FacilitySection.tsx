@@ -69,7 +69,7 @@ const FacilitySection = () => {
     },
     {
       icon: <IconBalcony />,
-      title: "Balkon Pemandangan Bagus",
+      title: "Balkon Pemandangan Kota",
       description: "Nikmati pemandangan bagus dari balkon dengan desain minimalis modern"
     },
     {

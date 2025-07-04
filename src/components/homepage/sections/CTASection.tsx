@@ -1,83 +1,122 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import React from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const CTASection = () => {
-  return (
-    <section id="cta-section" className="py-6 md:py-12 bg-background relative overflow-hidden scroll-mt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="rounded-2xl bg-gradient-to-r from-primary/90 to-secondary/90 px-6 py-10 md:py-16 shadow-xl overflow-hidden relative">
-          {/* Professional geometric background pattern */}
-          <div className="absolute inset-0 opacity-10">
-            {/* Right side pattern */}
-            <svg className="absolute right-0 top-0 h-full" width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M600 0V400H0L600 0Z" fillOpacity="0.1" fill="white"/>
-              <path d="M600 0V300H150L600 0Z" fillOpacity="0.1" fill="white"/>
-              <path d="M600 0V200H300L600 0Z" fillOpacity="0.1" fill="white"/>
-              <path d="M600 0V100H450L600 0Z" fillOpacity="0.1" fill="white"/>
-            </svg>
-            
-            {/* Left side subtle grid pattern */}
-            <svg className="absolute left-0 bottom-0 h-3/4" width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="0" y1="50" x2="300" y2="50" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="0" y1="100" x2="300" y2="100" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="0" y1="150" x2="300" y2="150" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="0" y1="200" x2="300" y2="200" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="0" y1="250" x2="300" y2="250" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              
-              <line x1="50" y1="0" x2="50" y2="300" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="100" y1="0" x2="100" y2="300" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="150" y1="0" x2="150" y2="300" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="200" y1="0" x2="200" y2="300" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-              <line x1="250" y1="0" x2="250" y2="300" stroke="white" strokeWidth="0.5" strokeDasharray="8 8"/>
-            </svg>
-          </div>
+    return (
+        <section
+            id="cta-section"
+            className="pb-20 md:pb-28 relative overflow-hidden scroll-mt-24"
+        >
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                {/* Left flowing ribbon shape */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-48 h-48 opacity-20">
+                    <svg
+                        className="w-full h-full"
+                        viewBox="0 0 200 200"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M20 50C40 30 70 40 90 60C110 80 120 100 100 120C80 140 50 130 30 110C10 90 0 70 20 50Z"
+                            fill="#6b7280"
+                            className="animate-pulse"
+                        />
+                        <path
+                            d="M30 70C50 50 80 60 100 80C120 100 130 120 110 140C90 160 60 150 40 130C20 110 10 90 30 70Z"
+                            fill="#9ca3af"
+                            opacity="0.7"
+                            className="animate-pulse"
+                            style={{ animationDelay: "1s" }}
+                        />
+                        <path
+                            d="M40 90C60 70 90 80 110 100C130 120 140 140 120 160C100 180 70 170 50 150C30 130 20 110 40 90Z"
+                            fill="#d1d5db"
+                            opacity="0.5"
+                            className="animate-pulse"
+                            style={{ animationDelay: "2s" }}
+                        />
+                    </svg>
+                </div>
 
-          <div className="relative z-10 text-center max-w-3xl mx-auto">
-            <motion.h2 
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              viewport={{ once: true }}
-            >
-              Siap untuk memulai hidup nyaman?
-            </motion.h2>
-            
-            <motion.p 
-              className="text-white/90 text-lg mb-8 md:mb-10 max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              Booking sekarang untuk mendapatkan kesempatan hunian terbaik sesuai kebutuhan Anda.
-              Dapatkan penawaran spesial untuk booking minggu ini.
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              viewport={{ once: true }}
-            >
-              <Link href="/kamar" passHref>
-                <Button 
-                  size="lg" 
-                  className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-lg rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Booking Sekarang
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+                {/* Right flowing ribbon shape */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-48 h-48 opacity-20">
+                    <svg
+                        className="w-full h-full"
+                        viewBox="0 0 200 200"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M180 50C160 30 130 40 110 60C90 80 80 100 100 120C120 140 150 130 170 110C190 90 200 70 180 50Z"
+                            fill="#6b7280"
+                            className="animate-pulse"
+                        />
+                        <path
+                            d="M170 70C150 50 120 60 100 80C80 100 70 120 90 140C110 160 140 150 160 130C180 110 190 90 170 70Z"
+                            fill="#9ca3af"
+                            opacity="0.7"
+                            className="animate-pulse"
+                            style={{ animationDelay: "1.5s" }}
+                        />
+                        <path
+                            d="M160 90C140 70 110 80 90 100C70 120 60 140 80 160C100 180 130 170 150 150C170 130 180 110 160 90Z"
+                            fill="#d1d5db"
+                            opacity="0.5"
+                            className="animate-pulse"
+                            style={{ animationDelay: "0.5s" }}
+                        />
+                    </svg>
+                </div>
+
+                <div className="text-center relative z-10">
+                    <motion.h2
+                        className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 leading-tight"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, duration: 0.8 }}
+                        viewport={{ once: true }}
+                    >
+                        Siap untuk memulai 
+                        <br />
+                        <span className="text-secondary">hidup nyaman?</span>
+                    </motion.h2>
+
+                    <motion.p
+                        className="text-primary/75 text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.8 }}
+                        viewport={{ once: true }}
+                    >
+                        Nikmati kenyamanan hunian modern dengan fasilitas
+                        lengkap dan lokasi strategis. Hubungi kami untuk
+                        penawaran terbaik.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                        viewport={{ once: true }}
+                    >
+                        <Link href="/kamar" passHref>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className=" border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 text-base rounded-full font-medium transition-all duration-300 hover:border-gray-600"
+                            >
+                                Booking Sekarang
+                            </Button>
+                        </Link>
+                    </motion.div>
+                </div>
+            </div>
+        </section>
+    );
 };
 
 export default CTASection;
