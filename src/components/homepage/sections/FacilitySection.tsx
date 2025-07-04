@@ -17,7 +17,7 @@ const FacilitySection = () => {
       price: "Rp 1.500.000",
       description: "Kamar nyaman dengan ukuran compact, ideal untuk mahasiswi atau profesional muda.",
       features: ["AC", "Kasur Queen Bed", "Wi-Fi", "Lemari Pakaian", "Meja Nakas", "Tempat Sampah"],
-      image: "/galeri/kamar_A/1.png",
+      image: "/galeri/kamar_A/h2.JPG",
       availability: "available" as const,
       type: "A" as const,
       units: 35
@@ -28,7 +28,7 @@ const FacilitySection = () => {
       price: "Rp 2.100.000",
       description: "Kamar luas dengan ruang yang lebih fleksibel untuk kebutuhan Anda.",
       features: ["AC", "Kasur Queen Bed", "Wi-Fi", "Lemari Pakaian Besar", "Meja Nakas", "Area Kerja"],
-      image: "/galeri/kamar_B/1.png",
+      image: "/galeri/kamar_A/h1.JPG",
       availability: "limited" as const,
       type: "B" as const,
       units: 5

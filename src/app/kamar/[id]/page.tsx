@@ -1,5 +1,11 @@
 import RoomDetail from "@/components/kamar/RoomDetail";
 
-export default function RoomDetailPage({ params }: { params: { id: string } }) {
-  return <RoomDetail roomId={params.id} />;
-} 
+
+export default async function RoomDetailPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const roomId = (await params).id;
+    return <RoomDetail roomId={roomId} />;
+}

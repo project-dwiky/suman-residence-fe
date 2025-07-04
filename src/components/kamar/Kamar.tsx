@@ -12,24 +12,24 @@ import RoomTypeCard from '../homepage/sections/facilities/RoomTypeCard';
 const roomData = [
   {
     id: 1,
-    title: "Kamar Premium Tipe A",
+    title: "Kamar Tipe A",
     size: "4 x 4 meter",
     price: "Rp 1.500.000",
     description: "Kamar nyaman dengan ukuran compact, ideal untuk mahasiswi atau profesional muda. Dilengkapi dengan fasilitas modern untuk kenyamanan maksimal.",
     features: ["AC", "Kasur Queen Bed", "Wi-Fi Gratis", "Lemari Pakaian", "Meja Nakas", "Tempat Sampah"],
-    image: "/galeri/kamar_A/1.png",
+    image: "/galeri/kamar_A/h2.JPG",
     availability: "available" as const,
     type: "A" as const,
-    units: 33
+    units: 35
   },
   {
     id: 2,
-    title: "Suite Executive Tipe B", 
+    title: "Kamar Tipe B", 
     size: "4 x 5,5 meter",
     price: "Rp 2.100.000",
     description: "Kamar luas dengan ruang yang lebih fleksibel untuk kebutuhan Anda. Suite premium dengan area kerja dan penyimpanan yang lebih besar.",
     features: ["AC", "Kasur Queen Bed", "Wi-Fi Gratis", "Lemari Pakaian Besar", "Meja Nakas", "Area Kerja"],
-    image: "/galeri/kamar_B/1.png",
+    image: "/galeri/kamar_A/h1.JPG",
     availability: "limited" as const,
     type: "B" as const,
     units: 5

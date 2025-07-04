@@ -21,12 +21,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 // Sample room data (in real app, this would come from API)
 const roomData = {
     1: {
         id: 1,
-        title: "Deluxe Room",
+        title: "Kamar Tipe A",
         size: "24m²",
         price: "Rp 350.000",
         originalPrice: "Rp 400.000",
@@ -74,12 +81,7 @@ const roomData = {
                 description: "Lemari pakaian dengan hanger",
             },
         ],
-        images: [
-            "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&h=600&fit=crop",
-            "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&h=600&fit=crop",
-            "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&h=600&fit=crop",
-            "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
-        ],
+        images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
         availability: "available" as const,
         type: "A" as const,
         units: 8,
@@ -91,7 +93,76 @@ const roomData = {
         floor: "2-4",
         checkIn: "14:00",
         checkOut: "12:00",
-        cancellation: "Free cancellation until 24 hours before check-in",
+        policies: [
+            "Check-in: 14:00 | Check-out: 12:00",
+            "Free cancellation until 24 hours before check-in",
+            "No smoking in rooms",
+            "Pets not allowed",
+            "Quiet hours: 22:00 - 07:00",
+        ],
+    },
+    2: {
+        id: 2,
+        title: "Kamar Tipe B",
+        size: "24m²",
+        price: "Rp 350.000",
+        originalPrice: "Rp 400.000",
+        description:
+            "Kamar nyaman dengan pemandangan kota yang indah, dilengkapi dengan fasilitas modern untuk kenyamanan maksimal. Kamar ini cocok untuk perjalanan bisnis maupun liburan.",
+        longDescription:
+            'Deluxe Room kami menawarkan pengalaman menginap yang nyaman dan mewah. Dengan luas 24m², kamar ini dilengkapi dengan tempat tidur queen yang nyaman, kamar mandi dalam yang bersih, dan pemandangan kota yang indah dari jendela kamar. AC yang sejuk, TV LED 32" dengan channel lengkap, dan WiFi gratis tersedia untuk kenyamanan Anda.',
+        features: [
+            "AC",
+            'TV LED 32"',
+            "WiFi Gratis",
+            "Kamar Mandi Dalam",
+            "Tempat Tidur Queen",
+            "Lemari Pakaian",
+        ],
+        amenities: [
+            {
+                name: "AC",
+                icon: Snowflake,
+                description: "Air conditioning dengan pengaturan suhu",
+            },
+            {
+                name: 'TV LED 32"',
+                icon: Tv,
+                description: "Televisi dengan channel lengkap",
+            },
+            {
+                name: "WiFi Gratis",
+                icon: Wifi,
+                description: "Koneksi internet cepat",
+            },
+            {
+                name: "Kamar Mandi Dalam",
+                icon: Bath,
+                description: "Kamar mandi pribadi dengan shower",
+            },
+            {
+                name: "Tempat Tidur Queen",
+                icon: Bed,
+                description: "Tempat tidur queen size yang nyaman",
+            },
+            {
+                name: "Lemari Pakaian",
+                icon: Users,
+                description: "Lemari pakaian dengan hanger",
+            },
+        ],
+        images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
+        availability: "available" as const,
+        type: "A" as const,
+        units: 8,
+        rating: 4.8,
+        reviewCount: 127,
+        maxGuests: 2,
+        bedType: "Queen Bed",
+        view: "City View",
+        floor: "2-4",
+        checkIn: "14:00",
+        checkOut: "12:00",
         policies: [
             "Check-in: 14:00 | Check-out: 12:00",
             "Free cancellation until 24 hours before check-in",
@@ -165,14 +236,6 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                     fill
                                     className="object-cover"
                                 />
-                                <div className="absolute top-4 left-4">
-                                    <Link
-                                        href="/kamar"
-                                        className="bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
-                                    >
-                                        <ArrowLeft className="w-5 h-5" />
-                                    </Link>
-                                </div>
                             </div>
                             <div className="p-4">
                                 <div className="grid grid-cols-4 gap-2">
@@ -221,14 +284,6 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                                 ({room.reviewCount} ulasan)
                                             </span>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-3xl font-bold text-primary">
-                                        {room.price}
-                                    </div>
-                                    <div className="text-sm text-gray-500 line-through">
-                                        {room.originalPrice}
                                     </div>
                                 </div>
                             </div>
@@ -361,56 +416,30 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Jumlah Tamu
                                         </label>
-                                        <select
-                                            value={guests}
-                                            onChange={(e) =>
-                                                setGuests(
-                                                    Number(e.target.value)
-                                                )
+                                        <Select
+                                            value={guests.toString()}
+                                            onValueChange={(value) =>
+                                                setGuests(Number(value))
                                             }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                         >
-                                            {[1, 2].map((num) => (
-                                                <option key={num} value={num}>
-                                                    {num} tamu
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="border-t pt-4 mb-6">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-gray-600">
-                                            Harga per malam
-                                        </span>
-                                        <span className="font-medium">
-                                            {room.price}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-gray-600">
-                                            Diskon
-                                        </span>
-                                        <span className="text-green-600">
-                                            -Rp 50.000
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-lg font-semibold">
-                                        <span>Total</span>
-                                        <span className="text-primary">
-                                            {room.price}
-                                        </span>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Pilih jumlah tamu" />
+                                            </SelectTrigger>
+                                            <SelectContent className="w-full">
+                                                <SelectItem value="1">
+                                                    1 Tamu
+                                                </SelectItem>
+                                                <SelectItem value="2">
+                                                    2 Tamu
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
 
                                 <Button className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors mb-4">
                                     Pesan Sekarang
                                 </Button>
-
-                                <div className="text-center text-sm text-gray-600 mb-4">
-                                    {room.cancellation}
-                                </div>
 
                                 <div className="border-t pt-4">
                                     <h4 className="font-medium mb-3">
