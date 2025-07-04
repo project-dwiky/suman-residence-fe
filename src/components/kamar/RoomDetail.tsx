@@ -34,142 +34,196 @@ const roomData = {
     1: {
         id: 1,
         title: "Kamar Tipe A",
-        size: "24m²",
-        price: "Rp 350.000",
-        originalPrice: "Rp 400.000",
+        size: "4 x 4 meter",
+        price: "Rp 1.500.000",
+        originalPrice: "Rp 1.800.000",
+        pricePerMonth: "Rp 1.500.000",
         description:
-            "Kamar nyaman dengan pemandangan kota yang indah, dilengkapi dengan fasilitas modern untuk kenyamanan maksimal. Kamar ini cocok untuk perjalanan bisnis maupun liburan.",
+            "Kamar eksklusif khusus perempuan dengan ukuran 4x4 meter. Dilengkapi dengan fasilitas modern untuk kenyamanan maksimal dalam hunian kos-kosan premium di Banda Aceh.",
         longDescription:
-            'Deluxe Room kami menawarkan pengalaman menginap yang nyaman dan mewah. Dengan luas 24m², kamar ini dilengkapi dengan tempat tidur queen yang nyaman, kamar mandi dalam yang bersih, dan pemandangan kota yang indah dari jendela kamar. AC yang sejuk, TV LED 32" dengan channel lengkap, dan WiFi gratis tersedia untuk kenyamanan Anda.',
+            'Kamar Tipe A di Suman Residence menawarkan hunian kos-kosan eksklusif khusus perempuan dengan konsep "Cozy Living Space". Dengan ukuran 4x4 meter, kamar ini dilengkapi dengan kasur Queen Bed yang nyaman, AC untuk kenyamanan suhu ruangan, lemari pakaian yang cukup luas, meja nakas, dan tempat sampah.',
         features: [
             "AC",
-            'TV LED 32"',
+            "Kasur Queen Bed",
             "WiFi Gratis",
-            "Kamar Mandi Dalam",
-            "Tempat Tidur Queen",
             "Lemari Pakaian",
+            "Meja Nakas", 
+            "Tempat Sampah"
         ],
         amenities: [
             {
                 name: "AC",
                 icon: Snowflake,
-                description: "Air conditioning dengan pengaturan suhu",
+                description: "Air conditioning untuk kenyamanan suhu ruangan",
             },
             {
-                name: 'TV LED 32"',
-                icon: Tv,
-                description: "Televisi dengan channel lengkap",
+                name: "Kasur Queen Bed",
+                icon: Bed,
+                description: "Kasur queen size yang nyaman untuk istirahat optimal",
             },
             {
                 name: "WiFi Gratis",
                 icon: Wifi,
-                description: "Koneksi internet cepat",
-            },
-            {
-                name: "Kamar Mandi Dalam",
-                icon: Bath,
-                description: "Kamar mandi pribadi dengan shower",
-            },
-            {
-                name: "Tempat Tidur Queen",
-                icon: Bed,
-                description: "Tempat tidur queen size yang nyaman",
+                description: "Koneksi internet gratis untuk kebutuhan digital",
             },
             {
                 name: "Lemari Pakaian",
                 icon: Users,
-                description: "Lemari pakaian dengan hanger",
+                description: "Lemari pakaian dengan kapasitas yang memadai",
+            },
+            {
+                name: "Meja Nakas",
+                icon: Tv,
+                description: "Meja nakas untuk keperluan pribadi",
+            },
+            {
+                name: "Tempat Sampah",
+                icon: Bath,
+                description: "Tempat sampah untuk menjaga kebersihan kamar",
             },
         ],
         images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
         availability: "available" as const,
         type: "A" as const,
-        units: 8,
-        rating: 4.8,
-        reviewCount: 127,
-        maxGuests: 2,
+        units: 35,
+        totalUnits: 39,
+        rating: 4.9,
+        reviewCount: 89,
+        maxGuests: 1,
         bedType: "Queen Bed",
         view: "City View",
-        floor: "2-4",
-        checkIn: "14:00",
-        checkOut: "12:00",
+        floor: "Lantai 1-3",
+        checkIn: "Fleksibel 24 jam",
+        checkOut: "Sesuai kontrak sewa",
+        rentalPeriods: ["Mingguan", "Bulanan", "Semester", "Tahunan"],
         policies: [
-            "Check-in: 14:00 | Check-out: 12:00",
-            "Free cancellation until 24 hours before check-in",
-            "No smoking in rooms",
-            "Pets not allowed",
-            "Quiet hours: 22:00 - 07:00",
+            "Hunian khusus perempuan",
+            "Check-in fleksibel 24 jam",
+            "Akses WiFi gratis unlimited", 
+            "Air PDAM gratis",
+            "Parkir gratis (mobil & motor)",
+            "Listrik prabayar per kamar",
+            "Laundry antar jemput tersedia"
         ],
+        includedFacilities: [
+            "Free Air PDAM",
+            "Free WiFi", 
+            "Free Parkir"
+        ],
+        excludedFacilities: [
+            "Listrik prabayar per kamar"
+        ],
+        sharedFacilities: [
+            "Void Lounge",
+            "Dapur Bersama", 
+            "Area Jemuran",
+            "Balkon",
+            "Parkiran (Mobil & Motor)"
+        ],
+        contact: {
+            owner: "08221140701",
+            admin: "081265945003", 
+            email: "Sumanresidence338@gmail.com",
+            instagram: "@Suman_Residence",
+            tiktok: "@Suman.Residence"
+        }
     },
     2: {
         id: 2,
-        title: "Kamar Tipe B",
-        size: "24m²",
-        price: "Rp 350.000",
-        originalPrice: "Rp 400.000",
+        title: "Kamar Tipe B", 
+        size: "4 x 5,5 meter",
+        price: "Rp 2.100.000",
+        originalPrice: "Rp 2.400.000",
+        pricePerMonth: "Rp 2.100.000",
         description:
-            "Kamar nyaman dengan pemandangan kota yang indah, dilengkapi dengan fasilitas modern untuk kenyamanan maksimal. Kamar ini cocok untuk perjalanan bisnis maupun liburan.",
+            "Kamar premium khusus perempuan dengan ukuran lebih luas 4x5,5 meter. Suite eksklusif dengan ruang yang lebih fleksibel untuk kenyamanan maksimal.",
         longDescription:
-            'Deluxe Room kami menawarkan pengalaman menginap yang nyaman dan mewah. Dengan luas 24m², kamar ini dilengkapi dengan tempat tidur queen yang nyaman, kamar mandi dalam yang bersih, dan pemandangan kota yang indah dari jendela kamar. AC yang sejuk, TV LED 32" dengan channel lengkap, dan WiFi gratis tersedia untuk kenyamanan Anda.',
+            'Kamar Tipe B di Suman Residence adalah pilihan premium dengan ukuran 4x5,5 meter yang memberikan ruang lebih luas dan fleksibel. Hunian kos-kosan eksklusif khusus perempuan ini dilengkapi dengan semua fasilitas modern termasuk kasur Queen Bed, AC, lemari pakaian yang lebih besar, meja nakas, dan area yang lebih lega untuk aktivitas sehari-hari.',
         features: [
             "AC",
-            'TV LED 32"',
+            "Kasur Queen Bed", 
             "WiFi Gratis",
-            "Kamar Mandi Dalam",
-            "Tempat Tidur Queen",
-            "Lemari Pakaian",
+            "Lemari Pakaian Besar",
+            "Meja Nakas",
+            "Area Lebih Luas"
         ],
         amenities: [
             {
                 name: "AC",
                 icon: Snowflake,
-                description: "Air conditioning dengan pengaturan suhu",
+                description: "Air conditioning untuk kenyamanan suhu ruangan",
             },
             {
-                name: 'TV LED 32"',
-                icon: Tv,
-                description: "Televisi dengan channel lengkap",
-            },
-            {
-                name: "WiFi Gratis",
-                icon: Wifi,
-                description: "Koneksi internet cepat",
-            },
-            {
-                name: "Kamar Mandi Dalam",
-                icon: Bath,
-                description: "Kamar mandi pribadi dengan shower",
-            },
-            {
-                name: "Tempat Tidur Queen",
+                name: "Kasur Queen Bed",
                 icon: Bed,
-                description: "Tempat tidur queen size yang nyaman",
+                description: "Kasur queen size premium yang sangat nyaman",
             },
             {
-                name: "Lemari Pakaian",
+                name: "WiFi Gratis", 
+                icon: Wifi,
+                description: "Koneksi internet gratis unlimited",
+            },
+            {
+                name: "Lemari Pakaian Besar",
                 icon: Users,
-                description: "Lemari pakaian dengan hanger",
+                description: "Lemari pakaian dengan kapasitas ekstra besar",
+            },
+            {
+                name: "Meja Nakas",
+                icon: Tv,
+                description: "Meja nakas dengan storage tambahan",
+            },
+            {
+                name: "Area Lebih Luas", 
+                icon: Bath,
+                description: "Ruang kamar yang lebih lega dan fleksibel",
             },
         ],
         images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
-        availability: "available" as const,
-        type: "A" as const,
-        units: 8,
-        rating: 4.8,
-        reviewCount: 127,
-        maxGuests: 2,
+        availability: "limited" as const,
+        type: "B" as const,
+        units: 5,
+        totalUnits: 39,
+        rating: 4.9,
+        reviewCount: 89,
+        maxGuests: 1,
         bedType: "Queen Bed",
-        view: "City View",
-        floor: "2-4",
-        checkIn: "14:00",
-        checkOut: "12:00",
+        view: "Premium City View", 
+        floor: "Lantai 2-3",
+        checkIn: "Fleksibel 24 jam",
+        checkOut: "Sesuai kontrak sewa",
+        rentalPeriods: ["Mingguan", "Bulanan", "Semester", "Tahunan"],
         policies: [
-            "Check-in: 14:00 | Check-out: 12:00",
-            "Free cancellation until 24 hours before check-in",
-            "No smoking in rooms",
-            "Pets not allowed",
-            "Quiet hours: 22:00 - 07:00",
+            "Hunian khusus perempuan",
+            "Check-in fleksibel 24 jam",
+            "Akses WiFi gratis unlimited",
+            "Air PDAM gratis", 
+            "Parkir gratis (mobil & motor)",
+            "Listrik prabayar per kamar",
+            "Laundry antar jemput tersedia"
         ],
+        includedFacilities: [
+            "Free Air PDAM",
+            "Free WiFi",
+            "Free Parkir"
+        ],
+        excludedFacilities: [
+            "Listrik prabayar per kamar"
+        ],
+        sharedFacilities: [
+            "Void Lounge",
+            "Dapur Bersama",
+            "Area Jemuran", 
+            "Balkon",
+            "Parkiran (Mobil & Motor)"
+        ],
+        contact: {
+            owner: "08221140701",
+            admin: "081265945003",
+            email: "Sumanresidence338@gmail.com", 
+            instagram: "@Suman_Residence",
+            tiktok: "@Suman.Residence"
+        }
     },
 };
 
@@ -272,19 +326,6 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                                         {room.title}
                                     </h1>
-                                    <div className="flex items-center space-x-4 text-gray-600">
-                                        <div className="flex items-center space-x-1">
-                                            <MapPin className="w-4 h-4" />
-                                            <span>Banda Aceh</span>
-                                        </div>
-                                        <div className="flex items-center space-x-1">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                            <span>{room.rating}</span>
-                                            <span>
-                                                ({room.reviewCount} ulasan)
-                                            </span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 

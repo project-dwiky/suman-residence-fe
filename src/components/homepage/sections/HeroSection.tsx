@@ -3,8 +3,9 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, MapPin, Star } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import AvatarGroup from "./facilities/AvatarGroup";
+import Link from "next/link";
 
 const HeroSection = () => {
     return (
@@ -47,7 +48,24 @@ const HeroSection = () => {
                                 Anda.
                             </p>
 
-                            <Button className="mt-5 bg-primary hover:bg-primary/80 text-white rounded-full px-8 py-6 transition-all duration-300">
+                            <Button
+                                className="mt-5 bg-primary hover:bg-primary/80 text-white rounded-full px-8 py-6 transition-all duration-300"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const section =
+                                        document.getElementById(
+                                            "gallery-section"
+                                        );
+                                    if (section) {
+                                        section.scrollIntoView({
+                                            behavior: "smooth",
+                                        });
+                                    } else {
+                                        window.location.hash =
+                                            "#gallery-section";
+                                    }
+                                }}
+                            >
                                 <div className="flex items-center gap-3 text-md font-semibold">
                                     <span>Lihat Unit</span>
                                     <ArrowRight className="w-6 h-6 rotate-45" />
@@ -142,7 +160,7 @@ const HeroSection = () => {
                                 className="absolute top-6 right-6 bg-white space-x-4 rounded-2xl p-2 shadow-lg flex items-center justify-between"
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.6, delay: 1 }}
+                                transition={{ duration: 0.6, delay: 0.5 }}
                             >
                                 <div className="flex flex-col px-2">
                                     <div>
@@ -153,10 +171,17 @@ const HeroSection = () => {
                                             Indonesia
                                         </p>
                                     </div>
-                                    <div className="mt-3 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center 
-                                    hover:bg-primary/80 transition-all duration-300 cursor-pointer">
-                                        <ArrowRight className="w-4 h-4 -rotate-45" />
-                                    </div>
+                                    <Link
+                                        href="https://maps.app.goo.gl/4iswZuYEofcETz9j9"
+                                        target="_blank"
+                                    >
+                                        <Button
+                                            className="mt-3 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center
+                                        hover:bg-primary/80 transition-all duration-300 cursor-pointer"
+                                        >
+                                            <ArrowRight className="w-4 h-4 -rotate-45" />
+                                        </Button>
+                                    </Link>
                                 </div>
                                 <div className="w-[100px] h-[100px] rounded-xl overflow-hidden">
                                     <Image
@@ -174,7 +199,7 @@ const HeroSection = () => {
                                 className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-6"
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: 1.2 }}
+                                transition={{ duration: 0.6, delay: 0.6 }}
                             >
                                 <p className="text-primary font-medium mb-4">
                                     Nikmati liburan di Suman Residence, dengan
@@ -183,12 +208,14 @@ const HeroSection = () => {
                                 </p>
 
                                 <div className="flex items-center space-x-4">
-                                    <Button className="bg-primary hover:bg-primary/80 text-white rounded-full">
-                                        <div className="flex items-center gap-2">
-                                            Pesan Sekarang
-                                            <ArrowRight className="w-4 h-4 -rotate-45" />
-                                        </div>
-                                    </Button>
+                                    <Link href="/kamar">
+                                        <Button className="bg-primary hover:bg-primary/80 text-white rounded-full">
+                                            <div className="flex items-center gap-2">
+                                                Pesan Sekarang
+                                                <ArrowRight className="w-4 h-4 -rotate-45" />
+                                            </div>
+                                        </Button>
+                                    </Link>
                                 </div>
                             </motion.div>
                         </div>
