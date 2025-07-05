@@ -79,8 +79,16 @@ export async function registerUser(userData: RegisterData): Promise<RegisterResp
     // Check if email already exists
     const user = await getUserByEmail(userData.email);
     if(user) {
+      if(user.isVerified){
+        return {
+          status: 'error',
+          code:'EMAIL_ALREADY_VERIFIED',
+          message: 'Email already verified'
+        };
+      }
       return {
         status: 'error',
+        code:'EMAIL_ALREADY_EXISTS',
         message: 'Email already registered'
       };
     }
@@ -90,6 +98,7 @@ export async function registerUser(userData: RegisterData): Promise<RegisterResp
     if(isPhoneRegistered) {
       return {
         status: 'error',
+        code:'PHONE_ALREADY_EXISTS',
         message: 'Phone number already registered'
       };
     }
@@ -106,18 +115,21 @@ export async function registerUser(userData: RegisterData): Promise<RegisterResp
       email: userData.email,
       name: userData.name,
       phone: userData.phone,
+      isVerified: false,
       role: 'customer', // Default role is always customer
     });
     
     // Just return success status, no tokens or user data
     return {
       status: 'success',
+      code:'REGISTRATION_SUCCESS',
       message: 'User registered successfully'
     };
   } catch (error: any) {
     console.error('Registration failed:', error.message);
     return {
       status: 'error',
+      code:'REGISTRATION_FAILED',
       message: error.message || 'Registration failed'
     };
   }
@@ -158,6 +170,10 @@ export async function loginUser(credentials: UserCredentials, res: NextResponse)
     const user = await getUserById(localId);
     if (!user) {
       throw new Error('User data not found in database');
+    }
+
+    if(!user.isVerified){
+      throw new Error('User is not verified');
     }
     
     // Generate our own tokens

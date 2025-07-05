@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   createdAt?: Date;
   updatedAt?: Date;
+  isVerified?: boolean;
 }
 
 export interface UserCredentials {
@@ -21,12 +22,14 @@ export interface UserCreate {
   phone: string;
   password: string;
   role: UserRole;
+  isVerified?: boolean;
 }
 
 export interface UserUpdate {
   name?: string;
   phone?: string;
   role?: UserRole;
+  isVerified?: boolean;
 }
 
 // Register data type extending UserCredentials
@@ -38,6 +41,7 @@ export interface RegisterData extends UserCredentials {
 // Response type for registration
 export interface RegisterResponse {
   status: 'success' | 'error';
+  code?: string;
   message?: string;
 }
 

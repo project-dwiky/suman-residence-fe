@@ -27,6 +27,7 @@ const AUTH_PATHS = [
   '/auth/login',
   '/auth/register',
   '/auth/forgot-password',
+  '/auth/reset-password',
 ];
 
 // Helper to check if path needs authentication

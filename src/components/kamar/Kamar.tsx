@@ -1,11 +1,8 @@
 'use client'
 
 import React from 'react';
-import Navbar from "../core/Navbar";
 import Footer from "../core/Footer";
 import { motion } from 'framer-motion';
-import { Search, Filter, MapPin, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import RoomTypeCard from '../homepage/sections/facilities/RoomTypeCard';
 
 // Sample room data
@@ -39,7 +36,6 @@ const roomData = [
 const Kamar = () => {
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
             
             {/* Hero Section */}
             <section className="relative bg-gradient-to-br from-primary to-primary/80 text-white py-20">

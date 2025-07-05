@@ -29,6 +29,7 @@ export async function createUser(id: string, user: Omit<User, 'id' | 'createdAt'
   }
 }
 
+
 export async function getUserById(id: string): Promise<User | null> {
   try {
     const docRef = userCollection.doc(id);
@@ -77,7 +78,9 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 export async function findByPhonenum(phonenum: string): Promise<User | null> {
   try {
-    const snapshot = await userCollection.where("phone", "==", phonenum).get();
+    const snapshot = await userCollection
+    .where("phone", "==", phonenum)
+    .where("isVerified", "==", true).get();
     
     if (!snapshot.empty) {
       const docData = snapshot.docs[0];

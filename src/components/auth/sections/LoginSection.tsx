@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mail, Lock, Loader2, AlertCircle, Info } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -11,10 +11,12 @@ import { toast } from 'sonner';
 
 interface LoginSectionProps {
   message?: string;
-  redirectTo: string;
+  success?: string;
+  registered?: boolean;
+  redirectTo?: string;
 }
 
-const LoginSection = ({ message, redirectTo }: LoginSectionProps) => {
+const LoginSection = ({ message, success, registered, redirectTo }: LoginSectionProps) => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,8 +44,20 @@ const LoginSection = ({ message, redirectTo }: LoginSectionProps) => {
       }
       
       toast.success('Login successful!');
-      // Redirect to the specified redirect path or dashboard by default
-      router.push(redirectTo);
+      
+      // If redirectTo is undefined, check user role to determine redirect destination
+      if (!redirectTo) {
+        // Check if user is admin to redirect to admin dashboard
+        if (data.data && data.data.role === 'admin') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
+      } else {
+        // Use the specified redirectTo path
+        router.push(redirectTo);
+      }
+      
       router.refresh();
       
     } catch (err: any) {
@@ -80,6 +94,30 @@ const LoginSection = ({ message, redirectTo }: LoginSectionProps) => {
             >
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <span>{message}</span>
+            </motion.div>
+          )}
+          
+          {success && (
+            <motion.div 
+              className="bg-green-50 border border-green-200 text-green-800 rounded-lg p-3 text-sm flex items-start gap-2"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0 text-green-600" />
+              <span>{success}</span>
+            </motion.div>
+          )}
+          
+          {registered && (
+            <motion.div 
+              className="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-3 text-sm flex items-start gap-2"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-600" />
+              <span>Registration successful! You can now sign in.</span>
             </motion.div>
           )}
           

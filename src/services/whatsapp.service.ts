@@ -1,4 +1,4 @@
-import { WhatsAppStatus, QRCodeResponse, SendMessageRequest, SendMessageResponse } from '@/types/whatsapp';
+import { WhatsAppStatus, QRCodeResponse, SendMessageResponse } from '@/types/whatsapp';
 
 // Konstanta untuk API WhatsApp
 const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8080';

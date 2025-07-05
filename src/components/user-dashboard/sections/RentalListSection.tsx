@@ -235,7 +235,7 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
             const isInView = useInView(cardRef, { once: true, margin: "-100px 0px" });
             
             return (
-              <Link key={index} href={`/dashboard/user/detail/${rental.id}`}>
+              <Link key={index} href={`/dashboard/detail/${rental.id}`}>
                 <motion.div 
                   ref={cardRef}
                   className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"

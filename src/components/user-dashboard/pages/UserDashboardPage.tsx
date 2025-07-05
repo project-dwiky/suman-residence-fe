@@ -2,9 +2,9 @@ import React from 'react';
 import { RentalData } from '../types';
 import RentalListSection from '../sections/RentalListSection';
 import { getRentalDataList } from '../actions/mockData';
-import Navbar from '@/components/core/Navbar';
 import Footer from '@/components/core/Footer';
 import Link from 'next/link';
+import Navbar from '@/components/core/Navbar';
 
 async function UserDashboardPage() {
   // Fetch rental data list using async/await on the server
