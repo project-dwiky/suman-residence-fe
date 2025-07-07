@@ -72,6 +72,7 @@ export async function middleware(request: NextRequest) {
 
   try {
     const origin = request.nextUrl.origin;
+    console.log('[Middleware] Origin:', origin);
     const refreshResponse = await fetch(`${origin}/api/auth/refresh`, {
       method: 'POST',
       headers: {
