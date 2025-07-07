@@ -47,6 +47,7 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
     // Handle dashboard navigation
     const handleDashboardClick = () => {
         setIsDropdownOpen(false);
+        setMobileMenuOpen(false);
         if (user?.role === 'admin') {
             router.push('/admin/dashboard');
         } else {
@@ -245,13 +246,6 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                     }`}
                                 >
                                     {link.name}
-                                    <span
-                                        className={`absolute -bottom-1 left-0 h-0.5 bg-secondary transition-all duration-300 ${
-                                            activeSection === link.scrollTo
-                                                ? "w-full"
-                                                : "w-0 group-hover:w-full"
-                                        }`}
-                                    ></span>
                                 </a>
                             ) : (
                                 <Link
@@ -266,17 +260,6 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                     }`}
                                 >
                                     {link.name}
-                                    <span
-                                        className={`absolute -bottom-1 left-0 h-0.5 bg-secondary transition-all duration-300 ${
-                                            (link.href === "/kamar" &&
-                                                pathname.startsWith(
-                                                    "/kamar"
-                                                )) ||
-                                            pathname === link.href
-                                                ? "w-full"
-                                                : "w-0 group-hover:w-full"
-                                        }`}
-                                    ></span>
                                 </Link>
                             )
                         )}
@@ -338,7 +321,7 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                     onClick={scrollToCTA}
                                     className="bg-primary text-white hover:bg-primary/90 rounded-full transition-all duration-300 hover:shadow-md hover:shadow-primary/20 hover:scale-[1.03] px-6"
                                 >
-                                    <span>Booking Sekarang</span>
+                                    <span>Book Now</span>
                                 </Button>
                             </div>
                         )}
@@ -346,45 +329,6 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center">
-                        {user && (
-                            <div className="relative mr-2">
-                                <button
-                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                    className="flex items-center space-x-1"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium">
-                                        {getUserInitials()}
-                                    </div>
-                                    <ChevronDown className="h-3 w-3 text-gray-600" />
-                                </button>
-                                
-                                {isDropdownOpen && (
-                                    <div 
-                                        className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200"
-                                    >
-                                        <div className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200">
-                                            <div className="font-medium truncate">{user.name || user.email}</div>
-                                            {user.role === 'admin' && (
-                                                <div className="text-xs text-gray-500 truncate">{user.role}</div>
-                                            )}
-                                        </div>
-                                        <button
-                                            onClick={handleDashboardClick}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        >
-                                            Dashboard
-                                        </button>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                        >
-                                            Logout
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        
                         <Button
                             variant="ghost"
                             size="icon"
@@ -410,6 +354,7 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                 } ${scroll ? "bg-white" : "bg-white/95"}`}
             >
                 <div className="px-4 pt-2 pb-4 space-y-3">
+                    {/* Navigation links */}
                     {navLinks.map((link) =>
                         link.scrollTo ? (
                             <a
@@ -443,6 +388,42 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                             </Link>
                         )
                     )}
+                    
+                    {/* User profile section for mobile */}
+                    {user && (
+                        <div className="border-t border-gray-200 pt-3 mt-3">
+                            <div className="flex items-center space-x-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium">
+                                    {getUserInitials()}
+                                </div>
+                                <div>
+                                    <div className="font-medium text-sm text-gray-900">
+                                        {user.name || user.email}
+                                    </div>
+                                    {user.role === 'admin' && (
+                                        <div className="text-xs text-gray-500">{user.role}</div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Button
+                                    onClick={handleDashboardClick}
+                                    className="bg-primary text-white hover:bg-primary/90 rounded-full w-full transition-all duration-300 hover:shadow-md"
+                                >
+                                    Dashboard
+                                </Button>
+                                <Button
+                                    onClick={handleLogout}
+                                    variant="outline"
+                                    className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full w-full transition-all duration-300"
+                                >
+                                    Logout
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Login and CTA buttons for non-logged users */}
                     {!user && (
                         <>
                             <div className="mb-3">
@@ -460,7 +441,7 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                 onClick={scrollToCTA}
                                 className="bg-primary text-white hover:bg-primary/90 rounded-full w-full transition-all duration-300 hover:shadow-md"
                             >
-                                <span>Booking Sekarang</span>
+                                <span>Book Now</span>
                             </Button>
                         </>
                     )}

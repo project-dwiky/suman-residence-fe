@@ -48,6 +48,7 @@ const LoginSection = ({ message, success, registered, redirectTo }: LoginSection
       
       // If redirectTo is undefined, check user role to determine redirect destination
       if (!redirectTo) {
+        console.log('User role:', data.data?.role);
         // Check if user is admin to redirect to admin dashboard
         if (data.data && data.data.role === 'admin') {
           router.push('/admin/dashboard');
