@@ -325,12 +325,22 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                 )}
                             </div>
                         ) : (
-                            <Button
-                                onClick={scrollToCTA}
-                                className="bg-primary text-white hover:bg-primary/90 rounded-full transition-all duration-300 hover:shadow-md hover:shadow-primary/20 hover:scale-[1.03] px-6"
-                            >
-                                <span>Booking Sekarang</span>
-                            </Button>
+                            <div className="flex space-x-3">
+                                <Link href="/auth/login">
+                                    <Button 
+                                        variant="outline"
+                                        className="border-primary text-primary hover:bg-primary/10 rounded-full transition-all duration-300 px-5"
+                                    >
+                                        <span>Login</span>
+                                    </Button>
+                                </Link>
+                                <Button
+                                    onClick={scrollToCTA}
+                                    className="bg-primary text-white hover:bg-primary/90 rounded-full transition-all duration-300 hover:shadow-md hover:shadow-primary/20 hover:scale-[1.03] px-6"
+                                >
+                                    <span>Booking Sekarang</span>
+                                </Button>
+                            </div>
                         )}
                     </div>
 
@@ -395,7 +405,7 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
             <div
                 className={`md:hidden transition-all duration-300 overflow-hidden ${
                     mobileMenuOpen
-                        ? "max-h-80 opacity-100"
+                        ? "max-h-[500px] opacity-100"
                         : "max-h-0 opacity-0"
                 } ${scroll ? "bg-white" : "bg-white/95"}`}
             >
@@ -415,9 +425,6 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                 }
                             >
                                 {link.name}
-                                {activeSection === link.scrollTo && (
-                                    <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                )}
                             </a>
                         ) : (
                             <Link
@@ -433,21 +440,29 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {link.name}
-                                {((link.href === "/kamar" &&
-                                    pathname.startsWith("/kamar")) ||
-                                    pathname === link.href) && (
-                                    <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                                )}
                             </Link>
                         )
                     )}
                     {!user && (
-                        <Button
-                            onClick={scrollToCTA}
-                            className="bg-primary text-white hover:bg-primary/90 rounded-full w-full mt-3 transition-all duration-300 hover:shadow-md"
-                        >
-                            <span>Booking Sekarang</span>
-                        </Button>
+                        <>
+                            <div className="mb-3">
+                                <Link href="/auth/login">
+                                    <Button 
+                                        variant="outline"
+                                        className="border-primary text-primary hover:bg-primary/10 rounded-full w-full transition-all duration-300"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Login
+                                    </Button>
+                                </Link>
+                            </div>
+                            <Button
+                                onClick={scrollToCTA}
+                                className="bg-primary text-white hover:bg-primary/90 rounded-full w-full transition-all duration-300 hover:shadow-md"
+                            >
+                                <span>Booking Sekarang</span>
+                            </Button>
+                        </>
                     )}
                 </div>
             </div>

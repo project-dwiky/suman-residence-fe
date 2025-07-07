@@ -31,6 +31,7 @@ const LoginSection = ({ message, success, registered, redirectTo }: LoginSection
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
