@@ -10,13 +10,16 @@ const userCollection = db.collection('users');
  */
 export async function GET(request: NextRequest) {
     try {
+        // Fix origin untuk Kubernetes/production environment
+        const origin = request.nextUrl.origin.replace('https://localhost', 'http://localhost');
+        
         // Ambil token dari URL
         const { searchParams } = new URL(request.url);
         const token = searchParams.get('token');
         
         if (!token) {
             // Redirect ke halaman login dengan pesan error
-            return NextResponse.redirect(`${request.nextUrl.origin}/auth/login?message=Invalid verification link`);
+            return NextResponse.redirect(`${origin}/auth/login?message=Invalid verification link`);
         }
         
         // Decode token untuk mendapatkan user ID
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
             userId = Buffer.from(token, 'base64').toString();
         } catch (error) {
             // Token tidak valid (tidak bisa di-decode)
-            return NextResponse.redirect(`${request.nextUrl.origin}/auth/login?message=Invalid verification token`);
+            return NextResponse.redirect(`${origin}/auth/login?message=Invalid verification token`);
         }
         
         // Ambil data user berdasarkan ID
@@ -33,13 +36,13 @@ export async function GET(request: NextRequest) {
         
         if (!user) {
             // User tidak ditemukan
-            return NextResponse.redirect(`${request.nextUrl.origin}/auth/login?message=User not found`);
+            return NextResponse.redirect(`${origin}/auth/login?message=User not found`);
         }
         
         // Cek jika user sudah terverifikasi
         if (user.isVerified) {
             // User sudah diverifikasi sebelumnya
-            return NextResponse.redirect(`${request.nextUrl.origin}/auth/login?message=Account already verified`);
+            return NextResponse.redirect(`${origin}/auth/login?message=Account already verified`);
         }
         
         // Cek jika ada user lain yang sudah terverifikasi dengan nomor telepon yang sama
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
             if (otherVerifiedUser) {
                 // Nomor telepon sudah digunakan oleh akun lain yang terverifikasi
                 return NextResponse.redirect(
-                    `${request.nextUrl.origin}/auth/login?message=Phone number already used by another verified account`
+                    `${origin}/auth/login?message=Phone number already used by another verified account`
                 );
             }
         }
@@ -68,15 +71,18 @@ export async function GET(request: NextRequest) {
         
         // Redirect ke halaman login dengan pesan sukses
         return NextResponse.redirect(
-            `${request.nextUrl.origin}/auth/login?success=Account verified successfully! You can now log in.`
+            `${origin}/auth/login?success=Account verified successfully! You can now log in.`
         );
         
     } catch (error: any) {
         console.error('Error verifying user account:', error);
         
+        // Fix origin untuk error redirect juga
+        const origin = request.nextUrl.origin.replace('https://localhost', 'http://localhost');
+        
         // Redirect ke halaman login dengan pesan error
         return NextResponse.redirect(
-            `${request.nextUrl.origin}/auth/login?message=Verification failed: ${error.message || 'Unknown error'}`
+            `${origin}/auth/login?message=Verification failed: ${error.message || 'Unknown error'}`
         );
     }
 }

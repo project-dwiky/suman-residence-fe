@@ -71,7 +71,7 @@ export async function middleware(request: NextRequest) {
   console.log('Access token exists:', !!request.cookies.get('access_token')?.value);
 
   try {
-    const origin = request.nextUrl.origin;
+    const origin = request.nextUrl.origin.replace('https://localhost', 'http://localhost');
     console.log('[Middleware] Origin:', origin);
     const refreshResponse = await fetch(`${origin}/api/auth/refresh`, {
       method: 'POST',
