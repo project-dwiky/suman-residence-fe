@@ -17,6 +17,8 @@ import {
     Mail,
     Clock,
     CheckCircle,
+    Armchair,
+    Building2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -46,8 +48,8 @@ const roomData = {
             "Kasur Queen Bed",
             "WiFi Gratis",
             "Lemari Pakaian",
-            "Meja Nakas", 
-            "Tempat Sampah"
+            "Meja Nakas",
+            "Tempat Sampah",
         ],
         amenities: [
             {
@@ -58,7 +60,8 @@ const roomData = {
             {
                 name: "Kasur Queen Bed",
                 icon: Bed,
-                description: "Kasur queen size yang nyaman untuk istirahat optimal",
+                description:
+                    "Kasur queen size yang nyaman untuk istirahat optimal",
             },
             {
                 name: "WiFi Gratis",
@@ -88,9 +91,9 @@ const roomData = {
         totalUnits: 39,
         rating: 4.9,
         reviewCount: 89,
-        maxGuests: 1,
+        maxGuests: 2,
         bedType: "Queen Bed",
-        view: "City View",
+        view: "Full Furnished",
         floor: "Lantai 1-3",
         checkIn: "Fleksibel 24 jam",
         checkOut: "Sesuai kontrak sewa",
@@ -98,38 +101,32 @@ const roomData = {
         policies: [
             "Hunian khusus perempuan",
             "Check-in fleksibel 24 jam",
-            "Akses WiFi gratis unlimited", 
+            "Akses WiFi gratis unlimited",
             "Air PDAM gratis",
             "Parkir gratis (mobil & motor)",
             "Listrik prabayar per kamar",
-            "Laundry antar jemput tersedia"
+            "Laundry antar jemput tersedia",
         ],
-        includedFacilities: [
-            "Free Air PDAM",
-            "Free WiFi", 
-            "Free Parkir"
-        ],
-        excludedFacilities: [
-            "Listrik prabayar per kamar"
-        ],
+        includedFacilities: ["Free Air PDAM", "Free WiFi", "Free Parkir"],
+        excludedFacilities: ["Listrik prabayar per kamar"],
         sharedFacilities: [
             "Void Lounge",
-            "Dapur Bersama", 
+            "Dapur Bersama",
             "Area Jemuran",
             "Balkon",
-            "Parkiran (Mobil & Motor)"
+            "Parkiran (Mobil & Motor)",
         ],
         contact: {
             owner: "08221140701",
-            admin: "081265945003", 
+            admin: "081265945003",
             email: "Sumanresidence338@gmail.com",
             instagram: "@Suman_Residence",
-            tiktok: "@Suman.Residence"
-        }
+            tiktok: "@Suman.Residence",
+        },
     },
     2: {
         id: 2,
-        title: "Kamar Tipe B", 
+        title: "Kamar Tipe B",
         size: "4 x 5,5 meter",
         price: "Rp 2.100.000",
         originalPrice: "Rp 2.400.000",
@@ -137,14 +134,14 @@ const roomData = {
         description:
             "Kamar premium khusus perempuan dengan ukuran lebih luas 4x5,5 meter. Suite eksklusif dengan ruang yang lebih fleksibel untuk kenyamanan maksimal.",
         longDescription:
-            'Kamar Tipe B di Suman Residence adalah pilihan premium dengan ukuran 4x5,5 meter yang memberikan ruang lebih luas dan fleksibel. Hunian kos-kosan eksklusif khusus perempuan ini dilengkapi dengan semua fasilitas modern termasuk kasur Queen Bed, AC, lemari pakaian yang lebih besar, meja nakas, dan area yang lebih lega untuk aktivitas sehari-hari.',
+            "Kamar Tipe B di Suman Residence adalah pilihan premium dengan ukuran 4x5,5 meter yang memberikan ruang lebih luas dan fleksibel. Hunian kos-kosan eksklusif khusus perempuan ini dilengkapi dengan semua fasilitas modern termasuk kasur Queen Bed, AC, lemari pakaian yang lebih besar, meja nakas, dan area yang lebih lega untuk aktivitas sehari-hari.",
         features: [
             "AC",
-            "Kasur Queen Bed", 
+            "Kasur Queen Bed",
             "WiFi Gratis",
             "Lemari Pakaian Besar",
             "Meja Nakas",
-            "Area Lebih Luas"
+            "Area Lebih Luas",
         ],
         amenities: [
             {
@@ -158,7 +155,7 @@ const roomData = {
                 description: "Kasur queen size premium yang sangat nyaman",
             },
             {
-                name: "WiFi Gratis", 
+                name: "WiFi Gratis",
                 icon: Wifi,
                 description: "Koneksi internet gratis unlimited",
             },
@@ -173,7 +170,7 @@ const roomData = {
                 description: "Meja nakas dengan storage tambahan",
             },
             {
-                name: "Area Lebih Luas", 
+                name: "Area Lebih Luas",
                 icon: Bath,
                 description: "Ruang kamar yang lebih lega dan fleksibel",
             },
@@ -185,9 +182,9 @@ const roomData = {
         totalUnits: 39,
         rating: 4.9,
         reviewCount: 89,
-        maxGuests: 1,
+        maxGuests: 2,
         bedType: "Queen Bed",
-        view: "Premium City View", 
+        view: "Full Furnished",
         floor: "Lantai 2-3",
         checkIn: "Fleksibel 24 jam",
         checkOut: "Sesuai kontrak sewa",
@@ -196,33 +193,27 @@ const roomData = {
             "Hunian khusus perempuan",
             "Check-in fleksibel 24 jam",
             "Akses WiFi gratis unlimited",
-            "Air PDAM gratis", 
+            "Air PDAM gratis",
             "Parkir gratis (mobil & motor)",
             "Listrik prabayar per kamar",
-            "Laundry antar jemput tersedia"
+            "Laundry antar jemput tersedia",
         ],
-        includedFacilities: [
-            "Free Air PDAM",
-            "Free WiFi",
-            "Free Parkir"
-        ],
-        excludedFacilities: [
-            "Listrik prabayar per kamar"
-        ],
+        includedFacilities: ["Free Air PDAM", "Free WiFi", "Free Parkir"],
+        excludedFacilities: ["Listrik prabayar per kamar"],
         sharedFacilities: [
             "Void Lounge",
             "Dapur Bersama",
-            "Area Jemuran", 
+            "Area Jemuran",
             "Balkon",
-            "Parkiran (Mobil & Motor)"
+            "Parkiran (Mobil & Motor)",
         ],
         contact: {
             owner: "08221140701",
             admin: "081265945003",
-            email: "Sumanresidence338@gmail.com", 
+            email: "Sumanresidence338@gmail.com",
             instagram: "@Suman_Residence",
-            tiktok: "@Suman.Residence"
-        }
+            tiktok: "@Suman.Residence",
+        },
     },
 };
 
@@ -340,7 +331,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                 </div>
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                                     <div className="w-6 h-6 mx-auto mb-2 text-primary">
-                                        🏙️
+                                        <Armchair />
                                     </div>
                                     <div className="text-sm text-gray-600">
                                         {room.view}
@@ -348,7 +339,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                 </div>
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                                     <div className="w-6 h-6 mx-auto mb-2 text-primary">
-                                        🏢
+                                        <Building2 />
                                     </div>
                                     <div className="text-sm text-gray-600">
                                         Lantai {room.floor}
@@ -388,6 +379,56 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Included vs Additional Costs */}
+                        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                            <h3 className="text-xl font-semibold mb-6">
+                                Rincian Biaya
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Included Facilities */}
+                                <div>
+                                    <h4 className="font-medium text-green-600 mb-4 flex items-center gap-2">
+                                        <CheckCircle className="w-5 h-5" />
+                                        Sudah Termasuk
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {room.includedFacilities.map((facility, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center space-x-2 text-sm"
+                                            >
+                                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                                <span className="text-gray-700">{facility}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Additional Costs */}
+                                <div>
+                                    <h4 className="font-medium text-orange-600 mb-4 flex items-center gap-2">
+                                        <Clock className="w-5 h-5" />
+                                        Biaya Tambahan
+                                    </h4>
+                                    <div className="space-y-2">
+                                        {room.excludedFacilities.map((facility, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center space-x-2 text-sm"
+                                            >
+                                                <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                                                <span className="text-gray-700">{facility}</span>
+                                            </div>
+                                        ))}
+                                        <div className="flex items-center space-x-2 text-sm">
+                                            <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                                            <span className="text-gray-700">Laundry antar jemput (berbayar)</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

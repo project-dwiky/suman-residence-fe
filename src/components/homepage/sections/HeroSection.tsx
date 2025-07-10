@@ -26,7 +26,7 @@ const HeroSection = () => {
                         <div className="space-y-4">
                             <div className="flex items-center space-x-4">
                                 <h1 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
-                                    Pesan Liburan
+                                    Pesan Hunian
                                     <br />
                                     <span className="text-secondary">
                                         Ideal Anda
@@ -35,7 +35,7 @@ const HeroSection = () => {
                                 <AvatarGroup />
                             </div>
                             <p className="text-primary text-lg font-semibold">
-                                Cozy Living Space
+                                Cozy Living Space in Banda Aceh
                             </p>
                         </div>
 
@@ -48,29 +48,26 @@ const HeroSection = () => {
                                 Anda.
                             </p>
 
-                            <Button
-                                className="mt-5 bg-primary hover:bg-primary/80 text-white rounded-full px-8 py-6 transition-all duration-300"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    const section =
-                                        document.getElementById(
-                                            "gallery-section"
-                                        );
-                                    if (section) {
-                                        section.scrollIntoView({
-                                            behavior: "smooth",
-                                        });
-                                    } else {
-                                        window.location.hash =
-                                            "#gallery-section";
-                                    }
-                                }}
-                            >
-                                <div className="flex items-center gap-3 text-md font-semibold">
-                                    <span>Lihat Unit</span>
-                                    <ArrowRight className="w-6 h-6 rotate-45" />
+                            {/* Customer Review */}
+                            <div className="mt-5 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                        ))}
+                                    </div>
+                                    <span className="text-sm font-medium text-primary">5.0</span>
+                                    <span className="text-xs text-primary">Google Maps</span>
                                 </div>
-                            </Button>
+                                
+                                <blockquote className="text-primary italic text-sm leading-relaxed border-l-3 border-yellow-400 pl-4">
+                                    "Sooo cozy and clean!!! Everything's great and most importantly, the owner is really really friendly"
+                                </blockquote>
+                                
+                                <p className="text-xs text-primary/80">
+                                    — Jumila Ramli
+                                </p>
+                            </div>
                         </div>
 
                         {/* Statistics Cards */}

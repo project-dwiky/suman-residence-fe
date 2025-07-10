@@ -11,49 +11,35 @@ const galleryItems = [
         url: "/galeri/g3.jpg",
         title: "Living Room Modern",
         description: "Ruang tamu dengan desain modern dan nyaman",
-        category: "Interior",
-    },
-    {
-        id: 2,
-        url: "/galeri/g4.jpg",
-        title: "Kamar Tidur Deluxe",
-        description: "Kamar tidur dengan pencahayaan alami",
-        category: "Bedroom",
+        category: "Living Room",
     },
     {
         id: 3,
-        url: "/galeri/g5.jpg",
-        title: "Dapur Modern",
+        url: "/galeri/g10.jpg",
+        title: "Dapur Bersama",
         description: "Dapur lengkap dengan kitchen island dan peralatan modern",
         category: "Kitchen",
     },
     {
+        id: 2,
+        url: "/galeri/kamar_A/3.png",
+        title: "Kamar Tidur Premium",
+        description: "Kamar tidur dengan pencahayaan alami",
+        category: "Bedroom",
+    },
+    {
         id: 4,
-        url: "/galeri/g6.jpg",
-        title: "Kamar Mandi Premium",
-        description: "Kamar mandi kontemporer dengan shower dan bathtub",
+        url: "/galeri/kamar_B/1.png",
+        title: "Kamar Mandi Dalam",
+        description: "Kamar mandi kontemporer dengan shower dan toilet",
         category: "Bathroom",
     },
     {
         id: 5,
-        url: "/galeri/g7.jpg",
-        title: "Ruang Makan Keluarga",
-        description: "Area makan yang hangat dengan meja kayu alami",
-        category: "Dining",
-    },
-    {
-        id: 6,
-        url: "/galeri/g8.jpg",
-        title: "Living Room Stylish",
-        description: "Ruang tamu bergaya dengan tanaman dan dekor menarik",
-        category: "Interior",
-    },
-    {
-        id: 7,
-        url: "/galeri/g9.jpg",
-        title: "Kamar Tidur Minimalis",
-        description: "Kamar tidur cerah dengan desain minimalis",
-        category: "Bedroom",
+        url: "/galeri/g4.jpg",
+        title: "Area Parkir",
+        description: "Area parkir yang luas dan aman",
+        category: "Parking Area",
     },
 ];
 
@@ -64,11 +50,11 @@ const GallerySection = () => {
 
     const categories = [
         "Semua",
-        "Interior",
-        "Bedroom",
+        "Living Room",
         "Kitchen",
+        "Bedroom",
         "Bathroom",
-        "Dining",
+        "Parking Area",
     ];
 
     const filteredItems =

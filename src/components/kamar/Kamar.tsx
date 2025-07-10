@@ -90,7 +90,7 @@ const Kamar = () => {
                                     </svg>
                                 </div>
                                 <h3 className="text-lg font-semibold mb-2">Check-in Fleksibel</h3>
-                                <p className="text-gray-600">Check-in tersedia 24 jam dengan pelayanan yang ramah dan profesional</p>
+                                <p className="text-gray-600">Check-in tersedia dengan pelayanan yang ramah dan profesional</p>
                             </div>
                             <div className="text-center">
                                 <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
