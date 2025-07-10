@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@/types/user";
+import { Language } from "@/translations";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface NavbarClientProps {
     user: User | null;
@@ -14,9 +16,10 @@ interface NavbarClientProps {
         href: string;
         scrollTo?: string;
     }>;
+    language: Language;
 }
 
-const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
+const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
     const [scroll, setScroll] = useState<boolean>(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
     const [activeSection, setActiveSection] = useState<string>("hero-section");
@@ -264,6 +267,9 @@ const NavbarClient = ({ user, navLinks }: NavbarClientProps) => {
                             )
                         )}
                     </div>
+
+
+                    <LanguageSwitcher currentLanguage={language} />
 
                     {/* User profile or CTA Button */}
                     <div className="hidden md:flex items-center space-x-3">

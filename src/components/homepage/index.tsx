@@ -6,13 +6,16 @@ import CTASection from './sections/CTASection';
 import Navbar from '../core/Navbar';
 import Footer from '../core/Footer';
 import FacilitySection from './sections/FacilitySection';
+import { getLanguageFromCookies } from '@/utils/language';
 
-const Homepage = () => {
+const Homepage = async () => {
+    const language = await getLanguageFromCookies();
+
     return (
         <div className="min-h-screen">
             <Navbar />
             <div>
-                <HeroSection />
+                <HeroSection language={language} />
                 <GallerySection />
                 <MapSection />
                 <FacilitySection />

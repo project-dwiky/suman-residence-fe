@@ -6,8 +6,14 @@ import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 import AvatarGroup from "./facilities/AvatarGroup";
 import Link from "next/link";
+import { Language, getTranslation } from "@/translations";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+    language: Language;
+}
+
+const HeroSection = ({ language }: HeroSectionProps) => {
+    const t = getTranslation(language);
     return (
         <section
             className="py-8 md:py-16 bg-gray-50 relative overflow-hidden"
@@ -26,26 +32,23 @@ const HeroSection = () => {
                         <div className="space-y-4">
                             <div className="flex items-center space-x-4">
                                 <h1 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
-                                    Pesan Hunian
+                                    {t.hero.title.split(' ').slice(0, 2).join(' ')}
                                     <br />
                                     <span className="text-secondary">
-                                        Ideal Anda
+                                        {t.hero.title.split(' ').slice(2).join(' ')}
                                     </span>
                                 </h1>
                                 <AvatarGroup />
                             </div>
                             <p className="text-primary text-lg font-semibold">
-                                Cozy Living Space in Banda Aceh
+                                {t.hero.subtitle}
                             </p>
                         </div>
 
                         {/* Description */}
                         <div className="space-y-4">
                             <p className="text-primary leading-relaxed">
-                                Temukan ruang hidup sempurna di Suman Residence.
-                                Dengan unit modern dan fasilitas terbaik, kami
-                                hadirkan kenyamanan dan kemudahan maksimal untuk
-                                Anda.
+                                {t.hero.description}
                             </p>
 
                             {/* Customer Review */}
@@ -61,11 +64,11 @@ const HeroSection = () => {
                                 </div>
                                 
                                 <blockquote className="text-primary italic text-sm leading-relaxed border-l-3 border-yellow-400 pl-4">
-                                    "Sooo cozy and clean!!! Everything's great and most importantly, the owner is really really friendly"
+                                    "{t.hero.review.quote}"
                                 </blockquote>
                                 
                                 <p className="text-xs text-primary/80">
-                                    — Jumila Ramli
+                                    — {t.hero.review.author}
                                 </p>
                             </div>
                         </div>
@@ -92,7 +95,7 @@ const HeroSection = () => {
                                     39+
                                 </h3>
                                 <p className="text-gray-600 text-sm leading-relaxed">
-                                    Unit kamar tersedia dengan berbagai pilihan
+                                    {t.hero.stats.rooms}
                                 </p>
                             </div>
 
@@ -111,7 +114,7 @@ const HeroSection = () => {
                                     12+
                                 </h3>
                                 <p className="text-gray-600 text-sm leading-relaxed">
-                                    Fasilitas modern untuk kenyamanan maksimal
+                                    {t.hero.stats.facilities}
                                 </p>
                             </div>
 
@@ -130,7 +133,7 @@ const HeroSection = () => {
                                     5 <Star className="w-5 h-5" />
                                 </h3>
                                 <p className="text-gray-600 text-sm leading-relaxed">
-                                    Rating tinggi dari penghuni
+                                    {t.hero.stats.rating}
                                 </p>
                             </div>
                         </motion.div>
@@ -162,10 +165,10 @@ const HeroSection = () => {
                                 <div className="flex flex-col px-2">
                                     <div>
                                         <h4 className="font-semibold text-primary text-sm w-max">
-                                            Banda Aceh
+                                            {t.hero.location.city}
                                         </h4>
                                         <p className="text-gray-600 text-sm">
-                                            Indonesia
+                                            {t.hero.location.country}
                                         </p>
                                     </div>
                                     <Link
@@ -199,16 +202,14 @@ const HeroSection = () => {
                                 transition={{ duration: 0.6, delay: 0.6 }}
                             >
                                 <p className="text-primary font-medium mb-4">
-                                    Nikmati liburan di Suman Residence, dengan
-                                    pemandangan kota yang indah dan fasilitas
-                                    modern.
+                                    {t.hero.propertyDescription}
                                 </p>
 
                                 <div className="flex items-center space-x-4">
                                     <Link href="/kamar">
                                         <Button className="bg-primary hover:bg-primary/80 text-white rounded-full">
                                             <div className="flex items-center gap-2">
-                                                Pesan Sekarang
+                                                {t.hero.cta}
                                                 <ArrowRight className="w-4 h-4 -rotate-45" />
                                             </div>
                                         </Button>
