@@ -1,8 +1,15 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import { Language, getMapTranslation } from "@/translations";
 
-const MapSection = () => {
+interface MapSectionProps {
+    language: Language;
+}
+
+const MapSection = ({ language }: MapSectionProps) => {
+    const t = getMapTranslation(language);
+    
     return (
         <section className="py-6 md:py-16 bg-background" id="map-section">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +27,7 @@ const MapSection = () => {
                         transition={{ duration: 0.5 }}
                         viewport={{ once: true }}
                     >
-                        Lokasi Kami
+                        {t.title}
                     </motion.h2>
                     <motion.p
                         className="text-muted-foreground max-w-2xl mx-auto"
@@ -29,10 +36,7 @@ const MapSection = () => {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         viewport={{ once: true }}
                     >
-                        Temukan Suman Residence dengan mudah. Berada di lokasi
-                        strategis, kami menawarkan akses cepat ke berbagai
-                        destinasi penting. Kunjungi kami untuk merasakan
-                        langsung kenyamanan yang kami tawarkan.
+                        {t.description}
                     </motion.p>
                 </motion.div>
 
@@ -52,7 +56,7 @@ const MapSection = () => {
                         allowFullScreen={true}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        title="Lokasi Suman Residence"
+                        title={t.iframeTitle}
                     ></iframe>
                 </motion.div>
             </div>

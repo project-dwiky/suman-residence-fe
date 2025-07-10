@@ -4,8 +4,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Language, getCtaTranslation } from "@/translations";
 
-const CTASection = () => {
+interface CtaSectionProps {
+    language: Language;
+}
+
+const CTASection = ({ language }: CtaSectionProps) => {
+    const t = getCtaTranslation(language);
+    
     return (
         <section
             id="cta-section"
@@ -80,9 +87,9 @@ const CTASection = () => {
                         transition={{ delay: 0.1, duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        Siap untuk memulai 
+                        {t.title.main}
                         <br />
-                        <span className="text-secondary">hidup nyaman?</span>
+                        <span className="text-secondary">{t.title.highlight}</span>
                     </motion.h2>
 
                     <motion.p
@@ -92,9 +99,7 @@ const CTASection = () => {
                         transition={{ delay: 0.2, duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        Nikmati kenyamanan hunian modern dengan fasilitas
-                        lengkap dan lokasi strategis. Hubungi kami untuk
-                        penawaran terbaik.
+                        {t.description}
                     </motion.p>
 
                     <motion.div
@@ -109,7 +114,7 @@ const CTASection = () => {
                                 size="lg"
                                 className=" border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 text-base rounded-full font-medium transition-all duration-300 hover:border-gray-600"
                             >
-                                Booking Sekarang
+                                {t.buttonText}
                             </Button>
                         </Link>
                     </motion.div>

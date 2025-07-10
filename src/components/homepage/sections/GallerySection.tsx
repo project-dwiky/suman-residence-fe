@@ -4,61 +4,67 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Language, getTranslation } from "@/translations";
 
-const galleryItems = [
-    {
-        id: 1,
-        url: "/galeri/g3.jpg",
-        title: "Living Room Modern",
-        description: "Ruang tamu dengan desain modern dan nyaman",
-        category: "Living Room",
-    },
-    {
-        id: 3,
-        url: "/galeri/g10.jpg",
-        title: "Dapur Bersama",
-        description: "Dapur lengkap dengan kitchen island dan peralatan modern",
-        category: "Kitchen",
-    },
-    {
-        id: 2,
-        url: "/galeri/kamar_A/3.png",
-        title: "Kamar Tidur Premium",
-        description: "Kamar tidur dengan pencahayaan alami",
-        category: "Bedroom",
-    },
-    {
-        id: 4,
-        url: "/galeri/kamar_B/1.png",
-        title: "Kamar Mandi Dalam",
-        description: "Kamar mandi kontemporer dengan shower dan toilet",
-        category: "Bathroom",
-    },
-    {
-        id: 5,
-        url: "/galeri/g4.jpg",
-        title: "Area Parkir",
-        description: "Area parkir yang luas dan aman",
-        category: "Parking Area",
-    },
-];
+interface GallerySectionProps {
+    language: Language;
+}
 
-const GallerySection = () => {
-    const [activeCategory, setActiveCategory] = useState("Semua");
+const GallerySection = ({ language }: GallerySectionProps) => {
+    const t = getTranslation(language);
+    const [activeCategory, setActiveCategory] = useState(t.gallery.categories.all);
     const [currentIndex, setCurrentIndex] = useState(0);
     const carouselRef = useRef<HTMLDivElement>(null);
 
+    const galleryItems = [
+        {
+            id: 1,
+            url: "/galeri/g3.jpg",
+            title: t.gallery.items.livingRoom.title,
+            description: t.gallery.items.livingRoom.description,
+            category: t.gallery.categories.livingRoom,
+        },
+        {
+            id: 3,
+            url: "/galeri/g10.jpg",
+            title: t.gallery.items.kitchen.title,
+            description: t.gallery.items.kitchen.description,
+            category: t.gallery.categories.kitchen,
+        },
+        {
+            id: 2,
+            url: "/galeri/kamar_A/3.png",
+            title: t.gallery.items.bedroom.title,
+            description: t.gallery.items.bedroom.description,
+            category: t.gallery.categories.bedroom,
+        },
+        {
+            id: 4,
+            url: "/galeri/kamar_B/1.png",
+            title: t.gallery.items.bathroom.title,
+            description: t.gallery.items.bathroom.description,
+            category: t.gallery.categories.bathroom,
+        },
+        {
+            id: 5,
+            url: "/galeri/g4.jpg",
+            title: t.gallery.items.parkingArea.title,
+            description: t.gallery.items.parkingArea.description,
+            category: t.gallery.categories.parkingArea,
+        },
+    ];
+
     const categories = [
-        "Semua",
-        "Living Room",
-        "Kitchen",
-        "Bedroom",
-        "Bathroom",
-        "Parking Area",
+        t.gallery.categories.all,
+        t.gallery.categories.livingRoom,
+        t.gallery.categories.kitchen,
+        t.gallery.categories.bedroom,
+        t.gallery.categories.bathroom,
+        t.gallery.categories.parkingArea,
     ];
 
     const filteredItems =
-        activeCategory === "Semua"
+        activeCategory === t.gallery.categories.all
             ? galleryItems
             : galleryItems.filter((item) => item.category === activeCategory);
 
@@ -113,6 +119,11 @@ const GallerySection = () => {
         return () => clearInterval(interval);
     }, [maxIndex]);
 
+    // Update activeCategory when language changes
+    useEffect(() => {
+        setActiveCategory(t.gallery.categories.all);
+    }, [language, t.gallery.categories.all]);
+
     return (
         <section
             className="py-8 md:py-16 bg-gradient-to-b from-background to-muted/20"
@@ -127,11 +138,10 @@ const GallerySection = () => {
                     viewport={{ once: true }}
                 >
                     <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
-                        Galeri Suman Residence
+                        {t.gallery.title}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                        Jelajahi berbagai tipe unit dan fasilitas premium yang
-                        kami tawarkan untuk kenyamanan hidup modern Anda
+                        {t.gallery.description}
                     </p>
                 </motion.div>
 

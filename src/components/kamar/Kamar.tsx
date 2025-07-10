@@ -4,36 +4,43 @@ import React from 'react';
 import Footer from "../core/Footer";
 import { motion } from 'framer-motion';
 import RoomTypeCard from '../homepage/sections/facilities/RoomTypeCard';
+import { Language, getKamarTranslation } from "@/translations";
 
-// Sample room data
-const roomData = [
-  {
-    id: 1,
-    title: "Kamar Tipe A",
-    size: "4 x 4 meter",
-    price: "Rp 1.500.000",
-    description: "Kamar nyaman dengan ukuran compact, ideal untuk mahasiswi atau profesional muda. Dilengkapi dengan fasilitas modern untuk kenyamanan maksimal.",
-    features: ["AC", "Kasur Queen Bed", "Wi-Fi Gratis", "Lemari Pakaian", "Meja Nakas", "Tempat Sampah"],
-    image: "/galeri/kamar_A/h2.JPG",
-    availability: "available" as const,
-    type: "A" as const,
-    units: 35
-  },
-  {
-    id: 2,
-    title: "Kamar Tipe B", 
-    size: "4 x 5,5 meter",
-    price: "Rp 2.100.000",
-    description: "Kamar luas dengan ruang yang lebih fleksibel untuk kebutuhan Anda. Suite premium dengan area kerja dan penyimpanan yang lebih besar.",
-    features: ["AC", "Kasur Queen Bed", "Wi-Fi Gratis", "Lemari Pakaian Besar", "Meja Nakas", "Area Kerja"],
-    image: "/galeri/kamar_A/h1.JPG",
-    availability: "limited" as const,
-    type: "B" as const,
-    units: 5
-  }
-];
+interface KamarProps {
+    language: Language;
+}
 
-const Kamar = () => {
+const Kamar = ({ language }: KamarProps) => {
+    const t = getKamarTranslation(language);
+
+    // Sample room data
+    const roomData = [
+      {
+        id: 1,
+        title: t.rooms.typeA.title,
+        size: t.rooms.typeA.size,
+        price: t.rooms.typeA.price,
+        description: t.rooms.typeA.description,
+        features: t.rooms.typeA.features,
+        image: "/galeri/kamar_A/h2.JPG",
+        availability: "available" as const,
+        type: "A" as const,
+        units: 35
+      },
+      {
+        id: 2,
+        title: t.rooms.typeB.title,
+        size: t.rooms.typeB.size,
+        price: t.rooms.typeB.price,
+        description: t.rooms.typeB.description,
+        features: t.rooms.typeB.features,
+        image: "/galeri/kamar_A/h1.JPG",
+        availability: "limited" as const,
+        type: "B" as const,
+        units: 5
+      }
+    ];
+
     return (
         <div className="min-h-screen bg-gray-50">
             
@@ -48,10 +55,10 @@ const Kamar = () => {
                         className="text-center"
                     >
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                            Pilihan Kamar Kami
+                            {t.hero.title}
                         </h1>
                         <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                            Nikmati kenyamanan dan kemewahan di setiap kamar yang dirancang khusus untuk memberikan pengalaman menginap terbaik
+                            {t.hero.description}
                         </p>
                     </motion.div>
                 </div>
@@ -89,8 +96,8 @@ const Kamar = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Check-in Fleksibel</h3>
-                                <p className="text-gray-600">Check-in tersedia dengan pelayanan yang ramah dan profesional</p>
+                                <h3 className="text-lg font-semibold mb-2">{t.additionalInfo.flexibleCheckin.title}</h3>
+                                <p className="text-gray-600">{t.additionalInfo.flexibleCheckin.description}</p>
                             </div>
                             <div className="text-center">
                                 <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -98,8 +105,8 @@ const Kamar = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Reservasi Instan</h3>
-                                <p className="text-gray-600">Booking kamar dapat dilakukan secara online dengan konfirmasi instan</p>
+                                <h3 className="text-lg font-semibold mb-2">{t.additionalInfo.instantReservation.title}</h3>
+                                <p className="text-gray-600">{t.additionalInfo.instantReservation.description}</p>
                             </div>
                             <div className="text-center">
                                 <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -107,8 +114,8 @@ const Kamar = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-2">Kenyamanan Maksimal</h3>
-                                <p className="text-gray-600">Setiap kamar dirancang untuk memberikan kenyamanan dan privasi terbaik</p>
+                                <h3 className="text-lg font-semibold mb-2">{t.additionalInfo.maximumComfort.title}</h3>
+                                <p className="text-gray-600">{t.additionalInfo.maximumComfort.description}</p>
                             </div>
                         </div>
                     </motion.div>

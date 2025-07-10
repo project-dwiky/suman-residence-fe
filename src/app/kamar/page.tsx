@@ -1,11 +1,14 @@
 import Navbar from "@/components/core/Navbar";
 import Kamar from "@/components/kamar/Kamar";
+import { getLanguageFromCookies } from '@/utils/language';
 
-export default function page() {
+export default async function page() {
+  const language = await getLanguageFromCookies();
+  
   return (
     <>
     <Navbar/>
-    <Kamar/>
+    <Kamar language={language}/>
     </>
   )
 }

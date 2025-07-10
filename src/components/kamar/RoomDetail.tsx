@@ -29,195 +29,144 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Language, getRoomDetailTranslation } from "@/translations";
 
-// Sample room data (in real app, this would come from API)
-const roomData = {
-    1: {
-        id: 1,
-        title: "Kamar Tipe A",
-        size: "4 x 4 meter",
-        price: "Rp 1.500.000",
-        originalPrice: "Rp 1.800.000",
-        pricePerMonth: "Rp 1.500.000",
-        description:
-            "Kamar eksklusif khusus perempuan dengan ukuran 4x4 meter. Dilengkapi dengan fasilitas modern untuk kenyamanan maksimal dalam hunian kos-kosan premium di Banda Aceh.",
-        longDescription:
-            'Kamar Tipe A di Suman Residence menawarkan hunian kos-kosan eksklusif khusus perempuan dengan konsep "Cozy Living Space". Dengan ukuran 4x4 meter, kamar ini dilengkapi dengan kasur Queen Bed yang nyaman, AC untuk kenyamanan suhu ruangan, lemari pakaian yang cukup luas, meja nakas, dan tempat sampah.',
-        features: [
-            "AC",
-            "Kasur Queen Bed",
-            "WiFi Gratis",
-            "Lemari Pakaian",
-            "Meja Nakas",
-            "Tempat Sampah",
-        ],
-        amenities: [
-            {
-                name: "AC",
-                icon: Snowflake,
-                description: "Air conditioning untuk kenyamanan suhu ruangan",
-            },
-            {
-                name: "Kasur Queen Bed",
-                icon: Bed,
-                description:
-                    "Kasur queen size yang nyaman untuk istirahat optimal",
-            },
-            {
-                name: "WiFi Gratis",
-                icon: Wifi,
-                description: "Koneksi internet gratis untuk kebutuhan digital",
-            },
-            {
-                name: "Lemari Pakaian",
-                icon: Users,
-                description: "Lemari pakaian dengan kapasitas yang memadai",
-            },
-            {
-                name: "Meja Nakas",
-                icon: Tv,
-                description: "Meja nakas untuk keperluan pribadi",
-            },
-            {
-                name: "Tempat Sampah",
-                icon: Bath,
-                description: "Tempat sampah untuk menjaga kebersihan kamar",
-            },
-        ],
-        images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
-        availability: "available" as const,
-        type: "A" as const,
-        units: 35,
-        totalUnits: 39,
-        rating: 4.9,
-        reviewCount: 89,
-        maxGuests: 2,
-        bedType: "Queen Bed",
-        view: "Full Furnished",
-        floor: "Lantai 1-3",
-        checkIn: "Fleksibel 24 jam",
-        checkOut: "Sesuai kontrak sewa",
-        rentalPeriods: ["Mingguan", "Bulanan", "Semester", "Tahunan"],
-        policies: [
-            "Hunian khusus perempuan",
-            "Check-in fleksibel 24 jam",
-            "Akses WiFi gratis unlimited",
-            "Air PDAM gratis",
-            "Parkir gratis (mobil & motor)",
-            "Listrik prabayar per kamar",
-            "Laundry antar jemput tersedia",
-        ],
-        includedFacilities: ["Free Air PDAM", "Free WiFi", "Free Parkir"],
-        excludedFacilities: ["Listrik prabayar per kamar"],
-        sharedFacilities: [
-            "Void Lounge",
-            "Dapur Bersama",
-            "Area Jemuran",
-            "Balkon",
-            "Parkiran (Mobil & Motor)",
-        ],
-        contact: {
-            owner: "08221140701",
-            admin: "081265945003",
-            email: "Sumanresidence338@gmail.com",
-            instagram: "@Suman_Residence",
-            tiktok: "@Suman.Residence",
-        },
-    },
-    2: {
-        id: 2,
-        title: "Kamar Tipe B",
-        size: "4 x 5,5 meter",
-        price: "Rp 2.100.000",
-        originalPrice: "Rp 2.400.000",
-        pricePerMonth: "Rp 2.100.000",
-        description:
-            "Kamar premium khusus perempuan dengan ukuran lebih luas 4x5,5 meter. Suite eksklusif dengan ruang yang lebih fleksibel untuk kenyamanan maksimal.",
-        longDescription:
-            "Kamar Tipe B di Suman Residence adalah pilihan premium dengan ukuran 4x5,5 meter yang memberikan ruang lebih luas dan fleksibel. Hunian kos-kosan eksklusif khusus perempuan ini dilengkapi dengan semua fasilitas modern termasuk kasur Queen Bed, AC, lemari pakaian yang lebih besar, meja nakas, dan area yang lebih lega untuk aktivitas sehari-hari.",
-        features: [
-            "AC",
-            "Kasur Queen Bed",
-            "WiFi Gratis",
-            "Lemari Pakaian Besar",
-            "Meja Nakas",
-            "Area Lebih Luas",
-        ],
-        amenities: [
-            {
-                name: "AC",
-                icon: Snowflake,
-                description: "Air conditioning untuk kenyamanan suhu ruangan",
-            },
-            {
-                name: "Kasur Queen Bed",
-                icon: Bed,
-                description: "Kasur queen size premium yang sangat nyaman",
-            },
-            {
-                name: "WiFi Gratis",
-                icon: Wifi,
-                description: "Koneksi internet gratis unlimited",
-            },
-            {
-                name: "Lemari Pakaian Besar",
-                icon: Users,
-                description: "Lemari pakaian dengan kapasitas ekstra besar",
-            },
-            {
-                name: "Meja Nakas",
-                icon: Tv,
-                description: "Meja nakas dengan storage tambahan",
-            },
-            {
-                name: "Area Lebih Luas",
-                icon: Bath,
-                description: "Ruang kamar yang lebih lega dan fleksibel",
-            },
-        ],
-        images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
-        availability: "limited" as const,
-        type: "B" as const,
-        units: 5,
-        totalUnits: 39,
-        rating: 4.9,
-        reviewCount: 89,
-        maxGuests: 2,
-        bedType: "Queen Bed",
-        view: "Full Furnished",
-        floor: "Lantai 2-3",
-        checkIn: "Fleksibel 24 jam",
-        checkOut: "Sesuai kontrak sewa",
-        rentalPeriods: ["Mingguan", "Bulanan", "Semester", "Tahunan"],
-        policies: [
-            "Hunian khusus perempuan",
-            "Check-in fleksibel 24 jam",
-            "Akses WiFi gratis unlimited",
-            "Air PDAM gratis",
-            "Parkir gratis (mobil & motor)",
-            "Listrik prabayar per kamar",
-            "Laundry antar jemput tersedia",
-        ],
-        includedFacilities: ["Free Air PDAM", "Free WiFi", "Free Parkir"],
-        excludedFacilities: ["Listrik prabayar per kamar"],
-        sharedFacilities: [
-            "Void Lounge",
-            "Dapur Bersama",
-            "Area Jemuran",
-            "Balkon",
-            "Parkiran (Mobil & Motor)",
-        ],
-        contact: {
-            owner: "08221140701",
-            admin: "081265945003",
-            email: "Sumanresidence338@gmail.com",
-            instagram: "@Suman_Residence",
-            tiktok: "@Suman.Residence",
-        },
-    },
-};
+interface RoomDetailProps {
+    roomId: string;
+    language: Language;
+}
 
-const RoomDetail = ({ roomId }: { roomId: string }) => {
+const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
+    const t = getRoomDetailTranslation(language);
+
+    // Sample room data (in real app, this would come from API)
+    const roomData = {
+        1: {
+            id: 1,
+            title: t.rooms.typeA.title,
+            size: t.rooms.typeA.size,
+            price: t.rooms.typeA.price,
+            originalPrice: t.rooms.typeA.originalPrice,
+            pricePerMonth: t.rooms.typeA.price,
+            description: t.rooms.typeA.description,
+            longDescription: t.rooms.typeA.longDescription,
+            features: t.rooms.typeA.features,
+            amenities: [
+                {
+                    name: t.rooms.typeA.amenities.ac.name,
+                    icon: Snowflake,
+                    description: t.rooms.typeA.amenities.ac.description,
+                },
+                {
+                    name: t.rooms.typeA.amenities.bed.name,
+                    icon: Bed,
+                    description: t.rooms.typeA.amenities.bed.description,
+                },
+                {
+                    name: t.rooms.typeA.amenities.wifi.name,
+                    icon: Wifi,
+                    description: t.rooms.typeA.amenities.wifi.description,
+                },
+                {
+                    name: t.rooms.typeA.amenities.wardrobe.name,
+                    icon: Users,
+                    description: t.rooms.typeA.amenities.wardrobe.description,
+                },
+                {
+                    name: t.rooms.typeA.amenities.table.name,
+                    icon: Tv,
+                    description: t.rooms.typeA.amenities.table.description,
+                },
+                {
+                    name: t.rooms.typeA.amenities.trash.name,
+                    icon: Bath,
+                    description: t.rooms.typeA.amenities.trash.description,
+                },
+            ],
+            images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
+            availability: "available" as const,
+            type: "A" as const,
+            units: 35,
+            totalUnits: t.common.totalUnits,
+            rating: t.common.rating,
+            reviewCount: t.common.reviewCount,
+            maxGuests: t.common.maxGuests,
+            bedType: t.rooms.typeA.bedType,
+            view: t.rooms.typeA.view,
+            floor: t.rooms.typeA.floor,
+            checkIn: t.rooms.typeA.checkIn,
+            checkOut: t.rooms.typeA.checkOut,
+            rentalPeriods: t.common.rentalPeriods,
+            policies: t.policies,
+            includedFacilities: t.facilities.included,
+            excludedFacilities: t.facilities.excluded,
+            sharedFacilities: t.facilities.shared,
+            contact: t.contact,
+        },
+        2: {
+            id: 2,
+            title: t.rooms.typeB.title,
+            size: t.rooms.typeB.size,
+            price: t.rooms.typeB.price,
+            originalPrice: t.rooms.typeB.originalPrice,
+            pricePerMonth: t.rooms.typeB.price,
+            description: t.rooms.typeB.description,
+            longDescription: t.rooms.typeB.longDescription,
+            features: t.rooms.typeB.features,
+            amenities: [
+                {
+                    name: t.rooms.typeB.amenities.ac.name,
+                    icon: Snowflake,
+                    description: t.rooms.typeB.amenities.ac.description,
+                },
+                {
+                    name: t.rooms.typeB.amenities.bed.name,
+                    icon: Bed,
+                    description: t.rooms.typeB.amenities.bed.description,
+                },
+                {
+                    name: t.rooms.typeB.amenities.wifi.name,
+                    icon: Wifi,
+                    description: t.rooms.typeB.amenities.wifi.description,
+                },
+                {
+                    name: t.rooms.typeB.amenities.wardrobe.name,
+                    icon: Users,
+                    description: t.rooms.typeB.amenities.wardrobe.description,
+                },
+                {
+                    name: t.rooms.typeB.amenities.table.name,
+                    icon: Tv,
+                    description: t.rooms.typeB.amenities.table.description,
+                },
+                {
+                    name: t.rooms.typeB.amenities.area.name,
+                    icon: Bath,
+                    description: t.rooms.typeB.amenities.area.description,
+                },
+            ],
+            images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
+            availability: "limited" as const,
+            type: "B" as const,
+            units: 5,
+            totalUnits: t.common.totalUnits,
+            rating: t.common.rating,
+            reviewCount: t.common.reviewCount,
+            maxGuests: t.common.maxGuests,
+            bedType: t.rooms.typeB.bedType,
+            view: t.rooms.typeB.view,
+            floor: t.rooms.typeB.floor,
+            checkIn: t.rooms.typeB.checkIn,
+            checkOut: t.rooms.typeB.checkOut,
+            rentalPeriods: t.common.rentalPeriods,
+            policies: t.policies,
+            includedFacilities: t.facilities.included,
+            excludedFacilities: t.facilities.excluded,
+            sharedFacilities: t.facilities.shared,
+            contact: t.contact,
+        },
+    };
+
     const room = roomData[roomId as unknown as keyof typeof roomData];
     const [selectedImage, setSelectedImage] = useState(0);
     const [checkIn, setCheckIn] = useState("");
@@ -230,13 +179,13 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                            Kamar tidak ditemukan
+                            {t.notFound.title}
                         </h1>
                         <Link
                             href="/kamar"
                             className="text-primary hover:underline"
                         >
-                            Kembali ke daftar kamar
+                            {t.notFound.backLink}
                         </Link>
                     </div>
                 </div>
@@ -252,11 +201,11 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Link href="/" className="hover:text-primary">
-                            Home
+                            {t.navigation.home}
                         </Link>
                         <span>/</span>
                         <Link href="/kamar" className="hover:text-primary">
-                            Kamar
+                            {t.navigation.rooms}
                         </Link>
                         <span>/</span>
                         <span className="text-gray-900">{room.title}</span>
@@ -320,7 +269,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                                     <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
                                     <div className="text-sm text-gray-600">
-                                        Max {room.maxGuests} tamu
+                                        {t.roomInfo.maxGuests.replace('{count}', room.maxGuests.toString())}
                                     </div>
                                 </div>
                                 <div className="text-center p-4 bg-gray-50 rounded-lg">
@@ -342,14 +291,14 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                         <Building2 />
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        Lantai {room.floor}
+                                        {t.roomInfo.floor} {room.floor}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="prose max-w-none">
                                 <h3 className="text-xl font-semibold mb-4">
-                                    Deskripsi Kamar
+                                    {t.roomInfo.roomDescription}
                                 </h3>
                                 <p className="text-gray-700 leading-relaxed mb-6">
                                     {room.longDescription}
@@ -360,7 +309,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                         {/* Amenities */}
                         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
                             <h3 className="text-xl font-semibold mb-6">
-                                Fasilitas Kamar
+                                {t.roomInfo.roomAmenities}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {room.amenities.map((amenity, index) => (
@@ -385,14 +334,14 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                         {/* Included vs Additional Costs */}
                         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
                             <h3 className="text-xl font-semibold mb-6">
-                                Rincian Biaya
+                                {t.roomInfo.costBreakdown}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Included Facilities */}
                                 <div>
                                     <h4 className="font-medium text-green-600 mb-4 flex items-center gap-2">
                                         <CheckCircle className="w-5 h-5" />
-                                        Sudah Termasuk
+                                        {t.roomInfo.included}
                                     </h4>
                                     <div className="space-y-2">
                                         {room.includedFacilities.map((facility, index) => (
@@ -411,7 +360,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                 <div>
                                     <h4 className="font-medium text-orange-600 mb-4 flex items-center gap-2">
                                         <Clock className="w-5 h-5" />
-                                        Biaya Tambahan
+                                        {t.roomInfo.additionalCosts}
                                     </h4>
                                     <div className="space-y-2">
                                         {room.excludedFacilities.map((facility, index) => (
@@ -423,10 +372,15 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                                 <span className="text-gray-700">{facility}</span>
                                             </div>
                                         ))}
-                                        <div className="flex items-center space-x-2 text-sm">
-                                            <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                                            <span className="text-gray-700">Laundry antar jemput (berbayar)</span>
-                                        </div>
+                                        {t.facilities.additional.map((facility, index) => (
+                                            <div
+                                                key={`additional-${index}`}
+                                                className="flex items-center space-x-2 text-sm"
+                                            >
+                                                <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                                                <span className="text-gray-700">{facility}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -435,7 +389,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                         {/* Policies */}
                         <div className="bg-white rounded-2xl shadow-lg p-8">
                             <h3 className="text-xl font-semibold mb-6">
-                                Kebijakan Kamar
+                                {t.roomInfo.roomPolicies}
                             </h3>
                             <div className="space-y-3">
                                 {room.policies.map((policy, index) => (
@@ -458,13 +412,13 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                         <div className="sticky top-24">
                             <div className="bg-white rounded-2xl shadow-lg p-6">
                                 <h3 className="text-xl font-semibold mb-4">
-                                    Pesan Kamar
+                                    {t.booking.title}
                                 </h3>
 
                                 <div className="space-y-4 mb-6">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Check-in
+                                            {t.booking.checkIn}
                                         </label>
                                         <input
                                             type="date"
@@ -478,7 +432,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Check-out
+                                            {t.booking.checkOut}
                                         </label>
                                         <input
                                             type="date"
@@ -492,7 +446,7 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Jumlah Tamu
+                                            {t.booking.guestCount}
                                         </label>
                                         <Select
                                             value={guests.toString()}
@@ -501,14 +455,14 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                             }
                                         >
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Pilih jumlah tamu" />
+                                                <SelectValue placeholder={t.booking.selectGuests} />
                                             </SelectTrigger>
                                             <SelectContent className="w-full">
                                                 <SelectItem value="1">
-                                                    1 Tamu
+                                                    1 {t.booking.guest}
                                                 </SelectItem>
                                                 <SelectItem value="2">
-                                                    2 Tamu
+                                                    2 {t.booking.guests}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -516,25 +470,25 @@ const RoomDetail = ({ roomId }: { roomId: string }) => {
                                 </div>
 
                                 <Button className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors mb-4">
-                                    Pesan Sekarang
+                                    {t.booking.bookNow}
                                 </Button>
 
                                 <div className="border-t pt-4">
                                     <h4 className="font-medium mb-3">
-                                        Butuh bantuan?
+                                        {t.booking.needHelp}
                                     </h4>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex items-center space-x-2">
                                             <Phone className="w-4 h-4 text-primary" />
-                                            <span>+62 812-3456-7890</span>
+                                            <span>{room.contact.owner}</span>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <Mail className="w-4 h-4 text-primary" />
-                                            <span>info@sumanresidence.com</span>
+                                            <span>{room.contact.email}</span>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                             <Clock className="w-4 h-4 text-primary" />
-                                            <span>24/7 Customer Service</span>
+                                            <span>{t.booking.customerService}</span>
                                         </div>
                                     </div>
                                 </div>

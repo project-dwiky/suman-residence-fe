@@ -15,24 +15,23 @@ import {
 } from "./facilities/FacilityIcons";
 import RentalOption from "./facilities/RentalOption";
 import RoomTypeCard, { RoomTypeProps } from "./facilities/RoomTypeCard";
+import { Language, getFacilityTranslation } from "@/translations";
 
-const FacilitySection = () => {
+interface FacilitySectionProps {
+    language: Language;
+}
+
+const FacilitySection = ({ language }: FacilitySectionProps) => {
+    const t = getFacilityTranslation(language);
+
     // Room types data
     const roomTypes: RoomTypeProps[] = [
         {
-            title: "Kamar Premium Tipe A",
-            size: "4 x 4 meter",
-            price: "Rp 1.500.000",
-            description:
-                "Kamar nyaman dengan ukuran compact, ideal untuk mahasiswi atau profesional muda.",
-            features: [
-                "AC",
-                "Kasur Queen Bed",
-                "Wi-Fi",
-                "Lemari Pakaian",
-                "Meja Nakas",
-                "Tempat Sampah",
-            ],
+            title: t.roomTypes.rooms.typeA.title,
+            size: t.roomTypes.rooms.typeA.size,
+            price: t.roomTypes.rooms.typeA.price,
+            description: t.roomTypes.rooms.typeA.description,
+            features: t.roomTypes.rooms.typeA.features,
             image: "/galeri/kamar_A/h2.JPG",
             availability: "available" as const,
             type: "A" as const,
@@ -40,19 +39,11 @@ const FacilitySection = () => {
             id: 1,
         },
         {
-            title: "Kamar Tipe B",
-            size: "4 x 5,5 meter",
-            price: "Rp 2.100.000",
-            description:
-                "Kamar luas dengan ruang yang lebih fleksibel untuk kebutuhan Anda.",
-            features: [
-                "AC",
-                "Kasur Queen Bed",
-                "Wi-Fi",
-                "Lemari Pakaian Besar",
-                "Meja Nakas",
-                "Area Kerja",
-            ],
+            title: t.roomTypes.rooms.typeB.title,
+            size: t.roomTypes.rooms.typeB.size,
+            price: t.roomTypes.rooms.typeB.price,
+            description: t.roomTypes.rooms.typeB.description,
+            features: t.roomTypes.rooms.typeB.features,
             image: "/galeri/kamar_A/h1.JPG",
             availability: "limited" as const,
             type: "B" as const,
@@ -65,95 +56,68 @@ const FacilitySection = () => {
     const buildingAmenities = [
         {
             icon: <IconWifi />,
-            title: "Wi-Fi Berkecepatan Tinggi",
-            description:
-                "Akses internet gratis di seluruh area residence dengan kecepatan premium",
+            title: t.amenities.items.wifi.title,
+            description: t.amenities.items.wifi.description,
         },
         {
             icon: <IconWater />,
-            title: "Air PDAM 24 Jam",
-            description:
-                "Supply air bersih tanpa terputus untuk kenyamanan maksimal",
+            title: t.amenities.items.water.title,
+            description: t.amenities.items.water.description,
         },
         {
             icon: <IconParking />,
-            title: "Area Parkir Luas",
-            description:
-                "Parkir aman dan gratis untuk kendaraan roda dua dan roda empat",
+            title: t.amenities.items.parking.title,
+            description: t.amenities.items.parking.description,
         },
         {
             icon: <IconLounge />,
-            title: "Lounge Area Eksklusif",
-            description:
-                "Ruang santai modern dengan desain interior premium untuk bersantai",
+            title: t.amenities.items.lounge.title,
+            description: t.amenities.items.lounge.description,
         },
         {
             icon: <IconKitchen />,
-            title: "Dapur Berkonsep Modern",
-            description:
-                "Dapur bersama dengan peralatan lengkap untuk kebutuhan memasak",
+            title: t.amenities.items.kitchen.title,
+            description: t.amenities.items.kitchen.description,
         },
         {
             icon: <IconLaundry />,
-            title: "Layanan Laundry",
-            description:
-                "Layanan antar-jemput laundry untuk memudahkan kebutuhan harian Anda",
+            title: t.amenities.items.laundry.title,
+            description: t.amenities.items.laundry.description,
         },
         {
             icon: <IconBalcony />,
-            title: "Balkon Pemandangan yang Bagus",
-            description:
-                "Nikmati pemandangan bagus dari balkon dengan desain minimalis modern",
+            title: t.amenities.items.balcony.title,
+            description: t.amenities.items.balcony.description,
         },
         {
             icon: <IconSecurity />,
-            title: "Keamanan 24 Jam",
-            description:
-                "Sistem keamanan dan staff security yang menjaga residence sepanjang hari",
+            title: t.amenities.items.security.title,
+            description: t.amenities.items.security.description,
         },
     ];
 
     // Rental options
     const rentalOptions = [
         {
-            title: "Mingguan",
-            period: "Fleksibilitas maksimal",
-            benefits: [
-                "Tanpa kontrak jangka panjang",
-                "Fleksibel untuk kebutuhan singkat",
-                "Semua fasilitas termasuk",
-            ],
+            title: t.rentalOptions.options.weekly.title,
+            period: t.rentalOptions.options.weekly.period,
+            benefits: t.rentalOptions.options.weekly.benefits,
         },
         {
-            title: "Bulanan",
-            period: "Paling populer",
-            benefits: [
-                "Harga lebih ekonomis",
-                "Cocok untuk kebutuhan menengah",
-                "Fleksibilitas perpanjangan",
-                "Semua fasilitas termasuk",
-            ],
+            title: t.rentalOptions.options.monthly.title,
+            period: t.rentalOptions.options.monthly.period,
+            benefits: t.rentalOptions.options.monthly.benefits,
             recommended: true,
         },
         {
-            title: "Semester",
-            period: "Untuk periode akademik",
-            benefits: [
-                "Diskon khusus",
-                "Pengajuan deposit lebih rendah",
-                "Prioritas perpanjangan",
-                "Semua fasilitas termasuk",
-            ],
+            title: t.rentalOptions.options.semester.title,
+            period: t.rentalOptions.options.semester.period,
+            benefits: t.rentalOptions.options.semester.benefits,
         },
         {
-            title: "Tahunan",
-            period: "Value terbaik",
-            benefits: [
-                "Harga terendah per bulan",
-                "Terjamin ketersediaan kamar",
-                "Prioritas pemilihan kamar",
-                "Semua fasilitas termasuk",
-            ],
+            title: t.rentalOptions.options.yearly.title,
+            period: t.rentalOptions.options.yearly.period,
+            benefits: t.rentalOptions.options.yearly.benefits,
         },
     ];
 
@@ -179,11 +143,10 @@ const FacilitySection = () => {
                     transition={{ duration: 0.6 }}
                 >
                     <h2 className="text-4xl font-bold text-primary mb-5">
-                        Fasilitas Eksklusif
+                        {t.title}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Nikmati berbagai fasilitas modern yang dirancang untuk
-                        memberikan pengalaman tinggal setara bintang 5.
+                        {t.description}
                     </p>
                 </motion.div>
 
@@ -197,21 +160,18 @@ const FacilitySection = () => {
                     >
                         <div className="max-w-xl">
                             <h3 className="text-2xl font-bold text-primary mb-4">
-                                Pilihan Kamar Premium
+                                {t.roomTypes.title}
                             </h3>
                             <p className="text-muted-foreground">
-                                Dirancang dengan mengedepankan kenyamanan dan
-                                keindahan, setiap kamar kami dilengkapi dengan
-                                fasilitas modern untuk memenuhi kebutuhan gaya
-                                hidup Anda.
+                                {t.roomTypes.description}
                             </p>
                         </div>
                         <div className="flex items-center space-x-2">
                             <div className="px-4 py-1 bg-primary text-white rounded-full text-sm font-medium">
-                                39 Total Unit
+                                39 {t.roomTypes.badges.totalUnits}
                             </div>
                             <div className="bg-white px-4 py-1 rounded-full text-sm font-medium border">
-                                Khusus Wanita
+                                {t.roomTypes.badges.womenOnly}
                             </div>
                         </div>
                     </motion.div>
@@ -245,12 +205,10 @@ const FacilitySection = () => {
                         transition={{ duration: 0.5 }}
                     >
                         <h3 className="text-2xl font-bold text-primary mb-2">
-                            Fasilitas Umum
+                            {t.amenities.title}
                         </h3>
                         <p className="text-muted-foreground max-w-2xl mx-auto">
-                            Berbagai fasilitas premium yang didesain untuk
-                            meningkatkan kualitas hidup Anda selama tinggal di
-                            Suman Residence.
+                            {t.amenities.description}
                         </p>
                     </motion.div>
 
@@ -277,11 +235,10 @@ const FacilitySection = () => {
                         transition={{ duration: 0.5 }}
                     >
                         <h3 className="text-2xl font-bold text-primary mb-2">
-                            Pilihan Durasi Sewa
+                            {t.rentalOptions.title}
                         </h3>
                         <p className="text-muted-foreground max-w-2xl mx-auto">
-                            Kami menawarkan fleksibilitas dalam durasi sewa
-                            untuk menyesuaikan dengan kebutuhan Anda.
+                            {t.rentalOptions.description}
                         </p>
                     </motion.div>
 

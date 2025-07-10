@@ -4,7 +4,7 @@ export const id: TranslationKeys = {
   hero: {
     title: "Pesan Hunian Ideal Anda",
     subtitle: "Cozy Living Space in Banda Aceh",
-    description: "Temukan ruang hidup sempurna di Suman Residence. Dengan unit modern dan fasilitas terbaik, kami hadirkan kenyamanan dan kemudahan maksimal untuk Anda.",
+    description: "Dapetin tempat hunian ultimate lo di Suman Residence. Kita punya unit modern yang keren abis dan fasilitas top-tier yang bakal bikin pengalaman hidup lo makin mantap.",
     review: {
       quote: "Sooo cozy and clean!!! Everything's great and most importantly, the owner is really really friendly",
       author: "Jumila Ramli"
@@ -19,6 +19,40 @@ export const id: TranslationKeys = {
     location: {
       city: "Banda Aceh",
       country: "Indonesia"
+    }
+  },
+  gallery: {
+    title: "Galeri Suman Residence",
+    description: "Jelajahi berbagai tipe unit dan fasilitas premium yang kami tawarkan untuk kenyamanan hidup modern Anda",
+    categories: {
+      all: "Semua",
+      livingRoom: "Living Room",
+      kitchen: "Kitchen", 
+      bedroom: "Bedroom",
+      bathroom: "Bathroom",
+      parkingArea: "Parking Area"
+    },
+    items: {
+      livingRoom: {
+        title: "Living Room Modern",
+        description: "Ruang tamu dengan desain modern dan nyaman"
+      },
+      kitchen: {
+        title: "Dapur Bersama", 
+        description: "Dapur lengkap dengan kitchen island dan peralatan modern"
+      },
+      bedroom: {
+        title: "Kamar Tidur Premium",
+        description: "Kamar tidur dengan pencahayaan alami"
+      },
+      bathroom: {
+        title: "Kamar Mandi Dalam",
+        description: "Kamar mandi kontemporer dengan shower dan toilet"
+      },
+      parkingArea: {
+        title: "Area Parkir",
+        description: "Area parkir yang luas dan aman"
+      }
     }
   }
 }; 

@@ -16,10 +16,10 @@ const Homepage = async () => {
             <Navbar />
             <div>
                 <HeroSection language={language} />
-                <GallerySection />
-                <MapSection />
-                <FacilitySection />
-                <CTASection />
+                <GallerySection language={language} />
+                <MapSection language={language} />
+                <FacilitySection language={language} />
+                <CTASection language={language} />
             </div>
             <Footer />
         </div>
