@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByEmail } from "@/repositories/user.repository";
-import { ResetPasswordWhatsappService } from "@/services/reset-password-whatsapp.service";
+import { ResetPasswordWhatsappService } from "@/services/auth/reset-password-whatsapp.service";
 import { saveResetToken } from "@/models/reset-token.model";
 import crypto from 'crypto';
 

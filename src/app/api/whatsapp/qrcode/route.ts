@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/services/auth.service";
+import { getCurrentUser } from "@/services/auth/auth.service";
 import whatsAppService from "@/services/whatsapp.service";
 
 export async function GET(request: NextRequest) {

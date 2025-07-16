@@ -7,21 +7,18 @@ export interface Room {
   tenant?: Tenant;
 }
 
+// Simplified tenant interface - only essential info for manual system
 export interface Tenant {
   id: string;
   name: string;
   phone: string;
-  email: string;
-  checkIn: string;
   checkOut: string;
   remainingDays: number;
-  paymentStatus: 'Paid' | 'Not Paid' | 'Partial';
-  totalAmount: number;
-  paidAmount: number;
 }
 
+// Simple actions for document sending via WhatsApp
 export interface BookingAction {
-  type: 'approve' | 'reject' | 'send_invoice' | 'send_receipt' | 'send_whatsapp';
+  type: 'send_booking_slip' | 'send_receipt_sop' | 'send_invoice' | 'send_whatsapp';
   roomId: string;
   tenantId?: string;
 }

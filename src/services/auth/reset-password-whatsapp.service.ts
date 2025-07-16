@@ -1,4 +1,4 @@
-import { WhatsAppService } from './whatsapp.service';
+import { WhatsAppService } from '../whatsapp.service';
 
 /**
  * Class untuk mengirim link reset password melalui WhatsApp

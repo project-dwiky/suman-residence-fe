@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByEmail } from "@/repositories/user.repository";
-import confirmationLinkWhatsappService from "@/services/confirmation-link-whatsapp.service";
+import confirmationLinkWhatsappService from "@/services/auth/confirmation-link-whatsapp.service";
 
 /**
  * API handler untuk mengirim ulang link konfirmasi ke pengguna

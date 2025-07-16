@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { logoutUser } from "@/services/auth.service";
+import { logoutUser } from "@/services/auth/auth.service";
 
 // GET request to handle logout
 export async function GET(request: NextRequest) {

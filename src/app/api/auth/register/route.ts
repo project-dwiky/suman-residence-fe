@@ -1,8 +1,8 @@
-import { registerUser } from "@/services/auth.service";
+import { registerUser } from "@/services/auth/auth.service";
 import { NextRequest, NextResponse } from "next/server";
 import { RegisterData } from "@/types/user";
 import { getUserByEmail } from "@/repositories/user.repository";
-import confirmationLinkWhatsappService from "@/services/confirmation-link-whatsapp.service";
+import confirmationLinkWhatsappService from "@/services/auth/confirmation-link-whatsapp.service";
 
 export async function POST(request: NextRequest) {
     try {

@@ -2,15 +2,13 @@
 
 import { useState } from "react";
 import { RoomCard } from "./RoomCard";
-import { DashboardStats } from "./DashboardStats";
 import { mockRooms } from "./mockData";
 import { Room } from "./types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Filter, Search, Download, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 
-type FilterType = 'all' | 'available' | 'booked' | 'not-paid' | 'partial-paid';
+type FilterType = 'all' | 'available' | 'booked';
 
 export function AdminDashboard() {
   const [rooms] = useState<Room[]>(mockRooms);
@@ -18,7 +16,7 @@ export function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredRooms = rooms.filter(room => {
-    // Filter berdasarkan tipe
+    // Simple filter: all, available, or booked only
     let matchesFilter = true;
     switch (filter) {
       case 'available':
@@ -27,41 +25,32 @@ export function AdminDashboard() {
       case 'booked':
         matchesFilter = room.status === 'Booked';
         break;
-      case 'not-paid':
-        matchesFilter = room.tenant?.paymentStatus === 'Not Paid';
-        break;
-      case 'partial-paid':
-        matchesFilter = room.tenant?.paymentStatus === 'Partial';
-        break;
       default:
         matchesFilter = true;
     }
 
-    // Filter berdasarkan pencarian
+    // Simple search by room name or tenant name
     const matchesSearch = 
       room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      room.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (room.tenant?.name.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
 
     return matchesFilter && matchesSearch;
   });
 
   const handleAction = (action: string, roomId: string, tenantId?: string) => {
-    console.log(`Action: ${action}, Room: ${roomId}, Tenant: ${tenantId}`);
-    
-    // Simulasi aksi yang akan dilakukan
+    // Handle document sending actions
     switch (action) {
-      case 'approve':
-        alert(`Booking untuk kamar ${roomId} telah di-ACC. Booking slip akan dikirim.`);
+      case 'send_booking_slip':
+        alert(`Booking slip untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
+        break;
+      case 'send_receipt_sop':
+        alert(`Receipt dan SOP untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
         break;
       case 'send_invoice':
-        alert(`Invoice untuk kamar ${roomId} telah dikirim ke tenant.`);
-        break;
-      case 'send_receipt':
-        alert(`Receipt dan SOP untuk kamar ${roomId} telah dikirim ke tenant.`);
+        alert(`Invoice untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
         break;
       case 'send_whatsapp':
-        // Simulasi redirect ke WhatsApp
+        // Send message to WhatsApp
         const room = rooms.find(r => r.id === roomId);
         if (room?.tenant) {
           const message = encodeURIComponent(
@@ -75,23 +64,10 @@ export function AdminDashboard() {
     }
   };
 
-  // Statistik
+  // Simple statistics
   const totalRooms = rooms.length;
   const availableRooms = rooms.filter(r => r.status === 'Available').length;
   const bookedRooms = rooms.filter(r => r.status === 'Booked').length;
-  const notPaidCount = rooms.filter(r => r.tenant?.paymentStatus === 'Not Paid').length;
-  const partialPaidCount = rooms.filter(r => r.tenant?.paymentStatus === 'Partial').length;
-  const totalRevenue = rooms
-    .filter(r => r.tenant?.paymentStatus === 'Paid')
-    .reduce((sum, r) => sum + (r.tenant?.paidAmount || 0), 0);
-
-  const filterOptions = [
-    { key: 'all', label: 'Semua Kamar', count: totalRooms },
-    { key: 'available', label: 'Tersedia', count: availableRooms },
-    { key: 'booked', label: 'Terisi', count: bookedRooms },
-    { key: 'not-paid', label: 'Belum Bayar', count: notPaidCount },
-    { key: 'partial-paid', label: 'Bayar Sebagian', count: partialPaidCount },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,51 +77,54 @@ export function AdminDashboard() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Kelola semua kamar dan penyewa Suman Residence</p>
-            </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" className="flex items-center space-x-2">
-                <Download className="h-4 w-4" />
-                <span>Export Data</span>
-              </Button>
-              <Button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4" />
-                <span>Tambah Kamar</span>
-              </Button>
+              <p className="text-gray-600 mt-1">Kelola kamar dan kirim dokumen via WhatsApp</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Statistik Dashboard */}
-        <DashboardStats
-          totalRooms={totalRooms}
-          availableRooms={availableRooms}
-          bookedRooms={bookedRooms}
-          notPaidCount={notPaidCount}
-          partialPaidCount={partialPaidCount}
-          totalRevenue={totalRevenue}
-        />
+        {/* Simple Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="p-6">
+            <div className="text-2xl font-bold text-gray-900">{totalRooms}</div>
+            <div className="text-gray-600">Total Kamar</div>
+          </Card>
+          <Card className="p-6">
+            <div className="text-2xl font-bold text-green-600">{availableRooms}</div>
+            <div className="text-gray-600">Kamar Tersedia</div>
+          </Card>
+          <Card className="p-6">
+            <div className="text-2xl font-bold text-blue-600">{bookedRooms}</div>
+            <div className="text-gray-600">Kamar Terisi</div>
+          </Card>
+        </div>
 
-        {/* Filter dan Pencarian */}
+        {/* Simple Filter and Search */}
         <Card className="p-6 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div className="flex flex-wrap gap-2">
-              {filterOptions.map((option) => (
-                <Button
-                  key={option.key}
-                  variant={filter === option.key ? "default" : "outline"}
-                  onClick={() => setFilter(option.key as FilterType)}
-                  className="flex items-center space-x-2"
-                  size="sm"
-                >
-                  <span>{option.label}</span>
-                  <Badge variant="secondary" className="ml-1">
-                    {option.count}
-                  </Badge>
-                </Button>
-              ))}
+              <Button
+                variant={filter === 'all' ? "default" : "outline"}
+                onClick={() => setFilter('all')}
+                size="sm"
+              >
+                Semua ({totalRooms})
+              </Button>
+              <Button
+                variant={filter === 'available' ? "default" : "outline"}
+                onClick={() => setFilter('available')}
+                size="sm"
+              >
+                Tersedia ({availableRooms})
+              </Button>
+              <Button
+                variant={filter === 'booked' ? "default" : "outline"}
+                onClick={() => setFilter('booked')}
+                size="sm"
+              >
+                Terisi ({bookedRooms})
+              </Button>
             </div>
             
             <div className="flex items-center space-x-2 max-w-md">
@@ -159,14 +138,11 @@ export function AdminDashboard() {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </Card>
 
-        {/* Grid Kamar */}
+        {/* Room Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRooms.map((room) => (
             <RoomCard

@@ -18,7 +18,7 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const router = useRouter();
   
-  // Filter data berdasarkan pencarian dan filter status
+  // Filter data berdasarkan pencarian dan filter status - simplified
   useEffect(() => {
     const filtered = rentalDataList.filter(rental => {
       const matchSearch = searchTerm === '' || 
@@ -29,7 +29,6 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
       const matchFilter = activeFilter === 'all' || 
         (activeFilter === 'active' && rental.rentalStatus === 'ACTIVE') ||
         (activeFilter === 'expired' && rental.rentalStatus === 'EXPIRED') ||
-        (activeFilter === 'not-renewed' && rental.rentalStatus === 'NOT_RENEWED') ||
         (activeFilter === 'pending' && rental.rentalStatus === 'PENDING');
       
       return matchSearch && matchFilter;
@@ -38,7 +37,7 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
     setFilteredRentals(filtered);
   }, [searchTerm, rentalDataList, activeFilter]);
 
-  // Status badge styling yang konsisten dengan payment badge
+  // Simplified status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
@@ -51,11 +50,6 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
           color: 'bg-red-50 border border-red-200 text-red-700', 
           text: 'Masa Sewa Habis'
         };
-      case 'NOT_RENEWED':
-        return { 
-          color: 'bg-orange-50 border border-orange-200 text-orange-700', 
-          text: 'Tidak Diperpanjang'
-        };
       case 'PENDING':
         return { 
           color: 'bg-amber-50 border border-amber-200 text-amber-700', 
@@ -66,20 +60,6 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
           color: 'bg-gray-50 border border-gray-200 text-gray-700', 
           text: status
         };
-    }
-  };
-
-  // Payment status text untuk ditampilkan sebagai key-value
-  const getPaymentStatus = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return 'Lunas';
-      case 'UNPAID':
-        return 'Belum Dibayar';
-      case 'PARTIALLY_PAID':
-        return 'DP';
-      default:
-        return status;
     }
   };
   
@@ -228,9 +208,8 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
       {filteredRentals.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {filteredRentals.map((rental, index) => {
-            const { room, rentalPeriod, rentalStatus, payment } = rental;
+            const { room, rentalPeriod, rentalStatus } = rental;
             const statusBadge = getStatusBadge(rentalStatus);
-            const paymentStatus = getPaymentStatus(payment.status);
             const cardRef = useRef(null);
             const isInView = useInView(cardRef, { once: true, margin: "-100px 0px" });
             
@@ -290,15 +269,7 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
                     <div>
                       <div className="text-xs font-medium text-gray-500 mb-1">Durasi sewa</div>
                       <div className="text-sm">
-                        {rentalPeriod.durationType === 'WEEKLY' ? 'Mingguan' : rentalPeriod.durationType === 'MONTHLY' ? 'Bulanan' : rentalPeriod.durationType === 'SEMESTER' ? 'Semester' : 'Tahunan'}
-                      </div>
-                    </div>
-                    
-                    {/* Status pembayaran */}
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 mb-1">Status pembayaran</div>
-                      <div className="text-sm">
-                        {paymentStatus}
+                        {rentalPeriod.durationType === 'MONTHLY' ? 'Bulanan' : rentalPeriod.durationType === 'SEMESTER' ? 'Semester' : 'Tahunan'}
                       </div>
                     </div>
                   </div>

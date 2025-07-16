@@ -13,13 +13,7 @@ export function AdminSidebar() {
       name: "Dashboard",
       href: "/admin/dashboard",
       icon: "🏠",
-      description: "Overview & statistik"
-    },
-    {
-      name: "Kelola Kamar",
-      href: "/admin/dashboard/rooms",
-      icon: "🏠",
-      description: "Daftar semua kamar"
+      description: "Overview kamar & penyewa"
     },
     {
       name: "Kelola Booking",
@@ -28,34 +22,10 @@ export function AdminSidebar() {
       description: "Permintaan booking baru"
     },
     {
-      name: "Penyewa Aktif",
-      href: "/admin/dashboard/tenants",
-      icon: "👥",
-      description: "Daftar penyewa aktif"
-    },
-    {
-      name: "Pembayaran",
-      href: "/admin/dashboard/payments",
-      icon: "💰",
-      description: "Status pembayaran"
-    },
-    {
       name: "WhatsApp",
       href: "/admin/dashboard/whatsapp",
       icon: "💬",
       description: "Pengaturan WhatsApp"
-    },
-    {
-      name: "Laporan",
-      href: "/admin/dashboard/reports",
-      icon: "📊",
-      description: "Laporan & analitik"
-    },
-    {
-      name: "Pengaturan",
-      href: "/admin/dashboard/settings",
-      icon: "⚙️", 
-      description: "Konfigurasi sistem"
     }
   ];
 

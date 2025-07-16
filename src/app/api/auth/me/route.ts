@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/services/auth.service";
+import { getCurrentUser } from "@/services/auth/auth.service";
 import { NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

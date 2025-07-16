@@ -1,4 +1,4 @@
-import whatsAppService, { WhatsAppService } from './whatsapp.service';
+import whatsAppService, { WhatsAppService } from '../whatsapp.service';
 import { User } from '@/types/user';
 
 /**

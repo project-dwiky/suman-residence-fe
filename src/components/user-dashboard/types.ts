@@ -1,40 +1,30 @@
 /**
- * User Dashboard Types
- * Types for managing user dashboard data requirements
+ * User Dashboard Types - Simplified for manual booking system
  */
 
-// Room rental status enum
+// Room rental status enum - simplified
 export enum RentalStatus {
   ACTIVE = 'ACTIVE',        // Sedang menyewa kamar
   EXPIRED = 'EXPIRED',      // Masa sewa habis
-  NOT_RENEWED = 'NOT_RENEWED',  // Tidak melanjutkan sewa
-  PENDING = 'PENDING'      // Dalam pengajuan/proses
+  PENDING = 'PENDING'       // Dalam pengajuan/proses
 }
 
-// Rental duration enum
+// Rental duration enum - simplified
 export enum RentalDuration {
-  WEEKLY = 'WEEKLY',       // Mingguan
   MONTHLY = 'MONTHLY',     // Bulanan
   SEMESTER = 'SEMESTER',   // Semester
   YEARLY = 'YEARLY'        // Tahunan
 }
 
-// Payment status enum
-export enum PaymentStatus {
-  UNPAID = 'UNPAID',         // Belum dibayar
-  PAID = 'PAID',           // Sudah dibayar/lunas
-  PARTIALLY_PAID = 'PARTIALLY_PAID', // Dibayar sebagian
-}
-
-// Document type enum
+// Document type enum - only essential documents per client requirement
 export enum DocumentType {
-  BOOKING_SLIP = 'BOOKING_SLIP',
-  RECEIPT = 'RECEIPT',
-  SOP = 'SOP',
-  INVOICE = 'INVOICE',
+  BOOKING_SLIP = 'BOOKING_SLIP',  // Booking slip (if DP paid)
+  RECEIPT = 'RECEIPT',            // Receipt + SOP (if fully paid)
+  SOP = 'SOP',                    // SOP document
+  INVOICE = 'INVOICE',            // Invoice (if unpaid)
 }
 
-// Room information type
+// Room information type - simplified
 export interface Room {
   id: string;
   roomNumber: string;
@@ -47,42 +37,31 @@ export interface Room {
   imagesGallery: string[]; // Array URL foto-foto kamar
 }
 
-// Document type
+// Document type - simplified
 export interface Document {
   id: string;
   type: DocumentType;
   fileName: string;
   fileUrl: string;
   createdAt: string;
-  expiresAt?: string;    // Opsional, jika dokumen memiliki masa berlaku
 }
 
-// Rental period information
+// Rental period information - simplified
 export interface RentalPeriod {
   startDate: string;     // Format ISO: YYYY-MM-DD
   endDate: string;       // Format ISO: YYYY-MM-DD
-  durationType: RentalDuration; // Jenis durasi sewa (Mingguan/Bulanan/Semester/Tahunan)
+  durationType: RentalDuration; // Jenis durasi sewa
 }
 
-// Payment information - disederhanakan
-export interface Payment {
-  status: PaymentStatus;      // Status pembayaran (dibayar/belum)
-  lastPaymentDate?: string;  // Tanggal pembayaran terakhir
-  receiptUrl?: string;       // URL bukti pembayaran jika ada
-}
-
-
-
-// Complete rental data
+// Complete rental data - simplified (no complex payment tracking)
 export interface RentalData {
   id: string;
   userId: string;
   room: Room;
   rentalStatus: RentalStatus;  // Status saat ini
   rentalPeriod: RentalPeriod;
-  payment: Payment;
-  documents: Document[];
-  notes?: string;        // Catatan tambahan jika ada
-  createdAt: string;     // Tanggal booking dibuat
-  updatedAt: string;     // Tanggal terakhir update data
+  documents: Document[];       // Available documents
+  notes?: string;             // Catatan tambahan jika ada
+  createdAt: string;          // Tanggal booking dibuat
+  updatedAt: string;          // Tanggal terakhir update data
 }

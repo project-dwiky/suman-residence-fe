@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/services/auth.service";
+import { getCurrentUser } from "@/services/auth/auth.service";
 import whatsAppService from "@/services/whatsapp.service";
 import { SendMessageRequest } from "@/types/whatsapp";
 import { formatPhoneNumber } from "@/utils/format-phonenumber";
