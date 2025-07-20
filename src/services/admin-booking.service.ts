@@ -46,10 +46,10 @@ export class AdminBookingService {
     }
   }
 
-  // Approve, reject, confirm, or cancel a booking
+  // Approve, reject, or cancel a booking - simplified actions
   static async updateBookingStatus(
     bookingId: string, 
-    action: 'approve' | 'confirm' | 'cancel'
+    action: 'approve' | 'reject' | 'cancel'
   ): Promise<AdminBookingResponse> {
     try {
       const response = await fetch(`${BACKEND_URL}/api/admin/bookings/${bookingId}/action`, {

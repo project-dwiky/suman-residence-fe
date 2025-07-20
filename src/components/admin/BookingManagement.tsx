@@ -96,7 +96,7 @@ const BookingManagement: React.FC = () => {
 
   const handleBookingAction = async (
     bookingId: string, 
-    action: 'approve' | 'confirm' | 'cancel'
+    action: 'approve' | 'reject' | 'cancel'
   ) => {
     try {
       setActionLoading(prev => ({ ...prev, [bookingId]: true }));
@@ -189,7 +189,7 @@ const BookingManagement: React.FC = () => {
             <Button
               size="sm"
               variant="destructive"
-              onClick={() => handleBookingAction(booking.id, 'cancel')}
+              onClick={() => handleBookingAction(booking.id, 'reject')}
               disabled={isLoading}
             >
               <XCircle className="w-4 h-4 mr-1" />
