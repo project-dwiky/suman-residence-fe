@@ -1,28 +1,101 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { RentalData } from '../types';
 import RentalListSection from '../sections/RentalListSection';
-import { getRentalDataList } from '../actions/mockData';
 import Footer from '@/components/core/Footer';
 import Link from 'next/link';
-import Navbar from '@/components/core/Navbar';
+import { BookingService } from '../services/booking.service';
+import { useRouter } from 'next/navigation';
 
-async function UserDashboardPage() {
-  // Fetch rental data list using async/await on the server
-  let rentalDataList: RentalData[] = [];
-  let error: string | null = null;
-  
-  try {
-    rentalDataList = await getRentalDataList();
-  } catch (err) {
-    console.error("Error loading rental data list:", err);
-    error = "Gagal memuat data sewa. Silakan coba lagi nanti.";
+function UserDashboardPage() {
+  const router = useRouter();
+  const [rentalDataList, setRentalDataList] = useState<RentalData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserAndBookings = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // First, get the current user
+        const userResponse = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
+        
+        if (!userResponse.ok) {
+          throw new Error('User not authenticated');
+        }
+        
+        const user = await userResponse.json();
+        console.log('🔍 Current user from auth:', user);
+        setCurrentUser(user);
+        
+        // Then fetch bookings for the authenticated user
+        console.log('🔍 Fetching bookings for user ID:', user.id);
+        console.log('🔍 Also trying with email:', user.email);
+        
+        // Try fetching by user ID first
+        let result = await BookingService.getUserBookings(user.id);
+        console.log('🔍 Result from getUserBookings by ID:', result);
+        
+        // If no bookings found by ID and user.id is different from email, try by email
+        if ((!result.success || !result.bookings || result.bookings.length === 0) && user.id !== user.email) {
+          console.log('🔍 No bookings found by ID, trying with email...');
+          result = await BookingService.getUserBookings(user.email);
+          console.log('🔍 Result from getUserBookings by email:', result);
+        }
+        
+        console.log('🔍 Final booking fetch result:', result);
+        
+        if (result.success && result.bookings && Array.isArray(result.bookings)) {
+          console.log('🔍 Setting rental data:', result.bookings.length, 'bookings');
+          setRentalDataList(result.bookings);
+        } else {
+          console.warn('🔍 No valid bookings found, setting empty array');
+          setRentalDataList([]);
+        }
+      } catch (err: any) {
+        console.error("Error loading user data or bookings:", err);
+        if (err.message === 'User not authenticated') {
+          setError("Anda harus login untuk melihat data booking.");
+          // Redirect to login page after a short delay
+          setTimeout(() => {
+            router.push('/auth/login?redirectTo=/user/dashboard');
+          }, 2000);
+        } else {
+          setError("Gagal memuat data sewa. Silakan coba lagi nanti.");
+        }
+        setRentalDataList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAndBookings();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Memuat data booking...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   // Error handling dengan desain premium
   if (error) {
     return (
       <div className="min-h-screen overflow-x-hidden bg-[#FAFAFA]">
-        <Navbar />
         <div className="pt-8">
           {/* Hero section dengan background gradient */}
           <div className="bg-primary text-white">
@@ -43,12 +116,21 @@ async function UserDashboardPage() {
                 </div>
                 <h3 className="text-xl font-semibold text-red-700 mb-2">Terjadi Kesalahan</h3>
                 <p className="text-gray-600 mb-6">{error}</p>
-                <Link 
-                  href="/dashboard/user" 
-                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
-                >
-                  Muat Ulang
-                </Link>
+                {error.includes('login') ? (
+                  <Link 
+                    href="/auth/login?redirectTo=/user/dashboard" 
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+                  >
+                    Login Sekarang
+                  </Link>
+                ) : (
+                  <Link 
+                    href="/dashboard/user" 
+                    className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
+                  >
+                    Muat Ulang
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -60,8 +142,6 @@ async function UserDashboardPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <Navbar />
-      
       {/* Hero section premium - Improved for mobile */}
       <div className=""> {/* Increased padding top for mobile to prevent navbar overlap */}
         <div className="bg-primary text-white relative overflow-hidden">
@@ -78,7 +158,7 @@ async function UserDashboardPage() {
               </div>
               
               <Link 
-                href="/booking" 
+                href="/kamar" 
                 className="flex items-center justify-center  px-4 md:px-5 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition shadow-md hover:shadow-lg group w-full md:w-auto"
               >
                 <span className="text-sm text-center">Sewa Properti Baru</span>

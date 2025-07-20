@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "../core/Footer";
 import { Button } from "@/components/ui/button";
+import DirectBookingForm from "@/components/customer/DirectBookingForm";
 import {
     ArrowLeft,
     Star,
@@ -13,23 +14,13 @@ import {
     Bed,
     Bath,
     Users,
-    Phone,
-    Mail,
-    Clock,
     CheckCircle,
-    Armchair,
     Building2,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Language, getRoomDetailTranslation } from "@/translations";
+import { fetchRoomData, SimpleRoom } from "@/utils/room-data";
 
 interface RoomDetailProps {
     roomId: string;
@@ -38,465 +29,216 @@ interface RoomDetailProps {
 
 const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
     const t = getRoomDetailTranslation(language);
+    const [room, setRoom] = useState<SimpleRoom | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [showBooking, setShowBooking] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(0);
 
-    // Sample room data (in real app, this would come from API)
-    const roomData = {
-        1: {
-            id: 1,
-            title: t.rooms.typeA.title,
-            size: t.rooms.typeA.size,
-            price: t.rooms.typeA.price,
-            originalPrice: t.rooms.typeA.originalPrice,
-            pricePerMonth: t.rooms.typeA.price,
-            description: t.rooms.typeA.description,
-            longDescription: t.rooms.typeA.longDescription,
-            features: t.rooms.typeA.features,
-            amenities: [
-                {
-                    name: t.rooms.typeA.amenities.ac.name,
-                    icon: Snowflake,
-                    description: t.rooms.typeA.amenities.ac.description,
-                },
-                {
-                    name: t.rooms.typeA.amenities.bed.name,
-                    icon: Bed,
-                    description: t.rooms.typeA.amenities.bed.description,
-                },
-                {
-                    name: t.rooms.typeA.amenities.wifi.name,
-                    icon: Wifi,
-                    description: t.rooms.typeA.amenities.wifi.description,
-                },
-                {
-                    name: t.rooms.typeA.amenities.wardrobe.name,
-                    icon: Users,
-                    description: t.rooms.typeA.amenities.wardrobe.description,
-                },
-                {
-                    name: t.rooms.typeA.amenities.table.name,
-                    icon: Tv,
-                    description: t.rooms.typeA.amenities.table.description,
-                },
-                {
-                    name: t.rooms.typeA.amenities.trash.name,
-                    icon: Bath,
-                    description: t.rooms.typeA.amenities.trash.description,
-                },
-            ],
-            images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
-            availability: "available" as const,
-            type: "A" as const,
-            units: 35,
-            totalUnits: t.common.totalUnits,
-            rating: t.common.rating,
-            reviewCount: t.common.reviewCount,
-            maxGuests: t.common.maxGuests,
-            bedType: t.rooms.typeA.bedType,
-            view: t.rooms.typeA.view,
-            floor: t.rooms.typeA.floor,
-            checkIn: t.rooms.typeA.checkIn,
-            checkOut: t.rooms.typeA.checkOut,
-            rentalPeriods: t.common.rentalPeriods,
-            policies: t.policies,
-            includedFacilities: t.facilities.included,
-            excludedFacilities: t.facilities.excluded,
-            sharedFacilities: t.facilities.shared,
-            contact: t.contact,
-        },
-        2: {
-            id: 2,
-            title: t.rooms.typeB.title,
-            size: t.rooms.typeB.size,
-            price: t.rooms.typeB.price,
-            originalPrice: t.rooms.typeB.originalPrice,
-            pricePerMonth: t.rooms.typeB.price,
-            description: t.rooms.typeB.description,
-            longDescription: t.rooms.typeB.longDescription,
-            features: t.rooms.typeB.features,
-            amenities: [
-                {
-                    name: t.rooms.typeB.amenities.ac.name,
-                    icon: Snowflake,
-                    description: t.rooms.typeB.amenities.ac.description,
-                },
-                {
-                    name: t.rooms.typeB.amenities.bed.name,
-                    icon: Bed,
-                    description: t.rooms.typeB.amenities.bed.description,
-                },
-                {
-                    name: t.rooms.typeB.amenities.wifi.name,
-                    icon: Wifi,
-                    description: t.rooms.typeB.amenities.wifi.description,
-                },
-                {
-                    name: t.rooms.typeB.amenities.wardrobe.name,
-                    icon: Users,
-                    description: t.rooms.typeB.amenities.wardrobe.description,
-                },
-                {
-                    name: t.rooms.typeB.amenities.table.name,
-                    icon: Tv,
-                    description: t.rooms.typeB.amenities.table.description,
-                },
-                {
-                    name: t.rooms.typeB.amenities.area.name,
-                    icon: Bath,
-                    description: t.rooms.typeB.amenities.area.description,
-                },
-            ],
-            images: ["/galeri/kamar_A/h1.JPG", "/galeri/kamar_A/h2.JPG"],
-            availability: "limited" as const,
-            type: "B" as const,
-            units: 5,
-            totalUnits: t.common.totalUnits,
-            rating: t.common.rating,
-            reviewCount: t.common.reviewCount,
-            maxGuests: t.common.maxGuests,
-            bedType: t.rooms.typeB.bedType,
-            view: t.rooms.typeB.view,
-            floor: t.rooms.typeB.floor,
-            checkIn: t.rooms.typeB.checkIn,
-            checkOut: t.rooms.typeB.checkOut,
-            rentalPeriods: t.common.rentalPeriods,
-            policies: t.policies,
-            includedFacilities: t.facilities.included,
-            excludedFacilities: t.facilities.excluded,
-            sharedFacilities: t.facilities.shared,
-            contact: t.contact,
-        },
+    // Load room data
+    useEffect(() => {
+        const loadRoom = async () => {
+            setLoading(true);
+            
+            // Fetch from API only
+            const roomData = await fetchRoomData(roomId);
+            setRoom(roomData);
+            setLoading(false);
+        };
+        
+        loadRoom();
+    }, [roomId]);
+
+    const handleBookingClick = () => {
+        setShowBooking(true);
     };
 
-    const room = roomData[roomId as unknown as keyof typeof roomData];
-    const [selectedImage, setSelectedImage] = useState(0);
-    const [checkIn, setCheckIn] = useState("");
-    const [checkOut, setCheckOut] = useState("");
-    const [guests, setGuests] = useState(1);
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading room details...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (!room) {
         return (
-            <div className="min-h-screen bg-gray-50">
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                            {t.notFound.title}
-                        </h1>
-                        <Link
-                            href="/kamar"
-                            className="text-primary hover:underline"
-                        >
-                            {t.notFound.backLink}
-                        </Link>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamar Tidak Ditemukan</h2>
+                    <p className="text-gray-600 mb-4">Kamar yang Anda cari tidak tersedia</p>
+                    <Link href="/kamar">
+                        <Button>Kembali ke Daftar Kamar</Button>
+                    </Link>
                 </div>
-                <Footer />
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Breadcrumb */}
-            <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Link href="/" className="hover:text-primary">
-                            {t.navigation.home}
+            {/* Header */}
+            <div className="bg-white shadow-sm">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex items-center justify-between">
+                        <Link href="/kamar" className="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                            <ArrowLeft className="w-5 h-5" />
+                            <span>Kembali ke Daftar Kamar</span>
                         </Link>
-                        <span>/</span>
-                        <Link href="/kamar" className="hover:text-primary">
-                            {t.navigation.rooms}
-                        </Link>
-                        <span>/</span>
-                        <span className="text-gray-900">{room.title}</span>
+                        
+                        <div className="flex items-center space-x-2">
+                            <Building2 className="w-5 h-5 text-gray-400" />
+                            <span className="text-gray-900">{room.name}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2">
-                        {/* Image Gallery */}
-                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-                            <div className="relative h-96">
-                                <Image
-                                    src={room.images[selectedImage]}
-                                    alt={room.title}
-                                    fill
-                                    className="object-cover"
-                                />
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Image Gallery */}
+                    <div className="space-y-4">
+                        <div className="aspect-video relative overflow-hidden rounded-lg bg-gray-200">
+                            <Image
+                                src={room.images[selectedImage] || '/galeri/default.jpg'}
+                                alt={room.name}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                        </div>
+                        
+                        {room.images.length > 1 && (
+                            <div className="grid grid-cols-4 gap-2">
+                                {room.images.map((image, index) => (
+                                    <div
+                                        key={index}
+                                        className={`aspect-video relative overflow-hidden rounded cursor-pointer border-2 ${
+                                            selectedImage === index ? 'border-blue-500' : 'border-transparent'
+                                        }`}
+                                        onClick={() => setSelectedImage(index)}
+                                    >
+                                        <Image
+                                            src={image}
+                                            alt={`${room.name} ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 768px) 25vw, 12.5vw"
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                            <div className="p-4">
-                                <div className="grid grid-cols-4 gap-2">
-                                    {room.images.map((image, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() =>
-                                                setSelectedImage(index)
-                                            }
-                                            className={`relative h-20 rounded-lg overflow-hidden ${
-                                                selectedImage === index
-                                                    ? "ring-2 ring-primary"
-                                                    : ""
-                                            }`}
-                                        >
-                                            <Image
-                                                src={image}
-                                                alt={`${room.title} ${
-                                                    index + 1
-                                                }`}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </button>
-                                    ))}
+                        )}
+                    </div>
+
+                    {/* Room Details */}
+                    <div className="space-y-6">
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                {room.name}
+                            </h1>
+                            <div className="flex items-center space-x-4 text-gray-600 mb-4">
+                                <div className="flex items-center space-x-1">
+                                    <Building2 className="w-4 h-4" />
+                                    <span>{room.size || 'Standard'}</span>
                                 </div>
+                                <div className="flex items-center space-x-1">
+                                    <MapPin className="w-4 h-4" />
+                                    <span>Suman Residence</span>
+                                </div>
+                            </div>
+                            
+                            <div className="text-2xl font-bold text-blue-600 mb-4">
+                                {room.price}
                             </div>
                         </div>
 
-                        {/* Room Information */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                            <div className="flex items-start justify-between mb-6">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                        {room.title}
-                                    </h1>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                    <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
-                                    <div className="text-sm text-gray-600">
-                                        {t.roomInfo.maxGuests.replace('{count}', room.maxGuests.toString())}
-                                    </div>
-                                </div>
-                                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                    <Bed className="w-6 h-6 mx-auto mb-2 text-primary" />
-                                    <div className="text-sm text-gray-600">
-                                        {room.bedType}
-                                    </div>
-                                </div>
-                                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                    <div className="w-6 h-6 mx-auto mb-2 text-primary">
-                                        <Armchair />
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                        {room.view}
-                                    </div>
-                                </div>
-                                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                                    <div className="w-6 h-6 mx-auto mb-2 text-primary">
-                                        <Building2 />
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                        {t.roomInfo.floor} {room.floor}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="prose max-w-none">
-                                <h3 className="text-xl font-semibold mb-4">
-                                    {t.roomInfo.roomDescription}
-                                </h3>
-                                <p className="text-gray-700 leading-relaxed mb-6">
-                                    {room.longDescription}
-                                </p>
-                            </div>
+                        {/* Description */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Deskripsi</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                {room.description}
+                            </p>
                         </div>
 
                         {/* Amenities */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                            <h3 className="text-xl font-semibold mb-6">
-                                {t.roomInfo.roomAmenities}
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Fasilitas</h3>
+                            <div className="grid grid-cols-2 gap-3">
                                 {room.amenities.map((amenity, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-                                    >
-                                        <amenity.icon className="w-5 h-5 text-primary flex-shrink-0" />
-                                        <div>
-                                            <div className="font-medium">
-                                                {amenity.name}
-                                            </div>
-                                            <div className="text-sm text-gray-600">
-                                                {amenity.description}
-                                            </div>
-                                        </div>
+                                    <div key={index} className="flex items-center space-x-2">
+                                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                        <span className="text-gray-700">{amenity}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Included vs Additional Costs */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-                            <h3 className="text-xl font-semibold mb-6">
-                                {t.roomInfo.costBreakdown}
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Included Facilities */}
-                                <div>
-                                    <h4 className="font-medium text-green-600 mb-4 flex items-center gap-2">
-                                        <CheckCircle className="w-5 h-5" />
-                                        {t.roomInfo.included}
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {room.includedFacilities.map((facility, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center space-x-2 text-sm"
-                                            >
-                                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                                <span className="text-gray-700">{facility}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Additional Costs */}
-                                <div>
-                                    <h4 className="font-medium text-orange-600 mb-4 flex items-center gap-2">
-                                        <Clock className="w-5 h-5" />
-                                        {t.roomInfo.additionalCosts}
-                                    </h4>
-                                    <div className="space-y-2">
-                                        {room.excludedFacilities.map((facility, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex items-center space-x-2 text-sm"
-                                            >
-                                                <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                                                <span className="text-gray-700">{facility}</span>
-                                            </div>
-                                        ))}
-                                        {t.facilities.additional.map((facility, index) => (
-                                            <div
-                                                key={`additional-${index}`}
-                                                className="flex items-center space-x-2 text-sm"
-                                            >
-                                                <Clock className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                                                <span className="text-gray-700">{facility}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                        {/* Booking Button */}
+                        <div className="bg-gray-50 rounded-lg p-6">
+                            <div className="text-center mb-4">
+                                <p className="text-gray-600 mb-2">Tertarik dengan kamar ini?</p>
+                                <p className="text-sm text-gray-500">
+                                    Hubungi admin untuk informasi ketersediaan dan booking
+                                </p>
                             </div>
-                        </div>
-
-                        {/* Policies */}
-                        <div className="bg-white rounded-2xl shadow-lg p-8">
-                            <h3 className="text-xl font-semibold mb-6">
-                                {t.roomInfo.roomPolicies}
-                            </h3>
-                            <div className="space-y-3">
-                                {room.policies.map((policy, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-start space-x-3"
-                                    >
-                                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                                        <span className="text-gray-700">
-                                            {policy}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Booking Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-24">
-                            <div className="bg-white rounded-2xl shadow-lg p-6">
-                                <h3 className="text-xl font-semibold mb-4">
-                                    {t.booking.title}
-                                </h3>
-
-                                <div className="space-y-4 mb-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            {t.booking.checkIn}
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={checkIn}
-                                            onChange={(e) =>
-                                                setCheckIn(e.target.value)
-                                            }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            {t.booking.checkOut}
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={checkOut}
-                                            onChange={(e) =>
-                                                setCheckOut(e.target.value)
-                                            }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            {t.booking.guestCount}
-                                        </label>
-                                        <Select
-                                            value={guests.toString()}
-                                            onValueChange={(value) =>
-                                                setGuests(Number(value))
-                                            }
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={t.booking.selectGuests} />
-                                            </SelectTrigger>
-                                            <SelectContent className="w-full">
-                                                <SelectItem value="1">
-                                                    1 {t.booking.guest}
-                                                </SelectItem>
-                                                <SelectItem value="2">
-                                                    2 {t.booking.guests}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-
-                                <Button className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors mb-4">
-                                    {t.booking.bookNow}
-                                </Button>
-
-                                <div className="border-t pt-4">
-                                    <h4 className="font-medium mb-3">
-                                        {t.booking.needHelp}
-                                    </h4>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex items-center space-x-2">
-                                            <Phone className="w-4 h-4 text-primary" />
-                                            <span>{room.contact.owner}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Mail className="w-4 h-4 text-primary" />
-                                            <span>{room.contact.email}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Clock className="w-4 h-4 text-primary" />
-                                            <span>{t.booking.customerService}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            
+                            <Button 
+                                onClick={handleBookingClick}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+                                size="lg"
+                            >
+                                Pesan Sekarang
+                            </Button>
+                            
+                            <div className="mt-4 text-center">
+                                <p className="text-xs text-gray-500">
+                                    * Ketersediaan kamar akan dikonfirmasi oleh admin
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Additional Info */}
+                <div className="mt-12 bg-white rounded-lg shadow p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Informasi Penting</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Ketentuan Sewa</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                                <li>• Minimal sewa 6 bulan</li>
+                                <li>• Deposit 1 bulan di muka</li>
+                                <li>• Listrik dan air terpisah</li>
+                                <li>• Tidak boleh merusak fasilitas</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Fasilitas Umum</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                                <li>• Parkir motor gratis</li>
+                                <li>• Security 24 jam</li>
+                                <li>• Akses Wi-Fi</li>
+                                <li>• Dapur umum (berbagi)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {/* Booking Form Modal */}
+            {showBooking && (
+                <DirectBookingForm
+                    room={{
+                        id: room.id,
+                        title: room.name,
+                        price: room.price
+                    }}
+                    onClose={() => setShowBooking(false)}
+                />
+            )}
 
             <Footer />
         </div>

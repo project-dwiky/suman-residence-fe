@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Document, DocumentType, RentalData } from '../types';
-import { downloadDocument } from '../actions/mockData';
 
 interface DocumentsSectionProps {
   rentalData: RentalData;
@@ -48,25 +47,31 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ rentalData }) => {
     },
   };
 
-  // Handle download document
+  // Handle download/view document
   const handleDownload = async (document: Document) => {
     try {
       setDownloadStatus(prev => ({ ...prev, [document.id]: 'loading' }));
-      const success = await downloadDocument(document.id);
       
-      if (success) {
+      // Open document in new tab for viewing
+      if (document.fileUrl) {
+        window.open(document.fileUrl, '_blank');
         setDownloadStatus(prev => ({ ...prev, [document.id]: 'success' }));
-        
-        // Reset status after 2 seconds
-        setTimeout(() => {
-          setDownloadStatus(prev => ({ ...prev, [document.id]: 'idle' }));
-        }, 2000);
       } else {
-        setDownloadStatus(prev => ({ ...prev, [document.id]: 'error' }));
+        throw new Error('Document URL not available');
       }
+      
+      // Reset status after 2 seconds
+      setTimeout(() => {
+        setDownloadStatus(prev => ({ ...prev, [document.id]: 'idle' }));
+      }, 2000);
     } catch (error) {
       setDownloadStatus(prev => ({ ...prev, [document.id]: 'error' }));
-      console.error("Error downloading document:", error);
+      console.error("Error opening document:", error);
+      
+      // Reset status after 2 seconds
+      setTimeout(() => {
+        setDownloadStatus(prev => ({ ...prev, [document.id]: 'idle' }));
+      }, 2000);
     }
   };
 
@@ -102,7 +107,7 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ rentalData }) => {
           Dokumen
         </motion.h2>
 
-        {rentalData.documents.length === 0 ? (
+        {(!rentalData.documents || !Array.isArray(rentalData.documents) || rentalData.documents.length === 0) ? (
           <motion.div 
             className="text-center py-8"
             variants={itemVariants}

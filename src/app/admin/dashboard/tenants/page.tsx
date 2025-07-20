@@ -1,55 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { BookingService } from "@/components/user-dashboard/services/booking.service";
+import { adminBookingService } from "@/services/admin-booking.service";
+
+interface Tenant {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  roomId: string;
+  roomName: string;
+  checkIn: string;
+  checkOut: string;
+  remainingDays: number;
+  paymentStatus: 'Paid' | 'Not Paid' | 'Partial';
+  totalAmount: number;
+  paidAmount: number;
+  lastPayment: string | null;
+}
 
 export default function TenantsPage() {
-  const [tenants] = useState([
-    {
-      id: "T001",
-      name: "Ahmad Ridwan",
-      phone: "081234567890",
-      email: "ahmad@email.com",
-      roomId: "R001",
-      roomName: "Kamar Deluxe A1",
-      checkIn: "2025-01-15",
-      checkOut: "2025-07-15",
-      remainingDays: 169,
-      paymentStatus: "Paid",
-      totalAmount: 15000000,
-      paidAmount: 15000000,
-      lastPayment: "2025-01-15",
-    },
-    {
-      id: "T002", 
-      name: "Siti Nurhaliza",
-      phone: "081234567891",
-      email: "siti@email.com",
-      roomId: "R002",
-      roomName: "Kamar Standard B1",
-      checkIn: "2025-02-01",
-      checkOut: "2025-08-01",
-      remainingDays: 185,
-      paymentStatus: "Not Paid",
-      totalAmount: 10800000,
-      paidAmount: 0,
-      lastPayment: null,
-    },
-    {
-      id: "T003",
-      name: "Budi Santoso", 
-      phone: "081234567892",
-      email: "budi@email.com",
-      roomId: "R004",
-      roomName: "Kamar Premium C1",
-      checkIn: "2025-01-01",
-      checkOut: "2025-06-01",
-      remainingDays: 155,
-      paymentStatus: "Partial",
-      totalAmount: 16000000,
-      paidAmount: 8000000,
-      lastPayment: "2025-01-01",
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchActiveBookings();
+  }, []);
+
+  const fetchActiveBookings = async () => {
+    try {
+      setLoading(true);
+      
+      // Use admin booking service to get full booking data with contact info
+      const result = await adminBookingService.getAllBookings();
+      
+      if (result.success && result.bookings) {
+        // Transform bookings to tenant format
+        const activeBookings = result.bookings
+          .filter(booking => booking.rentalStatus === 'ACTIVE' || booking.rentalStatus === 'SETUJUI' || booking.rentalStatus === 'CONFIRMATION')
+          .map(booking => {
+            const checkInDate = new Date(booking.rentalPeriod.startDate);
+            const checkOutDate = new Date(booking.rentalPeriod.endDate);
+            const today = new Date();
+            const remainingDays = Math.max(0, Math.floor((checkOutDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+            
+            // Get payment status from booking status
+            let paymentStatus: 'Paid' | 'Not Paid' | 'Partial' = 'Not Paid';
+            if (booking.rentalStatus === 'ACTIVE' || booking.rentalStatus === 'CONFIRMATION') {
+              paymentStatus = 'Paid';
+            } else if (booking.rentalStatus === 'SETUJUI') {
+              paymentStatus = 'Not Paid';
+            }
+
+            return {
+              id: booking.id,
+              name: booking.contactInfo?.name || booking.userId, // Use contact name if available
+              phone: booking.contactInfo?.phone || '', // Get phone from contact info
+              email: booking.contactInfo?.email || '', // Get email from contact info
+              roomId: booking.room.id,
+              roomName: booking.room.roomNumber,
+              checkIn: booking.rentalPeriod.startDate,
+              checkOut: booking.rentalPeriod.endDate,
+              remainingDays,
+              paymentStatus,
+              totalAmount: 0, // Price management removed
+              paidAmount: paymentStatus === 'Paid' ? 0 : 0, // Price management removed
+              lastPayment: paymentStatus === 'Paid' ? booking.rentalPeriod.startDate : null,
+            };
+          });
+
+        setTenants(activeBookings);
+      } else {
+        setError(result.error || 'Failed to fetch tenants');
+      }
+    } catch (err: any) {
+      console.error('Error fetching tenants:', err);
+      setError(err.message || 'Failed to fetch tenants');
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,10 +123,19 @@ export default function TenantsPage() {
         }
         break;
       case 'whatsapp':
+        let phoneNumber = tenant.phone.replace(/[^0-9]/g, '');
+        
+        // Ensure the number starts with 62 (Indonesia country code)
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = '62' + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith('62')) {
+          phoneNumber = '62' + phoneNumber;
+        }
+
         const message = encodeURIComponent(
           `Halo ${tenant.name}, ini adalah pesan dari Admin Suman Residence mengenai kamar ${tenant.roomName}.`
         );
-        window.open(`https://wa.me/${tenant.phone.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
+        window.open(`https://wa.me/+${phoneNumber}?text=${message}`, '_blank');
         break;
     }
   };
@@ -128,6 +169,54 @@ export default function TenantsPage() {
   const notPaidCount = tenants.filter(t => t.paymentStatus === 'Not Paid').length;
   const partialCount = tenants.filter(t => t.paymentStatus === 'Partial').length;
   const expiringCount = tenants.filter(t => t.remainingDays <= 30).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 className="text-3xl font-bold text-gray-900">Penyewa Aktif</h1>
+            <p className="text-gray-600 mt-1">Memuat data penyewa...</p>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white p-12 rounded-lg shadow text-center">
+            <div className="text-gray-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p>Memuat data penyewa...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 className="text-3xl font-bold text-gray-900">Penyewa Aktif</h1>
+            <p className="text-gray-600 mt-1">Error memuat data</p>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white p-12 rounded-lg shadow text-center">
+            <div className="text-red-500">
+              <h3 className="text-lg font-medium mb-2">Error</h3>
+              <p>{error}</p>
+              <button 
+                onClick={fetchActiveBookings}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

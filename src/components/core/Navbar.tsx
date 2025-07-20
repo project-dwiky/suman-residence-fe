@@ -1,4 +1,3 @@
-"use server";
 import NavbarClient from "./NavbarClient";
 import { User } from "@/types/user";
 import axiosServer from "@/lib/axios-server";

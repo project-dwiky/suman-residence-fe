@@ -1,19 +1,23 @@
 export interface Room {
   id: string;
   name: string;
-  status: 'Available' | 'Booked';
+  status: 'Available' | 'Booked' | 'Maintenance';
   type: string;
   price: number;
-  tenant?: Tenant;
-}
-
-// Simplified tenant interface - only essential info for manual system
-export interface Tenant {
-  id: string;
-  name: string;
-  phone: string;
-  checkOut: string;
-  remainingDays: number;
+  monthlyPrice: number;
+  description: string;
+  facilities: string[];
+  images: string[];
+  maxOccupancy: number;
+  size: number;
+  currentBooking?: {
+    bookingId: string;
+    tenantId: string;
+    checkIn: Date;
+    checkOut: Date;
+  };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Simple actions for document sending via WhatsApp

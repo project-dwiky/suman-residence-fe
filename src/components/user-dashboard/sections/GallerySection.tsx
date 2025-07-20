@@ -10,10 +10,17 @@ interface GallerySectionProps {
 }
 
 const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
-  const images = rentalData.room.imagesGallery.map(url => ({
-    url,
-    alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}`
-  }));
+  // Safely handle imagesGallery that might be undefined or not an array
+  const imageGallery = rentalData.room?.imagesGallery;
+  const images = (Array.isArray(imageGallery) && imageGallery.length > 0) 
+    ? imageGallery.map(url => ({
+        url,
+        alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}`
+      }))
+    : [{ 
+        url: '/images/room-placeholder.jpg', 
+        alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` 
+      }];
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);

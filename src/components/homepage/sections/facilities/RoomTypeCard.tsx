@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 export interface RoomTypeProps {
-  id?: number;
+  id?: string;
   title: string;
   size: string;
   price: string;
   description: string;
   features: string[];
   image: string;
-  availability: 'available' | 'limited' | 'booked';
+  availability?: 'available' | 'limited' | 'booked';
   type: 'A' | 'B';
-  units: number;
+  units?: number; // Add optional units prop
 }
 
 const RoomTypeCard: React.FC<RoomTypeProps> = ({
@@ -26,7 +26,7 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
   image,
   availability,
   type,
-  units
+  units,
 }) => {
   const availabilityStyles = {
     available: 'bg-green-50 text-green-700 border-green-200',
@@ -96,7 +96,7 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
         {/* Footer - Fixed Height */}
         <div className="flex justify-between items-center mt-6 pt-4 border-t">
           <div className="text-sm text-muted-foreground">
-            <span className="font-medium">{units} Unit</span> tersedia
+            <span className="font-medium">Informasi lengkap</span> tersedia
           </div>
           <Link 
             href={id ? `/kamar/${id}` : '/kamar'}

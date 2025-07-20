@@ -1,29 +1,53 @@
-import React from 'react';
-import { getRentalDataById } from '../actions/mockData';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { RentalData } from '../types';
 import RentalInfoSection from '../sections/RentalInfoSection';
 import DocumentsSection from '../sections/DocumentsSection';
 import GallerySection from '../sections/GallerySection';
 import Link from 'next/link';
+import { userBookingService } from '@/services/user-booking.service';
 
 interface RentalDetailPageProps {
   rentalId: string;
 }
 
-async function getRentalData(id: string): Promise<RentalData | null> {
-  try {
-    const data = await getRentalDataById(id);
-    return data || null;
-  } catch (error) {
-    console.error('Failed to fetch rental data:', error);
-    return null;
+const RentalDetailPage = ({ rentalId }: RentalDetailPageProps) => {
+  const [rentalData, setRentalData] = useState<RentalData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRentalData = async () => {
+      try {
+        setLoading(true);
+        const data = await userBookingService.getBookingDetails(rentalId);
+        setRentalData(data);
+      } catch (err) {
+        console.error('Failed to fetch rental data:', err);
+        setError('Failed to load rental data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (rentalId) {
+      fetchRentalData();
+    }
+  }, [rentalId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="max-w-md w-full mx-auto px-6 py-8 bg-background text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <h3 className="text-xl font-medium text-gray-900">Memuat data penyewaan...</h3>
+        </div>
+      </div>
+    );
   }
-}
 
-const RentalDetailPage = async ({ rentalId }: RentalDetailPageProps) => {
-  const rentalData = await getRentalData(rentalId);
-
-  if (!rentalData) {
+  if (error || !rentalData) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
         <div className="max-w-md w-full mx-auto px-6 py-8 bg-background text-center">

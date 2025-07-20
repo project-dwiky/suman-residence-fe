@@ -1,7 +1,9 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { headers } from 'next/headers';
 
 const getAxiosServerInstance = async () => {
+    // Dynamically import headers only when needed in server context
+    const { headers } = await import('next/headers');
+    
     // Get all headers from the incoming request
     const requestHeaders = await headers();
     const headerObj: Record<string, string> = {};
@@ -14,8 +16,7 @@ const getAxiosServerInstance = async () => {
         }
     });
     
-    
-        // Extract host and protocol from headers
+    // Extract host and protocol from headers
     const host = requestHeaders.get('host') || 'localhost:3000';
     const protocol = requestHeaders.get('x-forwarded-proto') || 'http';
     
@@ -23,7 +24,7 @@ const getAxiosServerInstance = async () => {
     const apiBaseUrl = `${protocol}://${host}`;
     
     return axios.create({
-        baseURL: apiBaseUrl, // Gunakan URL API langsung seperti di middleware
+        baseURL: apiBaseUrl,
         withCredentials: true,
         headers: headerObj
     });

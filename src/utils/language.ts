@@ -1,8 +1,8 @@
-import { cookies } from 'next/headers';
 import { Language, defaultLanguage, supportedLanguages } from '@/translations';
 
-
 export async function getLanguageFromCookies(): Promise<Language> {
+  // Dynamically import cookies only when needed in server context
+  const { cookies } = await import('next/headers');
   const cookieStore = await cookies();
   const languageCookie = cookieStore.get('language');
   

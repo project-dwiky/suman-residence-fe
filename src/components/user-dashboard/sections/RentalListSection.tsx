@@ -1,35 +1,50 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { RentalData } from '../types';
 import { formatDate } from '../utils/dateUtils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface RentalListSectionProps {
   rentalDataList: RentalData[];
 }
 
-export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList }) => {
+const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filteredRentals, setFilteredRentals] = useState<RentalData[]>(rentalDataList);
+  const [filteredRentals, setFilteredRentals] = useState<RentalData[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const router = useRouter();
   
+  // Initialize filteredRentals when rentalDataList changes
+  useEffect(() => {
+    if (rentalDataList && Array.isArray(rentalDataList)) {
+      setFilteredRentals(rentalDataList);
+    } else {
+      setFilteredRentals([]);
+    }
+  }, [rentalDataList]);
+  
   // Filter data berdasarkan pencarian dan filter status - simplified
   useEffect(() => {
-    const filtered = rentalDataList.filter(rental => {
+    // Ensure rentalDataList is an array
+    const dataList = Array.isArray(rentalDataList) ? rentalDataList : [];
+    
+    const filtered = dataList.filter(rental => {
+      // Safety check for rental object
+      if (!rental || !rental.room) return false;
+      
       const matchSearch = searchTerm === '' || 
-        rental.room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.room.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        rental.room.floor.toString().includes(searchTerm);
+        (rental.room.roomNumber && rental.room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (rental.room.type && rental.room.type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (rental.room.floor && rental.room.floor.toString().includes(searchTerm));
       
       const matchFilter = activeFilter === 'all' || 
-        (activeFilter === 'active' && rental.rentalStatus === 'ACTIVE') ||
-        (activeFilter === 'expired' && rental.rentalStatus === 'EXPIRED') ||
-        (activeFilter === 'pending' && rental.rentalStatus === 'PENDING');
+        (activeFilter === 'pending' && rental.rentalStatus === 'PENDING') ||
+        (activeFilter === 'setujui' && rental.rentalStatus === 'SETUJUI') ||
+        (activeFilter === 'cancel' && rental.rentalStatus === 'CANCEL');
       
       return matchSearch && matchFilter;
     });
@@ -37,23 +52,23 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
     setFilteredRentals(filtered);
   }, [searchTerm, rentalDataList, activeFilter]);
 
-  // Simplified status badge styling
+  // Simplified status badge styling - only 3 statuses
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
-        return { 
-          color: 'bg-green-50 border border-green-200 text-green-700', 
-          text: 'Aktif'
-        };
-      case 'EXPIRED':
-        return { 
-          color: 'bg-red-50 border border-red-200 text-red-700', 
-          text: 'Masa Sewa Habis'
-        };
       case 'PENDING':
         return { 
-          color: 'bg-amber-50 border border-amber-200 text-amber-700', 
+          color: 'bg-yellow-50 border border-yellow-200 text-yellow-700', 
           text: 'Dalam Pengajuan'
+        };
+      case 'SETUJUI':
+        return { 
+          color: 'bg-green-50 border border-green-200 text-green-700', 
+          text: 'Disetujui'
+        };
+      case 'CANCEL':
+        return { 
+          color: 'bg-red-50 border border-red-200 text-red-700', 
+          text: 'Dibatalkan'
         };
       default:
         return { 
@@ -63,6 +78,9 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
     }
   };
   
+  // Safety check to prevent runtime errors
+  const safeFilteredRentals = Array.isArray(filteredRentals) ? filteredRentals : [];
+  
   return (
     <section className="">
       {/* Header dan Search */}
@@ -71,9 +89,9 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
         <h2 className="text-2xl font-bold items-center text-primary ">
           Daftar Properti
         </h2>
-        {filteredRentals.length > 0 && (
+        {safeFilteredRentals.length > 0 && (
             <p className="text-sm font-normal text-gray-500 ml-2">
-              ({filteredRentals.length} properti)
+              ({safeFilteredRentals.length} properti)
             </p>
           )}
         </div>
@@ -111,42 +129,6 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
             Semua Properti
           </motion.button>
           <motion.button
-            onClick={() => setActiveFilter("active")}
-            className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
-              activeFilter === "active"
-                ? "text-secondary font-semibold"
-                : "text-gray-500 hover:text-primary"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Aktif
-          </motion.button>
-          <motion.button
-            onClick={() => setActiveFilter("expired")}
-            className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
-              activeFilter === "expired"
-                ? "text-secondary font-semibold"
-                : "text-gray-500 hover:text-primary"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Masa Sewa Habis
-          </motion.button>
-          <motion.button
-            onClick={() => setActiveFilter("not-renewed")}
-            className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
-              activeFilter === "not-renewed"
-                ? "text-secondary font-semibold"
-                : "text-gray-500 hover:text-primary"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Tidak Diperpanjang
-          </motion.button>
-          <motion.button
             onClick={() => setActiveFilter("pending")}
             className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
               activeFilter === "pending"
@@ -158,11 +140,35 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
           >
             Dalam Pengajuan
           </motion.button>
+          <motion.button
+            onClick={() => setActiveFilter("setujui")}
+            className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
+              activeFilter === "setujui"
+                ? "text-secondary font-semibold"
+                : "text-gray-500 hover:text-primary"
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Disetujui
+          </motion.button>
+          <motion.button
+            onClick={() => setActiveFilter("cancel")}
+            className={`pb-2 px-3 font-medium text-sm whitespace-nowrap transition-all ${
+              activeFilter === "cancel"
+                ? "text-secondary font-semibold"
+                : "text-gray-500 hover:text-primary"
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Dibatalkan
+          </motion.button>
         </div>
       </div>
 
       {/* Empty State - Lebih Menarik */}
-      {filteredRentals.length === 0 && (
+      {safeFilteredRentals.length === 0 && (
         <div className="text-center py-16 px-6 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
           {searchTerm || activeFilter !== 'all' ? (
             <>
@@ -194,7 +200,7 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
                 Anda belum menyewa properti apapun di Suman Residence. Temukan properti yang sesuai dengan kebutuhan Anda.
               </p>
               <Link 
-                href="/booking" 
+                href="/kamar" 
                 className="mt-4 inline-block px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-md hover:shadow-lg transition"
               >
                 Lihat Properti
@@ -205,22 +211,19 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
       )}
 
       {/* Property List - Tampilan Premium dengan animasi */}
-      {filteredRentals.length > 0 && (
+      {safeFilteredRentals.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {filteredRentals.map((rental, index) => {
+          {safeFilteredRentals.map((rental, index) => {
             const { room, rentalPeriod, rentalStatus } = rental;
             const statusBadge = getStatusBadge(rentalStatus);
-            const cardRef = useRef(null);
-            const isInView = useInView(cardRef, { once: true, margin: "-100px 0px" });
             
             return (
               <Link key={index} href={`/dashboard/detail/${rental.id}`}>
                 <motion.div 
-                  ref={cardRef}
                   className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
                   initial={{ opacity: 0, y: 30 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ y: -5 }}
                 >
                 {/* Room Image dengan Hover Effect */}
@@ -274,14 +277,19 @@ export const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalData
                     </div>
                   </div>
                   
-                  {/* Price - Total per periode dengan pembatas yang lebih jelas */}
+                  {/* Documents Section */}
                   <div className="border-t border-gray-200 pt-3 mb-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-semibold text-gray-500">Biaya</span>
-                      <p className="text-secondary font-bold text-lg">
-                        Rp {room.totalPrice?.toLocaleString('id-ID') || '0'}
-                      </p>
+                      <span className="text-sm font-semibold text-gray-500">Dokumen</span>
+                      <span className="text-sm text-gray-600">
+                        {rental.documents?.length || 0} file
+                      </span>
                     </div>
+                    {rental.documents && rental.documents.length > 0 && (
+                      <div className="mt-2 text-xs text-blue-600">
+                        Dokumen tersedia - klik untuk melihat detail
+                      </div>
+                    )}
                   </div>
                 </div>
                 </motion.div>

@@ -458,3 +458,4 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
 };
 
 export default NavbarClient;
+export { NavbarClient };

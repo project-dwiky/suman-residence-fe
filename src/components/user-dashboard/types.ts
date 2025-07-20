@@ -2,17 +2,18 @@
  * User Dashboard Types - Simplified for manual booking system
  */
 
-// Room rental status enum - simplified
+// Room rental status enum - simplified to 3 main statuses
 export enum RentalStatus {
-  ACTIVE = 'ACTIVE',        // Sedang menyewa kamar
-  EXPIRED = 'EXPIRED',      // Masa sewa habis
-  PENDING = 'PENDING'       // Dalam pengajuan/proses
+  PENDING = 'PENDING',     // Dalam pengajuan/proses
+  SETUJUI = 'SETUJUI',     // Disetujui admin
+  CANCEL = 'CANCEL'        // Dibatalkan
 }
 
-// Rental duration enum - simplified
+// Rental duration enum - expanded for all periods
 export enum RentalDuration {
+  WEEKLY = 'WEEKLY',       // Mingguan  
   MONTHLY = 'MONTHLY',     // Bulanan
-  SEMESTER = 'SEMESTER',   // Semester
+  SEMESTER = 'SEMESTER',   // Semester (6 bulan)
   YEARLY = 'YEARLY'        // Tahunan
 }
 
@@ -24,7 +25,7 @@ export enum DocumentType {
   INVOICE = 'INVOICE',            // Invoice (if unpaid)
 }
 
-// Room information type - simplified
+// Room information type - simplified, removed price tracking
 export interface Room {
   id: string;
   roomNumber: string;
@@ -32,7 +33,6 @@ export interface Room {
   floor: number;
   size: string;          // Ukuran kamar (contoh: "3x4 m")
   description: string;   // Deskripsi kamar
-  totalPrice: number;    // Harga total untuk periode sewa
   facilities: string[];  // Fasilitas dalam kamar
   imagesGallery: string[]; // Array URL foto-foto kamar
 }
