@@ -26,24 +26,24 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const pathname = usePathname();
     const router = useRouter();
-    
+
     // Handle logout
     const handleLogout = async () => {
         try {
-            const response = await fetch('/api/auth/logout', {
-                method: 'GET',
-                credentials: 'include',
+            const response = await fetch("/api/auth/logout", {
+                method: "GET",
+                credentials: "include",
             });
-            
+
             if (response.ok) {
                 // Redirect to home page after successful logout
-                router.push('/');
+                router.push("/");
                 router.refresh();
             } else {
-                console.error('Logout failed');
+                console.error("Logout failed");
             }
         } catch (error) {
-            console.error('Error during logout:', error);
+            console.error("Error during logout:", error);
         }
     };
 
@@ -51,10 +51,10 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
     const handleDashboardClick = () => {
         setIsDropdownOpen(false);
         setMobileMenuOpen(false);
-        if (user?.role === 'admin') {
-            router.push('/admin/dashboard');
+        if (user?.role === "admin") {
+            router.push("/admin/dashboard");
         } else {
-            router.push('/dashboard');
+            router.push("/dashboard");
         }
     };
 
@@ -97,7 +97,7 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
     // Get initials from user name or email
     const getUserInitials = (): string => {
         if (!user) return "";
-        
+
         if (user.name) {
             const nameParts = user.name.split(" ");
             if (nameParts.length > 1) {
@@ -105,7 +105,7 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
             }
             return user.name[0].toUpperCase();
         }
-        
+
         return user.email[0].toUpperCase();
     };
 
@@ -118,7 +118,10 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
         }
 
         // If on dashboard pages, don't set any nav link as active
-        if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin/dashboard")) {
+        if (
+            pathname.startsWith("/dashboard") ||
+            pathname.startsWith("/admin/dashboard")
+        ) {
             setActiveSection("dashboard-page");
             return; // Don't run scroll logic on dashboard pages
         }
@@ -193,18 +196,22 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            const dropdown = document.getElementById('user-dropdown');
-            const profileButton = document.getElementById('profile-button');
-            
-            if (dropdown && !dropdown.contains(event.target as Node) && 
-                profileButton && !profileButton.contains(event.target as Node)) {
+            const dropdown = document.getElementById("user-dropdown");
+            const profileButton = document.getElementById("profile-button");
+
+            if (
+                dropdown &&
+                !dropdown.contains(event.target as Node) &&
+                profileButton &&
+                !profileButton.contains(event.target as Node)
+            ) {
                 setIsDropdownOpen(false);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
@@ -268,7 +275,6 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                         )}
                     </div>
 
-
                     <LanguageSwitcher currentLanguage={language} />
 
                     {/* User profile or CTA Button */}
@@ -277,7 +283,9 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                             <div className="relative">
                                 <button
                                     id="profile-button"
-                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                    onClick={() =>
+                                        setIsDropdownOpen(!isDropdownOpen)
+                                    }
                                     className="flex items-center space-x-2 focus:outline-none"
                                 >
                                     <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium">
@@ -285,17 +293,21 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                                     </div>
                                     <ChevronDown className="h-4 w-4 text-gray-600" />
                                 </button>
-                                
+
                                 {/* Dropdown menu */}
                                 {isDropdownOpen && (
-                                    <div 
+                                    <div
                                         id="user-dropdown"
                                         className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200"
                                     >
                                         <div className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200">
-                                            <div className="font-medium truncate">{user.name || user.email}</div>
-                                            {user.role === 'admin' && (
-                                                <div className="text-xs text-gray-500 truncate">{user.role}</div>
+                                            <div className="font-medium truncate">
+                                                {user.name || user.email}
+                                            </div>
+                                            {user.role === "admin" && (
+                                                <div className="text-xs text-gray-500 truncate">
+                                                    {user.role}
+                                                </div>
                                             )}
                                         </div>
                                         <button
@@ -316,19 +328,18 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                         ) : (
                             <div className="flex space-x-3">
                                 <Link href="/auth/login">
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         className="border-primary text-primary hover:bg-primary/10 rounded-full transition-all duration-300 px-5"
                                     >
                                         <span>Login</span>
                                     </Button>
                                 </Link>
-                                <Button
-                                    onClick={scrollToCTA}
-                                    className="bg-primary text-white hover:bg-primary/90 rounded-full transition-all duration-300 hover:shadow-md hover:shadow-primary/20 hover:scale-[1.03] px-6"
-                                >
-                                    <span>Book Now</span>
-                                </Button>
+                                <Link href="/kamar">
+                                    <Button className="bg-primary text-white hover:bg-primary/90 rounded-full transition-all duration-300 hover:shadow-md hover:shadow-primary/20 hover:scale-[1.03] px-6">
+                                        <span>Book Now</span>
+                                    </Button>
+                                </Link>
                             </div>
                         )}
                     </div>
@@ -394,7 +405,7 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                             </Link>
                         )
                     )}
-                    
+
                     {/* User profile section for mobile */}
                     {user && (
                         <div className="border-t border-gray-200 pt-3 mt-3">
@@ -406,8 +417,10 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                                     <div className="font-medium text-sm text-gray-900">
                                         {user.name || user.email}
                                     </div>
-                                    {user.role === 'admin' && (
-                                        <div className="text-xs text-gray-500">{user.role}</div>
+                                    {user.role === "admin" && (
+                                        <div className="text-xs text-gray-500">
+                                            {user.role}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -434,7 +447,7 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                         <>
                             <div className="mb-3">
                                 <Link href="/auth/login">
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         className="border-primary text-primary hover:bg-primary/10 rounded-full w-full transition-all duration-300"
                                         onClick={() => setMobileMenuOpen(false)}

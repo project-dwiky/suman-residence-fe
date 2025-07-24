@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Language } from '@/translations';
 
 export interface RoomTypeProps {
   id?: string;
@@ -14,6 +15,7 @@ export interface RoomTypeProps {
   availability?: 'available' | 'limited' | 'booked';
   type: 'A' | 'B';
   units?: number; // Add optional units prop
+  language: Language;
 }
 
 const RoomTypeCard: React.FC<RoomTypeProps> = ({
@@ -27,18 +29,8 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
   availability,
   type,
   units,
+  language,
 }) => {
-  const availabilityStyles = {
-    available: 'bg-green-50 text-green-700 border-green-200',
-    limited: 'bg-amber-50 text-amber-700 border-amber-200',
-    booked: 'bg-red-50 text-red-700 border-red-200',
-  };
-
-  const availabilityText = {
-    available: 'Tersedia',
-    limited: 'Terbatas',
-    booked: 'Penuh',
-  };
 
   const typeColor = type === 'A' ? 'bg-primary' : 'bg-secondary';
   
@@ -59,7 +51,7 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
             className="object-cover transition-transform duration-700 group-hover:scale-110" 
           />
           <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold text-white ${typeColor}`}>
-            Tipe {type}
+            {language === 'id' ? 'Tipe' : 'Type'} {type}
           </div>
         </div>
         
@@ -80,7 +72,7 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
         
         {/* Features - Min Height */}
         <div className="border-t pt-4 flex-grow">
-          <p className="font-medium mb-2 text-sm">Fasilitas Kamar:</p>
+          <p className="font-medium mb-2 text-sm">{language === 'id' ? 'Fasilitas Kamar:' : 'Room Facilities:'}</p>
           <ul className="grid grid-cols-2 gap-x-4 gap-y-2 min-h-[100px]">
             {features.map((feature, index) => (
               <li key={index} className="flex items-start text-sm">
@@ -96,13 +88,13 @@ const RoomTypeCard: React.FC<RoomTypeProps> = ({
         {/* Footer - Fixed Height */}
         <div className="flex justify-between items-center mt-6 pt-4 border-t">
           <div className="text-sm text-muted-foreground">
-            <span className="font-medium">Informasi lengkap</span> tersedia
+            <span className="font-medium">{language === 'id' ? 'Informasi lengkap' : 'Full information'}</span> {language === 'id' ? 'tersedia' : 'available'}
           </div>
           <Link 
             href={id ? `/kamar/${id}` : '/kamar'}
             className="bg-primary hover:bg-primary/90 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
-            Lihat Detail
+            {language === 'id' ? 'Lihat Detail' : 'View Detail'}
           </Link>
         </div>
       </div>

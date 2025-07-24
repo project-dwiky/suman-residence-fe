@@ -2,15 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Star, CheckCircle } from 'lucide-react';
+import { Language } from '@/translations';
 
 export interface RentalOptionProps {
   title: string;
   period: string;
   benefits: string[];
   recommended?: boolean;
+  language: Language;
 }
 
-const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, recommended = false }) => {
+const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, recommended = false, language }) => {
   return (
     <motion.div 
       className={`rounded-2xl overflow-hidden shadow-lg relative h-full ${
@@ -48,7 +50,7 @@ const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, re
         >
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-current" />
-            Rekomendasi
+            {language === 'id' ? 'Rekomendasi' : 'Recommended'}
           </div>
         </motion.div>
       )}
@@ -114,7 +116,7 @@ const RentalOption: React.FC<RentalOptionProps> = ({ title, period, benefits, re
             }`}
           >
             <div className="flex items-center justify-center gap-2">
-              Pilih {title}
+              {title}
               {recommended && <Star className="w-4 h-4 fill-current" />}
             </div>
           </Button>

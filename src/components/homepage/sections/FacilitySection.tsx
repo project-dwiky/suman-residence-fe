@@ -36,7 +36,8 @@ const FacilitySection = ({ language }: FacilitySectionProps) => {
             availability: "available" as const,
             type: "A" as const,
             units: 35,
-            id: 1,
+            id: "1",
+            language: language,
         },
         {
             title: t.roomTypes.rooms.typeB.title,
@@ -48,7 +49,8 @@ const FacilitySection = ({ language }: FacilitySectionProps) => {
             availability: "limited" as const,
             type: "B" as const,
             units: 5,
-            id: 2,
+            id: "2",
+            language: language,
         },
     ];
 
@@ -190,6 +192,7 @@ const FacilitySection = ({ language }: FacilitySectionProps) => {
                                 type={room.type}
                                 units={room.units}
                                 id={room.id}
+                                language={language}
                             />
                         ))}
                     </div>
@@ -244,7 +247,7 @@ const FacilitySection = ({ language }: FacilitySectionProps) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {rentalOptions.map((option, index) => (
-                            <RentalOption key={index} {...option} />
+                            <RentalOption key={index} {...option} language={language} />
                         ))}
                     </div>
                 </div>

@@ -38,7 +38,7 @@ const HeroSection = ({ language }: HeroSectionProps) => {
                                         {t.hero.title.split(' ').slice(2).join(' ')}
                                     </span>
                                 </h1>
-                                <AvatarGroup />
+                                {/* <AvatarGroup /> */}
                             </div>
                             <p className="text-primary text-lg font-semibold">
                                 {t.hero.subtitle}

@@ -87,7 +87,7 @@ export const facilityId: FacilityTranslationKeys = {
     description: "Kami menawarkan fleksibilitas dalam durasi sewa untuk menyesuaikan dengan kebutuhan Anda.",
     options: {
       weekly: {
-        title: "Mingguan",
+        title: "Pilih Mingguan",
         period: "Fleksibilitas maksimal",
         benefits: [
           "Tanpa kontrak jangka panjang",
@@ -96,7 +96,7 @@ export const facilityId: FacilityTranslationKeys = {
         ]
       },
       monthly: {
-        title: "Bulanan",
+        title: "Pilih Bulanan",
         period: "Paling populer",
         benefits: [
           "Harga lebih ekonomis",
@@ -106,7 +106,7 @@ export const facilityId: FacilityTranslationKeys = {
         ]
       },
       semester: {
-        title: "Semester",
+        title: "Pilih Semester",
         period: "Untuk periode akademik",
         benefits: [
           "Diskon khusus",
@@ -116,7 +116,7 @@ export const facilityId: FacilityTranslationKeys = {
         ]
       },
       yearly: {
-        title: "Tahunan",
+        title: "Pilih Tahunan",
         period: "Value terbaik",
         benefits: [
           "Harga terendah per bulan",

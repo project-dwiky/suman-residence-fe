@@ -85,7 +85,7 @@ export const facilityEn = {
     description: "We offer flexibility in rental duration to suit your needs.",
     options: {
       weekly: {
-        title: "Weekly",
+        title: "Choose Weekly",
         period: "Maximum flexibility",
         benefits: [
           "No long-term contract",
@@ -94,7 +94,7 @@ export const facilityEn = {
         ]
       },
       monthly: {
-        title: "Monthly",
+        title: "Choose Monthly",
         period: "Most popular",
         benefits: [
           "More economical price",
@@ -104,7 +104,7 @@ export const facilityEn = {
         ]
       },
       semester: {
-        title: "Semester",
+        title: "Choose Semester",
         period: "For academic period",
         benefits: [
           "Special discount",
@@ -114,7 +114,7 @@ export const facilityEn = {
         ]
       },
       yearly: {
-        title: "Yearly",
+        title: "Choose Yearly",
         period: "Best value",
         benefits: [
           "Lowest monthly price",
