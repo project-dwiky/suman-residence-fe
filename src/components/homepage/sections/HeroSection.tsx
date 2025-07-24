@@ -32,21 +32,34 @@ const HeroSection = ({ language }: HeroSectionProps) => {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h1 className="text-4xl md:text-5xl font-bold text-primary leading-tight">
-                                    {t.hero.title.split(' ').slice(0, 2).join(' ')}
+                                    {t.hero.title
+                                        .split(" ")
+                                        .slice(0, 2)
+                                        .join(" ")}
                                     <br />
                                     <span className="text-secondary">
-                                        {t.hero.title.split(' ').slice(2).join(' ')}
+                                        {t.hero.title
+                                            .split(" ")
+                                            .slice(2)
+                                            .join(" ")}
                                     </span>
                                 </h1>
-                                
+
                                 {/* 3 Oval Design Elements */}
                                 <div className="hidden lg:flex relative w-48 h-32">
                                     {/* First Oval - Top Left */}
                                     <motion.div
-                                        className="absolute -top-6 -left-9 w-15 h-40 rounded-full overflow-hidden shadow-lg z-30 bg-gradient-to-br from-purple-500 to-pink-500"
-                                        initial={{ opacity: 0, scale: 0.8, x: -20 }}
-                                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.2 }}
+                                        className="absolute top-2 -left-9 w-15 h-36 rounded-full overflow-hidden shadow-lg z-30"
+                                        initial={{
+                                            opacity: 0,
+                                            scale: 0.8,
+                                            y: -20,
+                                        }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        transition={{
+                                            duration: 0.6,
+                                            delay: 0.2,
+                                        }}
                                     >
                                         <Image
                                             src="/galeri/kamar_A/h2.JPG"
@@ -56,32 +69,46 @@ const HeroSection = ({ language }: HeroSectionProps) => {
                                         />
                                     </motion.div>
 
-                                    {/* Second Oval - Top Right */}
+                                    {/* Second Oval - Bottom Center */}
                                     <motion.div
-                                        className="absolute -top-4 left-26 w-15 h-42 rounded-full overflow-hidden shadow-lg  z-20 bg-gradient-to-br from-blue-500 to-teal-500"
-                                        initial={{ opacity: 0, scale: 0.8, x: 20 }}
-                                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.4 }}
-                                    >
-                                        <Image
-                                            src="/galeri/g10.jpg"
-                                            fill
-                                            alt="Room Design 2"
-                                            className="object-cover"
-                                        />
-                                    </motion.div>
-
-                                    {/* Third Oval - Bottom Center */}
-                                    <motion.div
-                                        className="absolute top-6 left-16 transform -translate-x-1/2 w-15 h-40 rounded-full overflow-hidden shadow-lg z-10 bg-gradient-to-br from-green-500 to-emerald-500"
-                                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                        className="absolute top-10 left-16 transform -translate-x-1/2 w-15 h-36 rounded-full overflow-hidden shadow-lg z-10 "
+                                        initial={{
+                                            opacity: 0,
+                                            scale: 0.8,
+                                            y: 20,
+                                        }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        transition={{ duration: 0.6, delay: 0.6 }}
+                                        transition={{
+                                            duration: 0.6,
+                                            delay: 0.4,
+                                        }}
                                     >
                                         <Image
                                             src="/galeri/g3.jpg"
                                             fill
                                             alt="Room Design 3"
+                                            className="object-cover"
+                                        />
+                                    </motion.div>
+
+                                    {/* Third Oval - Top Right */}
+                                    <motion.div
+                                        className="absolute top-4 left-26 w-15 h-36 rounded-full overflow-hidden shadow-lg z-20 "
+                                        initial={{
+                                            opacity: 0,
+                                            scale: 0.8,
+                                            y: -20,
+                                        }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        transition={{
+                                            duration: 0.6,
+                                            delay: 0.6,
+                                        }}
+                                    >
+                                        <Image
+                                            src="/galeri/g10.jpg"
+                                            fill
+                                            alt="Room Design 2"
                                             className="object-cover"
                                         />
                                     </motion.div>
@@ -103,17 +130,24 @@ const HeroSection = ({ language }: HeroSectionProps) => {
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                            <Star
+                                                key={i}
+                                                className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                                            />
                                         ))}
                                     </div>
-                                    <span className="text-sm font-medium text-primary">5.0</span>
-                                    <span className="text-xs text-primary">Google Maps</span>
+                                    <span className="text-sm font-medium text-primary">
+                                        5.0
+                                    </span>
+                                    <span className="text-xs text-primary">
+                                        Google Maps
+                                    </span>
                                 </div>
-                                
+
                                 <blockquote className="text-primary italic text-sm leading-relaxed border-l-3 border-yellow-400 pl-4">
                                     "{t.hero.review.quote}"
                                 </blockquote>
-                                
+
                                 <p className="text-xs text-primary/80">
                                     — {t.hero.review.author}
                                 </p>
