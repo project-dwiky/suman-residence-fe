@@ -1,9 +1,7 @@
 import { WhatsAppStatus, QRCodeResponse, SendMessageResponse } from '@/types/whatsapp';
 
-// Konstanta untuk API WhatsApp
-const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8080';
-const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || 'suman-residence-whatsapp-secret-2025';
-
+// Use local API routes that proxy to the backend
+const WHATSAPP_API_URL = '/api';
 
 /**
  * Service untuk mengelola fungsi-fungsi WhatsApp
@@ -17,7 +15,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/status`, {
         method: 'GET',
         headers: {
-          'x-api-key': WHATSAPP_API_KEY
+          'Content-Type': 'application/json'
         }
       });
 
@@ -40,7 +38,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/qrcode`, {
         method: 'GET',
         headers: {
-          'x-api-key': WHATSAPP_API_KEY
+          'Content-Type': 'application/json'
         }
       });
 
@@ -64,7 +62,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/reset-connection`, {
         method: 'POST',
         headers: {
-          'x-api-key': WHATSAPP_API_KEY
+          'Content-Type': 'application/json'
         }
       });
 
@@ -89,8 +87,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/send`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': WHATSAPP_API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           phoneNumber: normalizedPhone,

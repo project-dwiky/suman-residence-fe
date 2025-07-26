@@ -12,7 +12,6 @@ export interface Room {
   size: number;
   currentBooking?: {
     bookingId: string;
-    tenantId: string;
     checkIn: Date;
     checkOut: Date;
   };
@@ -24,5 +23,4 @@ export interface Room {
 export interface BookingAction {
   type: 'send_booking_slip' | 'send_receipt_sop' | 'send_invoice' | 'send_whatsapp';
   roomId: string;
-  tenantId?: string;
 }

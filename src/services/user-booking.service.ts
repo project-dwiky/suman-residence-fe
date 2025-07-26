@@ -1,12 +1,23 @@
 import { RentalData, RentalStatus, RentalDuration } from '@/components/user-dashboard/types';
+import { getRoomMainImage } from '@/utils/static-room-data';
 
 export class UserBookingService {
   private baseUrl: string;
-  private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-    this.apiKey = process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadaKey';
+    // Use local Next.js API routes
+    this.baseUrl = '/api';
+  }
+
+  // Helper function to get room image based on room type
+  private getRoomImage(roomType?: string): string {
+    if (roomType === 'A') {
+      return getRoomMainImage('A', 'id');
+    } else if (roomType === 'B') {
+      return getRoomMainImage('B', 'id');
+    }
+    // Default to Type A image if no specific type
+    return getRoomMainImage('A', 'id');
   }
 
   // Get all bookings for current user
@@ -20,10 +31,9 @@ export class UserBookingService {
 
       console.log('🔍 UserBookingService: Fetching bookings for user:', userId);
 
-      const response = await fetch(`${this.baseUrl}/api/bookings/user/${userId}`, {
+      const response = await fetch(`${this.baseUrl}/bookings?userId=${userId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         }
       });
@@ -72,7 +82,7 @@ export class UserBookingService {
               roomNumber: 'Unknown',
               type: 'Standard',
               floor: 1,
-              imagesGallery: ['/images/room-placeholder.jpg'],
+              imagesGallery: [this.getRoomImage()],
               size: 'Unknown',
               facilities: [],
               description: 'Data tidak tersedia'
@@ -114,7 +124,7 @@ export class UserBookingService {
     let rentalStatus: RentalStatus;
     if (booking.rentalStatus === 'PENDING' || booking.status === 'Pending') {
       rentalStatus = RentalStatus.PENDING;
-    } else if (booking.rentalStatus === 'SETUJUI' || booking.status === 'Setujui') {
+    } else if (booking.rentalStatus === 'APPROVED' || booking.status === 'Approved') {
       rentalStatus = RentalStatus.SETUJUI;
     } else if (booking.rentalStatus === 'CANCEL' || booking.status === 'Cancel' || booking.rentalStatus === 'CANCELLED') {
       rentalStatus = RentalStatus.CANCEL;
@@ -161,7 +171,7 @@ export class UserBookingService {
         roomNumber: booking.room?.roomNumber || 'Unknown',
         type: booking.room?.type || 'Standard',
         floor: booking.room?.floor || 1,
-        imagesGallery: booking.room?.imagesGallery || ['/images/room-placeholder.jpg'],
+        imagesGallery: booking.room?.imagesGallery || [this.getRoomImage(booking.room?.type)],
         size: booking.room?.size || 'Unknown',
         facilities: booking.room?.facilities || [],
         description: booking.room?.description || 'Kamar nyaman dengan fasilitas lengkap'
@@ -188,10 +198,9 @@ export class UserBookingService {
   // Get specific booking details
   async getBookingDetails(bookingId: string): Promise<RentalData | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/bookings/${bookingId}`, {
+      const response = await fetch(`${this.baseUrl}/bookings/${bookingId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
           'Content-Type': 'application/json'
         }
       });
@@ -212,6 +221,36 @@ export class UserBookingService {
     } catch (error) {
       console.error('Error fetching booking details:', error);
       return null;
+    }
+  }
+
+  // Create a new booking
+  async createBooking(bookingData: any): Promise<{ success: boolean; booking?: any; error?: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || result.message || 'Failed to create booking');
+      }
+
+      return {
+        success: true,
+        booking: result.booking
+      };
+    } catch (error: any) {
+      console.error('Error creating booking:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create booking'
+      };
     }
   }
 }

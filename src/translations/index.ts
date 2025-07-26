@@ -10,6 +10,8 @@ import { kamarEn, KamarTranslationKeys } from './kamar.en';
 import { kamarId } from './kamar.id';
 import { roomDetailEn, RoomDetailTranslationKeys } from './room-detail.en';
 import { roomDetailId } from './room-detail.id';
+import { bookingEn, BookingTranslationKeys } from './booking.en';
+import { bookingId } from './booking.id';
 
 export type Language = 'en' | 'id';
 
@@ -43,6 +45,11 @@ export const roomDetailTranslations = {
   id: roomDetailId
 } as const;
 
+export const bookingTranslations = {
+  en: bookingEn,
+  id: bookingId
+} as const;
+
 export const getTranslation = (language: Language): TranslationKeys => {
   return translations[language] || translations.en;
 };
@@ -67,6 +74,10 @@ export const getRoomDetailTranslation = (language: Language): RoomDetailTranslat
   return roomDetailTranslations[language] || roomDetailTranslations.en;
 };
 
+export const getBookingTranslation = (language: Language): BookingTranslationKeys => {
+  return bookingTranslations[language] || bookingTranslations.en;
+};
+
 export const defaultLanguage: Language = 'id';
 export const supportedLanguages: Language[] = ['en', 'id'];
 
@@ -81,4 +92,6 @@ export * from './cta.id';
 export * from './kamar.en';
 export * from './kamar.id';
 export * from './room-detail.en';
-export * from './room-detail.id'; 
+export * from './room-detail.id';
+export * from './booking.en';
+export * from './booking.id'; 

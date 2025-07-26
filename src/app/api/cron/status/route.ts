@@ -1,19 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    const body = await request.json();
-    const { type } = body; // 'h15' or 'h1'
-    
     // Proxy request to backend
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:8080';
-    const response = await fetch(`${backendUrl}/api/cron/trigger`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ type })
-    });
+    const response = await fetch(`${backendUrl}/api/cron/status`);
 
     if (!response.ok) {
       throw new Error(`Backend responded with ${response.status}`);
@@ -22,11 +13,11 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error triggering cron job:', error);
+    console.error('Error fetching cron status:', error);
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to trigger cron job',
+        error: 'Failed to fetch cron status',
         message: 'Backend connection failed - make sure backend server is running'
       },
       { status: 500 }

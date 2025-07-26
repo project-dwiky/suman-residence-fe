@@ -38,7 +38,7 @@ interface BookingDocument {
 interface Booking {
   id: string;
   userId: string;
-  rentalStatus: 'PENDING' | 'SETUJUI' | 'CANCEL';
+  rentalStatus: 'PENDING' | 'APPROVED' | 'CANCEL';
   room: {
     id: string;
     roomNumber: string;
@@ -69,12 +69,26 @@ const BookingManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && searchQuery) {
+        setSearchQuery('');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [searchQuery]);
 
   const fetchBookings = async () => {
     try {
@@ -150,9 +164,9 @@ const BookingManagement: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      PENDING: { color: 'bg-yellow-100 text-yellow-800', label: 'Menunggu' },
-      SETUJUI: { color: 'bg-green-100 text-green-800', label: 'Disetujui' },
-      CANCEL: { color: 'bg-red-100 text-red-800', label: 'Dibatalkan' }
+      PENDING: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
+      APPROVED: { color: 'bg-green-100 text-green-800', label: 'Disetujui' },
+      CANCEL: { color: 'bg-red-100 text-red-800', label: 'Canceled' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
@@ -164,9 +178,37 @@ const BookingManagement: React.FC = () => {
     );
   };
 
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm || !text) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="bg-yellow-200 font-semibold">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+
   const filteredBookings = bookings.filter(booking => {
-    if (activeFilter === 'all') return true;
-    return booking.rentalStatus === activeFilter;
+    // Filter by status
+    const matchesFilter = activeFilter === 'all' || booking.rentalStatus === activeFilter;
+    
+    // Filter by search query (booking ID, user ID, room number, contact info)
+    const matchesSearch = !searchQuery || 
+      booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.room.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.contactInfo?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.contactInfo?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      booking.contactInfo?.phone?.includes(searchQuery);
+    
+    return matchesFilter && matchesSearch;
   });
 
   const getActionButtons = (booking: Booking) => {
@@ -184,7 +226,7 @@ const BookingManagement: React.FC = () => {
               className="bg-green-600 hover:bg-green-700"
             >
               <CheckCircle className="w-4 h-4 mr-1" />
-              Setujui
+              Disetujui
             </Button>
             <Button
               size="sm"
@@ -198,7 +240,7 @@ const BookingManagement: React.FC = () => {
           </div>
         );
       
-      case 'SETUJUI':
+      case 'APPROVED':
         return (
           <div className="flex gap-2">
             <Button
@@ -241,31 +283,21 @@ const BookingManagement: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE', file: File) => {
+    const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE', file: File) => {
     setUploadingFile(`${bookingId}-${documentType}`);
     
+    // Placeholder implementation - Isa akan kerjakan :D
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('bookingId', bookingId);
-      formData.append('documentType', documentType);
-
-      const response = await fetch('/api/admin/bookings/upload-document', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(`Dokumen ${documentType} berhasil diupload`);
-        fetchBookings(); // Refresh bookings to show new document
-      } else {
-        const error = await response.json();
-        toast.error(error.message || 'Gagal mengupload dokumen');
-      }
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      toast.error('Gagal mengupload dokumen');
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success(`✨ Placeholder: File ${file.name} akan diupload untuk ${documentType}. Isa akan kerjakan fitur ini! 🚀`);
+      
+      // For now, just refresh the bookings to simulate update
+      await fetchBookings();
+    } catch (error: any) {
+      console.error('Placeholder file upload:', error);
+      toast.error('📄 Fitur upload file sedang dalam pengembangan - Isa akan kerjakan! 💪');
     } finally {
       setUploadingFile(null);
     }
@@ -319,29 +351,70 @@ const BookingManagement: React.FC = () => {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant={activeFilter === 'all' ? 'default' : 'outline'}
-          onClick={() => setActiveFilter('all')}
-          size="sm"
-        >
-          <Filter className="w-4 h-4 mr-1" />
-          Semua ({bookings.length})
-        </Button>
-        {['PENDING', 'SETUJUI', 'CONFIRMATION', 'ACTIVE', 'COMPLETED', 'CANCEL'].map(status => {
-          const count = bookings.filter(b => b.rentalStatus === status).length;
-          return (
-            <Button
-              key={status}
-              variant={activeFilter === status ? 'default' : 'outline'}
-              onClick={() => setActiveFilter(status)}
-              size="sm"
-            >
-              {getStatusBadge(status)} ({count})
-            </Button>
-          );
-        })}
+      {/* Search and Filter Section */}
+      <div className="space-y-6">
+        {/* Search Bar */}
+        <div className="w-full">
+          <div className="relative max-w-2xl">
+            <input
+              type="text"
+              placeholder="Cari booking ID, user ID, kamar, nama, email, atau telepon..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-12 py-4 text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 hover:border-gray-400"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                title="Clear search"
+              >
+                <XCircle className="h-6 w-6" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-3 text-sm text-gray-600">
+              Menampilkan {filteredBookings.length} dari {bookings.length} booking
+            </div>
+          )}
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex gap-3 flex-wrap items-center">
+          <span className="text-sm font-medium text-gray-700 mr-2">Filter Status:</span>
+          <Button
+            variant={activeFilter === 'all' ? 'default' : 'outline'}
+            onClick={() => setActiveFilter('all')}
+            size="default"
+            className="h-10 px-4"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            Semua ({bookings.length})
+          </Button>
+          {['PENDING', 'APPROVED', 'CANCEL'].map(status => {
+            const count = bookings.filter(b => b.rentalStatus === status).length;
+            const statusLabel = status === 'PENDING' ? 'Pending' : 
+                               status === 'APPROVED' ? 'Disetujui' : 
+                               status === 'CANCEL' ? 'Canceled' : status;
+            return (
+              <Button
+                key={status}
+                variant={activeFilter === status ? 'default' : 'outline'}
+                onClick={() => setActiveFilter(status)}
+                size="default"
+                className="h-10 px-4"
+              >
+                {statusLabel} ({count})
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Bookings List */}
@@ -350,13 +423,27 @@ const BookingManagement: React.FC = () => {
           <Card>
             <CardContent className="flex items-center justify-center py-8">
               <div className="text-center">
-                <p className="text-gray-500 mb-2">Tidak ada booking</p>
+                <p className="text-gray-500 mb-2">
+                  {searchQuery ? 'Tidak ada booking yang sesuai dengan pencarian' : 'Tidak ada booking'}
+                </p>
                 <p className="text-sm text-gray-400">
-                  {activeFilter === 'all' 
-                    ? 'Belum ada booking yang masuk' 
-                    : `Tidak ada booking dengan status ${activeFilter}`
+                  {searchQuery 
+                    ? `Tidak ditemukan hasil untuk "${searchQuery}"`
+                    : activeFilter === 'all' 
+                      ? 'Belum ada booking yang masuk' 
+                      : `Tidak ada booking dengan status ${activeFilter}`
                   }
                 </p>
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                    className="mt-3"
+                  >
+                    Hapus Pencarian
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -369,7 +456,7 @@ const BookingManagement: React.FC = () => {
                     <div className="flex items-center gap-4 mb-4">
                       <div>
                         <h3 className="font-semibold text-lg">
-                          Booking ID: {booking.id.substring(0, 8)}...
+                          Booking ID: {highlightSearchTerm(booking.id.substring(0, 8) + '...', searchQuery)}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
                           {getStatusBadge(booking.rentalStatus)}
@@ -387,15 +474,15 @@ const BookingManagement: React.FC = () => {
                         <div className="space-y-1 text-sm">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-gray-400" />
-                            <span>{booking.contactInfo?.name || booking.userId}</span>
+                            <span>{highlightSearchTerm(booking.contactInfo?.name || booking.userId, searchQuery)}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Phone className="w-4 h-4 text-gray-400" />
-                            <span>{booking.contactInfo?.phone || '-'}</span>
+                            <span>{highlightSearchTerm(booking.contactInfo?.phone || '-', searchQuery)}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-gray-400" />
-                            <span>{booking.contactInfo?.email || '-'}</span>
+                            <span>{highlightSearchTerm(booking.contactInfo?.email || '-', searchQuery)}</span>
                           </div>
                         </div>
                       </div>
@@ -406,7 +493,7 @@ const BookingManagement: React.FC = () => {
                         <div className="space-y-1 text-sm">
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4 text-gray-400" />
-                            <span>{booking.room.roomNumber}</span>
+                            <span>{highlightSearchTerm(booking.room.roomNumber, searchQuery)}</span>
                           </div>
                           <div>Tipe: {booking.room.type}</div>
                           <div>Ukuran: {booking.room.size}</div>
@@ -437,7 +524,12 @@ const BookingManagement: React.FC = () => {
 
                     {/* Document Management Section */}
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-3">Dokumen Booking</h4>
+                      <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                        Dokumen Booking
+                        <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                          Preview - Isa akan kerjakan 🚀
+                        </span>
+                      </h4>
                       
                       {/* Existing Documents */}
                       {booking.documents && booking.documents.length > 0 && (

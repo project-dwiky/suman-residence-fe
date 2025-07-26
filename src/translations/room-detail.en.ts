@@ -47,6 +47,13 @@ export const roomDetailEn = {
       floor: "1-3",
       checkIn: "Flexible 24 hours",
       checkOut: "According to rental contract",
+      images: [
+        "/galeri/kamar_A/h1.JPG", 
+        "/galeri/kamar_A/h2.JPG",
+        "/galeri/kamar_A/1.png",
+        "/galeri/kamar_A/2.png",
+        "/galeri/kamar_A/3.png"
+      ],
       amenities: {
         ac: {
           name: "AC",
@@ -87,6 +94,9 @@ export const roomDetailEn = {
       floor: "2-3",
       checkIn: "Flexible 24 hours",
       checkOut: "According to rental contract",
+      images: [
+        "/galeri/kamar_B/1.png"
+      ],
       amenities: {
         ac: {
           name: "AC",

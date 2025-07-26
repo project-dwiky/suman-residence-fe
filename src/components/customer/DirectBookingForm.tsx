@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { BookingService, BookingRequest } from "@/components/user-dashboard/services/booking.service";
 import { toast } from "sonner";
+import { Language } from "@/translations";
 
 interface DirectBookingFormProps {
   room: {
@@ -37,10 +38,11 @@ interface DirectBookingFormProps {
       yearly: number;
     };
   };
+  language?: Language;
   onClose: () => void;
 }
 
-export default function DirectBookingForm({ room, onClose }: DirectBookingFormProps) {
+export default function DirectBookingForm({ room, language = 'id', onClose }: DirectBookingFormProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",

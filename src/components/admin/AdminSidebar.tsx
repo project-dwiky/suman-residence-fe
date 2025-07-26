@@ -16,22 +16,10 @@ export function AdminSidebar() {
       description: "Overview kamar & penyewa"
     },
     {
-      name: "Kelola Kamar",
-      href: "/admin/dashboard/rooms", 
-      icon: "🏨",
-      description: "Manajemen kamar & harga"
-    },
-    {
       name: "Kelola Booking",
       href: "/admin/dashboard/booking", 
       icon: "📋",
       description: "Permintaan booking baru"
-    },
-    {
-      name: "Penyewa Aktif",
-      href: "/admin/dashboard/tenants",
-      icon: "👥", 
-      description: "Data penyewa aktif"
     },
     {
       name: "WhatsApp",

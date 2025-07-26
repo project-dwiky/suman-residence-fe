@@ -4,17 +4,19 @@ import Navbar from '@/components/core/Navbar';
 import Footer from '@/components/core/Footer';
 
 interface DetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function RentalDetailView({ params }: DetailPageProps) {
+  const { id } = await params;
+  
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-gray-50">
-        <RentalDetailPage rentalId={params.id} />
+        <RentalDetailPage rentalId={id} />
       </main>
       <Footer />
     </>

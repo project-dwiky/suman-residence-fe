@@ -7,16 +7,36 @@ import { formatDate } from '../utils/dateUtils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Language } from '@/translations';
+import { getRoomMainImage } from '@/utils/static-room-data';
 
 interface RentalListSectionProps {
   rentalDataList: RentalData[];
+  language?: Language;
 }
 
-const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList }) => {
+const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList, language = 'id' }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredRentals, setFilteredRentals] = useState<RentalData[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const router = useRouter();
+  
+  // Helper function to get room image based on room type
+  const getRoomImage = (room: any): string => {
+    if (room.imagesGallery && room.imagesGallery.length > 0) {
+      return room.imagesGallery[0];
+    }
+    
+    // Fallback to static room images based on room type
+    if (room.type === 'A') {
+      return getRoomMainImage('A', 'id');
+    } else if (room.type === 'B') {
+      return getRoomMainImage('B', 'id');
+    }
+    
+    // Default to Type A image
+    return getRoomMainImage('A', 'id');
+  };
   
   // Initialize filteredRentals when rentalDataList changes
   useEffect(() => {
@@ -43,7 +63,7 @@ const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList })
       
       const matchFilter = activeFilter === 'all' || 
         (activeFilter === 'pending' && rental.rentalStatus === 'PENDING') ||
-        (activeFilter === 'setujui' && rental.rentalStatus === 'SETUJUI') ||
+        (activeFilter === 'setujui' && rental.rentalStatus === 'APPROVED') ||
         (activeFilter === 'cancel' && rental.rentalStatus === 'CANCEL');
       
       return matchSearch && matchFilter;
@@ -60,7 +80,7 @@ const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList })
           color: 'bg-yellow-50 border border-yellow-200 text-yellow-700', 
           text: 'Dalam Pengajuan'
         };
-      case 'SETUJUI':
+      case 'APPROVED':
         return { 
           color: 'bg-green-50 border border-green-200 text-green-700', 
           text: 'Disetujui'
@@ -229,7 +249,7 @@ const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList })
                 {/* Room Image dengan Hover Effect */}
                 <div className="relative h-56 w-full overflow-hidden">
                   <Image 
-                    src={(room.imagesGallery && room.imagesGallery.length > 0) ? room.imagesGallery[0] : "/images/room-placeholder.jpg"} 
+                    src={getRoomImage(room)} 
                     alt={`Kamar ${room.roomNumber}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"

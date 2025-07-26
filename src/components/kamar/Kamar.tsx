@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Footer from "../core/Footer";
 import { motion } from 'framer-motion';
 import RoomTypeCard from '../homepage/sections/facilities/RoomTypeCard';
 import { Language, getKamarTranslation } from "@/translations";
-import { fetchAllRooms, SimpleRoom } from "@/utils/room-data";
+import { getKamarRoomData } from "@/utils/static-room-data";
 
 interface KamarProps {
     language: Language;
@@ -13,27 +13,9 @@ interface KamarProps {
 
 const Kamar = ({ language }: KamarProps) => {
     const t = getKamarTranslation(language);
-    const [rooms, setRooms] = useState<SimpleRoom[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const loadRooms = async () => {
-            try {
-                setLoading(true);
-                const roomsData = await fetchAllRooms();
-                setRooms(roomsData);
-            } catch (err) {
-                console.error('Error loading rooms:', err);
-                setError('Failed to load rooms from database');
-                setRooms([]); // Set empty array on error
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadRooms();
-    }, []);
+    
+    // Get room data from static translations
+    const roomData = getKamarRoomData(language);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -61,48 +43,21 @@ const Kamar = ({ language }: KamarProps) => {
             {/* Rooms Grid */}
             <section className="py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {loading ? (
-                        <div className="flex items-center justify-center py-16">
-                            <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                                <p className="text-gray-600">Loading rooms...</p>
-                            </div>
-                        </div>
-                    ) : error ? (
-                        <div className="text-center py-16">
-                            <p className="text-red-600 mb-4">{error}</p>
-                            <p className="text-gray-600">Please contact admin to add rooms to the database</p>
-                        </div>
-                    ) : rooms.length === 0 ? (
-                        <div className="text-center py-16">
-                            <p className="text-gray-600 mb-4">No rooms available</p>
-                            <p className="text-sm text-gray-500">Please contact admin to add rooms</p>
-                        </div>
-                    ) : null}
-
-                    {rooms.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {rooms.map((room, index) => (
-                                <motion.div
-                                    key={room.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                >
-                                    <RoomTypeCard 
-                                        id={room.id}
-                                        title={room.name}
-                                        size={room.size || 'Standard'}
-                                        price={room.price}
-                                        description={room.description}
-                                        features={room.amenities}
-                                        image={room.images[0] || '/galeri/default.jpg'}
-                                        type={room.type as 'A' | 'B' || 'A'}
-                                    />
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {roomData.map((room, index) => (
+                            <motion.div
+                                key={room.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                            >
+                                <RoomTypeCard 
+                                    {...room}
+                                    language={language}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
 
                     {/* Additional Info */}
                     <motion.div

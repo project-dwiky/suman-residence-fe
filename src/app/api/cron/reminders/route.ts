@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-const BACKEND_API_KEY = process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadaKey';
+const BACKEND_API_KEY = process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadakey';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,21 +15,13 @@ export async function POST(request: NextRequest) {
 
     console.log('🔄 Running automated contract expiry reminders...');
 
-    // Call the backend to process reminders based on duration types
-    const response = await fetch(`${BACKEND_URL}/api/cron/check-reminders`, {
+    // Call the backend H-15 reminder system (simplified approach)
+    const response = await fetch(`${BACKEND_URL}/api/cron/h15-reminders`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${BACKEND_API_KEY}`,
         'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        reminderSchedule: [
-          { durationType: 'WEEKLY', daysBefore: 1 },
-          { durationType: 'MONTHLY', daysBefore: 7 },
-          { durationType: 'SEMESTER', daysBefore: 15 },
-          { durationType: 'YEARLY', daysBefore: 30 }
-        ]
-      })
+      }
     });
 
     if (response.ok) {

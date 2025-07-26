@@ -9,7 +9,7 @@ import { User, Calendar, MessageCircle, Home, Clock } from "lucide-react";
 interface RoomCardProps {
   room: Room;
   activeBooking?: Booking | null; // Optional active booking data
-  onAction: (action: string, roomId: string, tenantId?: string) => void;
+  onAction: (action: string, roomId: string) => void;
 }
 
 export function RoomCard({ room, activeBooking, onAction }: RoomCardProps) {
@@ -105,7 +105,7 @@ export function RoomCard({ room, activeBooking, onAction }: RoomCardProps) {
           <div className="flex items-center space-x-2">
             <User className="h-4 w-4 text-gray-500" />
             <div className="flex-1">
-              <span className="text-sm font-medium block">Tenant ID: {activeBooking.tenantId}</span>
+              <span className="text-sm font-medium block">Booking ID: {activeBooking.id}</span>
               <span className="text-xs text-gray-500 block">
                 Email: Data dari booking system
               </span>
@@ -131,37 +131,52 @@ export function RoomCard({ room, activeBooking, onAction }: RoomCardProps) {
 
           {/* Action Buttons for Booked Rooms */}
           <div className="grid grid-cols-2 gap-2 mt-4">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAction('send_booking_slip', room.id, activeBooking?.tenantId)}
-              className="text-xs"
-            >
-              📄 Booking Slip
-            </Button>
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onAction('send_booking_slip', room.id)}
+                className="text-xs w-full"
+              >
+                📄 Booking Slip
+              </Button>
+              <span className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-xs px-1 rounded-full">
+                🔨
+              </span>
+            </div>
+            
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onAction('send_receipt_sop', room.id)}
+                className="text-xs w-full"
+              >
+                🧾 Receipt & SOP
+              </Button>
+              <span className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-xs px-1 rounded-full">
+                🔨
+              </span>
+            </div>
+            
+            <div className="relative">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onAction('send_invoice', room.id)}
+                className="text-xs w-full"
+              >
+                💰 Invoice
+              </Button>
+              <span className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-xs px-1 rounded-full">
+                🔨
+              </span>
+            </div>
             
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onAction('send_receipt_sop', room.id, activeBooking?.tenantId)}
-              className="text-xs"
-            >
-              🧾 Receipt & SOP
-            </Button>
-            
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAction('send_invoice', room.id, activeBooking?.tenantId)}
-              className="text-xs"
-            >
-              💰 Invoice
-            </Button>
-            
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAction('send_whatsapp', room.id, activeBooking?.tenantId)}
+              onClick={() => onAction('send_whatsapp', room.id)}
               className="text-xs bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
             >
               <MessageCircle className="h-3 w-3 mr-1" />

@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-const BACKEND_API_KEY = process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadaKey';
+import { getAllBookings, Booking } from '@/repositories/booking.repository';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const userId = params.userId;
+    const resolvedParams = await params;
+    const userId = resolvedParams.userId;
     
     if (!userId) {
       return NextResponse.json(
@@ -17,26 +16,25 @@ export async function GET(
       );
     }
 
-    // Forward the request to the backend API
-    const response = await fetch(`${BACKEND_URL}/api/bookings/user/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${BACKEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    console.log(`🔍 Fetching bookings for user: ${userId}`);
 
-    if (!response.ok) {
-      throw new Error(`Backend API error: ${response.status}`);
-    }
+    // Get all bookings from Firebase and filter by userId
+    const allBookings = await getAllBookings();
+    const userBookings = allBookings.filter((booking: Booking) => booking.userId === userId);
 
-    const result = await response.json();
+    console.log(`✅ Found ${userBookings.length} bookings for user ${userId}`);
     
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: true,
+      bookings: userBookings
+    });
   } catch (error) {
-    console.error('Error fetching user bookings:', error);
+    console.error('❌ Error fetching user bookings:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch user bookings' },
+      { 
+        success: false,
+        error: 'Failed to fetch user bookings' 
+      },
       { status: 500 }
     );
   }

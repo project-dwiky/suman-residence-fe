@@ -1,7 +1,6 @@
 import { RentalData } from '@/components/user-dashboard/types';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-const BACKEND_API_KEY = process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadaKey';
+const BASE_URL = '/api';
 
 export interface AdminBookingResponse {
   success: boolean;
@@ -12,19 +11,18 @@ export interface AdminBookingResponse {
 }
 
 export class AdminBookingService {
-  private static getAuthHeaders() {
+  private static getHeaders() {
     return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${BACKEND_API_KEY}`
+      'Content-Type': 'application/json'
     };
   }
 
   // Get all bookings for admin
   static async getAllBookings(): Promise<AdminBookingResponse> {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/bookings`, {
+      const response = await fetch(`${BASE_URL}/bookings`, {
         method: 'GET',
-        headers: AdminBookingService.getAuthHeaders()
+        headers: AdminBookingService.getHeaders()
       });
 
       const result = await response.json();
@@ -52,9 +50,9 @@ export class AdminBookingService {
     action: 'approve' | 'reject' | 'cancel'
   ): Promise<AdminBookingResponse> {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/admin/bookings/${bookingId}/action`, {
+      const response = await fetch(`${BASE_URL}/admin/bookings/${bookingId}/action`, {
         method: 'POST',
-        headers: AdminBookingService.getAuthHeaders(),
+        headers: AdminBookingService.getHeaders(),
         body: JSON.stringify({ action })
       });
 
@@ -81,9 +79,9 @@ export class AdminBookingService {
   // Update booking details
   static async updateBooking(bookingId: string, updateData: any): Promise<AdminBookingResponse> {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/admin/bookings/${bookingId}`, {
+      const response = await fetch(`${BASE_URL}/admin/bookings/${bookingId}`, {
         method: 'PUT',
-        headers: AdminBookingService.getAuthHeaders(),
+        headers: AdminBookingService.getHeaders(),
         body: JSON.stringify(updateData)
       });
 
@@ -110,9 +108,9 @@ export class AdminBookingService {
   // Delete a booking
   static async deleteBooking(bookingId: string): Promise<AdminBookingResponse> {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/admin/bookings/${bookingId}`, {
+      const response = await fetch(`${BASE_URL}/admin/bookings/${bookingId}`, {
         method: 'DELETE',
-        headers: AdminBookingService.getAuthHeaders()
+        headers: AdminBookingService.getHeaders()
       });
 
       const result = await response.json();
@@ -160,13 +158,12 @@ export class AdminBookingService {
     let statusInfo = '';
     switch (booking.rentalStatus) {
       case 'CONFIRMED':
+      case 'APPROVED':
         statusInfo = '✅ Booking Anda telah DIKONFIRMASI! Silakan lakukan pembayaran sesuai instruksi berikut:';
         break;
       case 'CANCELLED':
+      case 'CANCEL':
         statusInfo = '❌ Mohon maaf, booking Anda tidak dapat kami proses karena alasan tertentu.';
-        break;
-      case 'ACTIVE':
-        statusInfo = '🎉 Selamat! Kamar Anda sudah siap ditempati.';
         break;
       default:
         statusInfo = 'ℹ️ Update status booking Anda:';

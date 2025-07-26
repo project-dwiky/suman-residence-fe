@@ -55,7 +55,7 @@ const RentalDetailPage = ({ rentalId }: RentalDetailPageProps) => {
           <p className="mt-3 text-gray-500">Silakan kembali ke halaman dashboard dan coba lagi.</p>
           <div className="mt-6">
             <Link 
-              href="/dashboard/user"
+              href="/dashboard"
               className="inline-flex items-center px-6 py-2 text-sm font-medium rounded-full text-white bg-primary hover:bg-primary/90 focus:outline-none shadow-sm"
             >
               Kembali ke Dashboard
@@ -71,7 +71,7 @@ const RentalDetailPage = ({ rentalId }: RentalDetailPageProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-4">
         <Link 
-          href="/dashboard/user"
+          href="/dashboard"
           className="inline-flex items-center px-4 py-2 text-primary hover:bg-gray-100 transition-colors rounded-md font-medium text-sm"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

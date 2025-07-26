@@ -49,6 +49,13 @@ export const roomDetailId: RoomDetailTranslationKeys = {
       floor: "1-3",
       checkIn: "Fleksibel 24 jam",
       checkOut: "Sesuai kontrak sewa",
+      images: [
+        "/galeri/kamar_A/h1.JPG", 
+        "/galeri/kamar_A/h2.JPG",
+        "/galeri/kamar_A/1.png",
+        "/galeri/kamar_A/2.png",
+        "/galeri/kamar_A/3.png"
+      ],
       amenities: {
         ac: {
           name: "AC",
@@ -89,6 +96,9 @@ export const roomDetailId: RoomDetailTranslationKeys = {
       floor: "2-3",
       checkIn: "Fleksibel 24 jam",
       checkOut: "Sesuai kontrak sewa",
+      images: [
+        "/galeri/kamar_B/1.png"
+      ],
       amenities: {
         ac: {
           name: "AC",

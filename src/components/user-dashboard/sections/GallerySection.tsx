@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { RentalData } from '../types';
+import { getRoomMainImage } from '@/utils/static-room-data';
 
 interface GallerySectionProps {
   rentalData: RentalData;
@@ -12,15 +13,43 @@ interface GallerySectionProps {
 const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
   // Safely handle imagesGallery that might be undefined or not an array
   const imageGallery = rentalData.room?.imagesGallery;
+  
+  // Helper function to get fallback image based on room type
+  const getFallbackImage = (): string => {
+    try {
+      if (rentalData.room.type === 'A') {
+        const imageUrl = getRoomMainImage('A', 'id');
+        return imageUrl || '/galeri/kamar_A/h1.JPG';
+      } else if (rentalData.room.type === 'B') {
+        const imageUrl = getRoomMainImage('B', 'id');
+        return imageUrl || '/galeri/kamar_B/1.png';
+      }
+      // Default to Type A image
+      const imageUrl = getRoomMainImage('A', 'id');
+      return imageUrl || '/galeri/kamar_A/h1.JPG';
+    } catch (error) {
+      console.error('Error getting fallback image:', error);
+      return '/galeri/kamar_A/h1.JPG'; // Hard fallback
+    }
+  };
+  
   const images = (Array.isArray(imageGallery) && imageGallery.length > 0) 
-    ? imageGallery.map(url => ({
-        url,
-        alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}`
-      }))
+    ? imageGallery
+        .filter(url => url && url.trim() !== '') // Filter out empty URLs
+        .map(url => ({
+          url,
+          alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}`
+        }))
     : [{ 
-        url: '/images/room-placeholder.jpg', 
+        url: getFallbackImage(), 
         alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` 
       }];
+
+  // Ensure we always have at least one valid image
+  const validImages = images.length > 0 ? images : [{ 
+    url: '/galeri/kamar_A/h1.JPG', 
+    alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` 
+  }];
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -29,13 +58,13 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
   
   // Handle next/previous image
   const handlePrevImage = () => {
-    setActiveIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setActiveIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));
     resetAutoplayTimer();
   };
 
   const handleNextImage = useCallback(() => {
-    setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images.length]);
+    setActiveIndex((prev) => (prev === validImages.length - 1 ? 0 : prev + 1));
+  }, [validImages.length]);
   
   // Reset autoplay timer when user interacts
   const resetAutoplayTimer = () => {
@@ -54,13 +83,13 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
   // Get the 3 thumbnails to show (previous, current, next)
   const getVisibleThumbnails = () => {
     // If we have fewer than 3 images, just return all of them
-    if (images.length <= 3) {
-      return images.map((_, index) => index);
+    if (validImages.length <= 3) {
+      return validImages.map((_, index) => index);
     }
     
     // Get indices of previous, current, and next images
-    const prev = activeIndex === 0 ? images.length - 1 : activeIndex - 1;
-    const next = activeIndex === images.length - 1 ? 0 : activeIndex + 1;
+    const prev = activeIndex === 0 ? validImages.length - 1 : activeIndex - 1;
+    const next = activeIndex === validImages.length - 1 ? 0 : activeIndex + 1;
     
     return [prev, activeIndex, next];
   };
@@ -70,7 +99,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
   // Setup autoplay
   useEffect(() => {
     // Set up autoplay - move to next image every 5 seconds
-    if (!isPaused && !autoplayTimerRef.current && images.length > 1) {
+    if (!isPaused && !autoplayTimerRef.current && validImages.length > 1) {
       autoplayTimerRef.current = setInterval(handleNextImage, 5000);
     }
     
@@ -80,10 +109,10 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
         clearInterval(autoplayTimerRef.current);
       }
     };
-  }, [isPaused, handleNextImage, images.length]);
+  }, [isPaused, handleNextImage, validImages.length]);
 
   // If no images, show simple placeholder without card
-  if (images.length === 0) {
+  if (validImages.length === 0) {
     return (
       <div className="w-full h-[500px] flex items-center justify-center bg-gray-100 rounded-lg">
         <p className="text-gray-500">Tidak ada gambar tersedia</p>
@@ -103,7 +132,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
         transition={{ duration: 0.5 }}
       >
         {/* Main image */}
-        {images.map((image, index) => (
+        {validImages.map((image, index) => (
           <div 
             key={index}
             className={`absolute inset-0 transition-opacity duration-300 ${
@@ -163,7 +192,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {activeIndex + 1} / {images.length}
+          {activeIndex + 1} / {validImages.length}
         </motion.div>
       </motion.div>
 
@@ -184,7 +213,7 @@ const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
               className={`relative w-full aspect-[16/9] rounded-md overflow-hidden transition ${index === activeIndex ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'}`}
             >
               <Image
-                src={images[index].url}
+                src={validImages[index].url}
                 alt={`Thumbnail ${index + 1}`}
                 fill
                 sizes="(max-width: 768px) 120px, 160px"

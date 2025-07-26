@@ -7,8 +7,13 @@ import Footer from '@/components/core/Footer';
 import Link from 'next/link';
 import { BookingService } from '../services/booking.service';
 import { useRouter } from 'next/navigation';
+import { Language } from '@/translations';
 
-function UserDashboardPage() {
+interface UserDashboardPageProps {
+  language?: Language;
+}
+
+function UserDashboardPage({ language = 'id' }: UserDashboardPageProps) {
   const router = useRouter();
   const [rentalDataList, setRentalDataList] = useState<RentalData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +130,7 @@ function UserDashboardPage() {
                   </Link>
                 ) : (
                   <Link 
-                    href="/dashboard/user" 
+                    href="/dashboard" 
                     className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition"
                   >
                     Muat Ulang
@@ -173,7 +178,7 @@ function UserDashboardPage() {
         {/* Main Content Area */}
         <div className="max-w-7xl mx-auto px-4 mt-6 mb-16">
           <div className="bg-white rounded-xl shadow-md p-6 md:p-8 border border-gray-100">
-            <RentalListSection rentalDataList={rentalDataList} />
+            <RentalListSection rentalDataList={rentalDataList} language={language} />
           </div>
         </div>
       </div>

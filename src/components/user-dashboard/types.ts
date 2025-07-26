@@ -5,7 +5,7 @@
 // Room rental status enum - simplified to 3 main statuses
 export enum RentalStatus {
   PENDING = 'PENDING',     // Dalam pengajuan/proses
-  SETUJUI = 'SETUJUI',     // Disetujui admin
+  SETUJUI = 'APPROVED',    // Disetujui admin (mapped to APPROVED)
   CANCEL = 'CANCEL'        // Dibatalkan
 }
 

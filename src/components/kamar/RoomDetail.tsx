@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Footer from "../core/Footer";
 import { Button } from "@/components/ui/button";
 import DirectBookingForm from "@/components/customer/DirectBookingForm";
@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { Language, getRoomDetailTranslation } from "@/translations";
-import { fetchRoomData, SimpleRoom } from "@/utils/room-data";
+import { getStaticRoomById } from "@/utils/static-room-data";
 
 interface RoomDetailProps {
     roomId: string;
@@ -29,46 +29,22 @@ interface RoomDetailProps {
 
 const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
     const t = getRoomDetailTranslation(language);
-    const [room, setRoom] = useState<SimpleRoom | null>(null);
-    const [loading, setLoading] = useState(true);
+    
+    // Get room data from static translations
+    const room = getStaticRoomById(roomId, language);
     const [showBooking, setShowBooking] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
-
-    // Load room data
-    useEffect(() => {
-        const loadRoom = async () => {
-            setLoading(true);
-            
-            // Fetch from API only
-            const roomData = await fetchRoomData(roomId);
-            setRoom(roomData);
-            setLoading(false);
-        };
-        
-        loadRoom();
-    }, [roomId]);
 
     const handleBookingClick = () => {
         setShowBooking(true);
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading room details...</p>
-                </div>
-            </div>
-        );
-    }
-
     if (!room) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamar Tidak Ditemukan</h2>
-                    <p className="text-gray-600 mb-4">Kamar yang Anda cari tidak tersedia</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">{t.notFound.title}</h2>
+                    <p className="text-gray-600 mb-4">{t.notFound.backLink}</p>
                     <Link href="/kamar">
                         <Button>Kembali ke Daftar Kamar</Button>
                     </Link>
@@ -90,7 +66,7 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                         
                         <div className="flex items-center space-x-2">
                             <Building2 className="w-5 h-5 text-gray-400" />
-                            <span className="text-gray-900">{room.name}</span>
+                            <span className="text-gray-900">{room.title}</span>
                         </div>
                     </div>
                 </div>
@@ -103,7 +79,7 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                         <div className="aspect-video relative overflow-hidden rounded-lg bg-gray-200">
                             <Image
                                 src={room.images[selectedImage] || '/galeri/default.jpg'}
-                                alt={room.name}
+                                alt={room.title}
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -122,7 +98,7 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                                     >
                                         <Image
                                             src={image}
-                                            alt={`${room.name} ${index + 1}`}
+                                            alt={`${room.title} ${index + 1}`}
                                             fill
                                             className="object-cover"
                                             sizes="(max-width: 768px) 25vw, 12.5vw"
@@ -137,7 +113,7 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                     <div className="space-y-6">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                {room.name}
+                                {room.title}
                             </h1>
                             <div className="flex items-center space-x-4 text-gray-600 mb-4">
                                 <div className="flex items-center space-x-1">
@@ -170,7 +146,7 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                                 {room.amenities.map((amenity, index) => (
                                     <div key={index} className="flex items-center space-x-2">
                                         <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                        <span className="text-gray-700">{amenity}</span>
+                                        <span className="text-gray-700">{amenity.name}</span>
                                     </div>
                                 ))}
                             </div>
@@ -233,9 +209,16 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
                 <DirectBookingForm
                     room={{
                         id: room.id,
-                        title: room.name,
-                        price: room.price
+                        title: room.title,
+                        price: room.price,
+                        type: room.type,
+                        size: room.size,
+                        description: room.description,
+                        facilities: room.features,
+                        images: room.images,
+                        pricing: room.pricing
                     }}
+                    language={language}
                     onClose={() => setShowBooking(false)}
                 />
             )}

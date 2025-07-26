@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BookingRepository } from '@/repositories/booking.repository';
-import { TenantRepository } from '@/repositories/tenant.repository';
-import { RoomRepository } from '@/repositories/room.repository';
-
-const bookingRepository = new BookingRepository();
-const tenantRepository = new TenantRepository();
-const roomRepository = new RoomRepository();
+import { getAllBookings, getBookingById, Booking } from '@/repositories/booking.repository';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,48 +12,37 @@ export async function GET(request: NextRequest) {
     let bookings;
 
     if (withDetails) {
-      // Get bookings with populated room and tenant data
-      bookings = await bookingRepository.getAllBookingsWithDetails();
+      // Get bookings with populated room and tenant data - for now just get all bookings
+      bookings = await getAllBookings();
       
       // Filter by status if provided
       if (status) {
-        bookings = bookings.filter(booking => booking.status === status);
+        bookings = bookings.filter((booking: Booking) => booking.rentalStatus === status);
       }
       
       // Filter by tenant if provided
       if (tenantId) {
-        bookings = bookings.filter(booking => booking.tenantId === tenantId);
+        bookings = bookings.filter((booking: Booking) => booking.userId === tenantId);
       }
 
       // Filter by userId if provided (userId should match tenantId in this system)
       if (userId) {
-        bookings = bookings.filter(booking => booking.tenantId === userId);
+        bookings = bookings.filter((booking: Booking) => booking.userId === userId);
       }
     } else {
       // Get basic bookings
       if (status) {
-        bookings = await bookingRepository.getBookingsByStatus(status as any);
+        const allBookings = await getAllBookings();
+        bookings = allBookings.filter((booking: Booking) => booking.rentalStatus === status);
       } else if (tenantId) {
-        bookings = await bookingRepository.getBookingsByTenant(tenantId);
+        const allBookings = await getAllBookings();
+        bookings = allBookings.filter((booking: Booking) => booking.userId === tenantId);
       } else if (userId) {
-        // Handle userId filtering - use the dedicated function from backend
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-        const response = await fetch(`${backendUrl}/api/bookings/user/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_BACKEND_API_KEY || 'gaadaKey'}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          bookings = result.bookings || [];
-        } else {
-          bookings = [];
-        }
+        // Filter bookings by userId (using local repository)
+        const allBookings = await getAllBookings();
+        bookings = allBookings.filter((booking: Booking) => booking.userId === userId);
       } else {
-        bookings = await bookingRepository.getAllBookings();
+        bookings = await getAllBookings();
       }
     }
 
@@ -77,30 +60,33 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Forward the request to the backend API
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-    const response = await fetch(`${backendUrl}/api/bookings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body)
-    });
+    console.log('🔄 Creating new booking:', body);
+    
+    // Import the booking repository to create booking directly in Firebase
+    const { createBooking, getBookingById } = await import('@/repositories/booking.repository');
+    
+    // Create booking directly in Firebase
+    const bookingId = await createBooking(body);
 
-    const result = await response.json();
+    console.log('✅ Booking created successfully with ID:', bookingId);
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: result.error || result.message || 'Failed to create booking' },
-        { status: response.status }
-      );
-    }
+    // Get the full booking object to return
+    const newBooking = await getBookingById(bookingId);
 
-    return NextResponse.json(result, { status: response.status });
+    return NextResponse.json({
+      success: true,
+      booking: newBooking,
+      bookingId: bookingId,
+      message: 'Booking created successfully'
+    }, { status: 201 });
   } catch (error) {
-    console.error('Error creating booking:', error);
+    console.error('❌ Error creating booking:', error);
     return NextResponse.json(
-      { error: 'Failed to create booking' },
+      { 
+        success: false,
+        error: 'Failed to create booking',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

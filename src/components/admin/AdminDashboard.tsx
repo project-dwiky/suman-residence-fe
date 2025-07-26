@@ -1,157 +1,103 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RoomCard } from "./RoomCard";
-import { Room, Booking } from "@/models";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, RefreshCw, Settings } from "lucide-react";
-import Link from "next/link";
+import { RefreshCw, Calendar, Clock, MessageSquare, CheckCircle, AlertCircle } from "lucide-react";
 
-type FilterType = 'all' | 'available' | 'booked';
+interface CronStatus {
+  isActive: boolean;
+  lastRun: string | null;
+  nextRun: string | null;
+  totalSent: number;
+  h15Count: number;
+  h1Count: number;
+}
 
 export function AdminDashboard() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [activeBookings, setActiveBookings] = useState<Record<string, Booking>>({});
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [cronStatus, setCronStatus] = useState<CronStatus>({
+    isActive: true,
+    lastRun: null,
+    nextRun: null,
+    totalSent: 0,
+    h15Count: 0,
+    h1Count: 0
+  });
 
-  // Fetch rooms from API
-  const fetchRooms = async () => {
+  // Fetch cron status
+  const fetchCronStatus = async () => {
     try {
       setLoading(true);
-      setError(null);
-      
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-      const response = await fetch(`${backendUrl}/api/rooms`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch rooms');
+      const response = await fetch('/api/cron/status');
+      if (response.ok) {
+        const data = await response.json();
+        setCronStatus(data);
       }
-      
-      const data = await response.json();
-      setRooms(data.rooms || []);
-    } catch (err) {
-      console.error('Error fetching rooms:', err);
-      setError('Failed to load rooms. Please try again.');
+    } catch (error) {
+      console.error('Error fetching cron status:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch active bookings for all rooms
-  const fetchActiveBookings = async () => {
+  // Trigger manual reminder check
+  const triggerReminders = async () => {
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
-      const response = await fetch(`${backendUrl}/api/bookings?status=Active`);
-      if (!response.ok) {
-        return; // If bookings API fails, continue without bookings
+      setLoading(true);
+      const response = await fetch('/api/cron/trigger', { method: 'POST' });
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`✅ Manual reminder job completed!
+
+📊 Summary:
+• H-15 Reminders: ${result.cronResult.summary?.h15Count || 0}
+• H-1 Reminders: ${result.cronResult.summary?.h1Count || 0}
+• Total Sent: ${result.cronResult.summary?.successful || 0}
+• Failed: ${result.cronResult.summary?.failed || 0}
+
+${result.cronResult.details || 'Check console for details'}`);
+        
+        // Refresh status after manual trigger
+        await fetchCronStatus();
+      } else {
+        alert('❌ Failed to trigger reminder job: ' + result.error);
       }
+    } catch (error) {
+      alert('❌ Error triggering reminder job: ' + error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Start/Stop cron service
+  const toggleCronService = async () => {
+    try {
+      setLoading(true);
+      const action = cronStatus.isActive ? 'stop' : 'start';
+      const response = await fetch(`/api/cron/${action}`, { method: 'POST' });
+      const result = await response.json();
       
-      const data = await response.json();
-      const bookings = data.bookings || [];
-      
-      // Create a map of roomId -> active booking
-      const bookingsMap: Record<string, Booking> = {};
-      bookings.forEach((booking: Booking) => {
-        bookingsMap[booking.roomId] = booking;
-      });
-      
-      setActiveBookings(bookingsMap);
-    } catch (err) {
-      console.error('Error fetching active bookings:', err);
-      // Continue without bookings - this is optional functionality
+      if (result.success) {
+        alert(`✅ Cron service ${action}ed successfully!`);
+        await fetchCronStatus();
+      } else {
+        alert(`❌ Failed to ${action} cron service: ` + result.error);
+      }
+    } catch (error) {
+      alert(`❌ Error ${cronStatus.isActive ? 'stopping' : 'starting'} cron service: ` + error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRooms();
-    fetchActiveBookings();
+    fetchCronStatus();
+    // Refresh status every 30 seconds
+    const interval = setInterval(fetchCronStatus, 30000);
+    return () => clearInterval(interval);
   }, []);
-
-  const filteredRooms = rooms.filter(room => {
-    // Simple filter: all, available, or booked only
-    let matchesFilter = true;
-    switch (filter) {
-      case 'available':
-        matchesFilter = room.status === 'Available';
-        break;
-      case 'booked':
-        matchesFilter = room.status === 'Booked';
-        break;
-      default:
-        matchesFilter = true;
-    }
-
-    // Simple search by room name or tenant name
-    const matchesSearch = 
-      room.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesFilter && matchesSearch;
-  });
-
-  const handleAction = async (action: string, roomId: string, tenantId?: string) => {
-    // Handle document sending actions
-    switch (action) {
-      case 'send_booking_slip':
-        alert(`Booking slip untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
-        break;
-      case 'send_receipt_sop':
-        alert(`Receipt dan SOP untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
-        break;
-      case 'send_invoice':
-        alert(`Invoice untuk kamar ${roomId} telah dikirim ke WhatsApp tenant.`);
-        break;
-      case 'send_whatsapp':
-        // Send message to WhatsApp
-        const room = rooms.find(r => r.id === roomId);
-        const activeBooking = activeBookings[roomId];
-        if (room && activeBooking) {
-          // In real implementation, you would get tenant details from the booking
-          const message = encodeURIComponent(
-            `Halo, ini adalah pesan dari Admin Suman Residence mengenai kamar ${room.name}.`
-          );
-          window.open(`https://wa.me/+6281234567890?text=${message}`, '_blank');
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  // Simple statistics
-  const totalRooms = rooms.length;
-  const availableRooms = rooms.filter(r => r.status === 'Available').length;
-  const bookedRooms = rooms.filter(r => r.status === 'Booked').length;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading rooms...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 max-w-md">
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-red-600 mb-2">Error</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={fetchRooms} className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Try Again
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -161,185 +107,225 @@ export function AdminDashboard() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Kelola kamar dan kirim dokumen via WhatsApp</p>
+              <p className="text-gray-600 mt-1">Automated Reminder Management System</p>
             </div>
             <div className="flex space-x-2">
               <Button
-                onClick={fetchRooms}
+                onClick={fetchCronStatus}
                 variant="outline"
                 disabled={loading}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                Refresh Status
               </Button>
-              <Link href="/admin/dashboard/rooms">
-                <Button variant="outline">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Kelola Kamar
-                </Button>
-              </Link>
-              <Link href="/admin/dashboard/rooms">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tambah Kamar
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Simple Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="text-2xl font-bold text-gray-900">{totalRooms}</div>
-            <div className="text-gray-600">Total Kamar</div>
-          </Card>
-          <Card className="p-6">
-            <div className="text-2xl font-bold text-green-600">{availableRooms}</div>
-            <div className="text-gray-600">Kamar Tersedia</div>
-          </Card>
-          <Card className="p-6">
-            <div className="text-2xl font-bold text-blue-600">{bookedRooms}</div>
-            <div className="text-gray-600">Kamar Terisi</div>
-          </Card>
-        </div>
-
-        {/* Simple Filter and Search */}
+        {/* Service Status Card */}
         <Card className="p-6 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={filter === 'all' ? "default" : "outline"}
-                onClick={() => setFilter('all')}
-                size="sm"
-              >
-                Semua ({totalRooms})
-              </Button>
-              <Button
-                variant={filter === 'available' ? "default" : "outline"}
-                onClick={() => setFilter('available')}
-                size="sm"
-              >
-                Tersedia ({availableRooms})
-              </Button>
-              <Button
-                variant={filter === 'booked' ? "default" : "outline"}
-                onClick={() => setFilter('booked')}
-                size="sm"
-              >
-                Terisi ({bookedRooms})
-              </Button>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                {cronStatus.isActive ? (
+                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                )}
+                Cron Service Status
+              </h2>
+              <p className="text-sm text-gray-600">
+                Status: <span className={`font-medium ${cronStatus.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                  {cronStatus.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </p>
             </div>
-            
-            <div className="flex items-center space-x-2 max-w-md">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Cari kamar atau nama penyewa..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            <Button
+              onClick={toggleCronService}
+              variant={cronStatus.isActive ? "destructive" : "default"}
+              disabled={loading}
+            >
+              {loading ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
+              {cronStatus.isActive ? 'Stop Service' : 'Start Service'}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-blue-600">Last Run</div>
+              <div className="text-lg font-bold text-blue-700 mt-1">
+                {cronStatus.lastRun ? new Date(cronStatus.lastRun).toLocaleString() : 'Never'}
+              </div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-green-600">Next Run</div>
+              <div className="text-lg font-bold text-green-700 mt-1">
+                {cronStatus.nextRun ? new Date(cronStatus.nextRun).toLocaleString() : 'Not scheduled'}
+              </div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-purple-600">Total Sent Today</div>
+              <div className="text-lg font-bold text-purple-700 mt-1">{cronStatus.totalSent}</div>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-orange-600">Service Uptime</div>
+              <div className="text-lg font-bold text-orange-700 mt-1">
+                {cronStatus.isActive ? '✅ Running' : '❌ Stopped'}
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Room Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              activeBooking={activeBookings[room.id] || null}
-              onAction={handleAction}
-            />
-          ))}
-        </div>
-
-        {filteredRooms.length === 0 && !loading && (
-          <Card className="p-12 text-center">
-            <div className="text-gray-500">
-              <h3 className="text-lg font-medium mb-2">Tidak ada kamar yang ditemukan</h3>
-              {rooms.length === 0 ? (
-                <div>
-                  <p className="mb-4">Database masih kosong. Inisialisasi data sampel untuk memulai.</p>
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const response = await fetch('/api/seed', { method: 'POST' });
-                        if (response.ok) {
-                          alert('Data sampel berhasil dibuat!');
-                          fetchRooms();
-                        } else {
-                          alert('Gagal membuat data sampel');
-                        }
-                      } catch (error) {
-                        alert('Error: ' + error);
-                      }
-                    }}
-                  >
-                    Buat Data Sampel
-                  </Button>
-                </div>
-              ) : (
-                <p>Coba ubah filter atau kata kunci pencarian Anda.</p>
-              )}
+        {/* Reminder Types */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="p-6">
+            <div className="flex items-center mb-4">
+              <Calendar className="h-6 w-6 text-blue-600 mr-3" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">H-15 Contract Renewal</h3>
+                <p className="text-sm text-gray-600">15 days before contract expiry</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Schedule:</span>
+                <span className="text-sm font-medium">Daily at 9:00 AM</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Sent Today:</span>
+                <span className="text-sm font-medium text-blue-600">{cronStatus.h15Count}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Purpose:</span>
+                <span className="text-sm font-medium">Contract renewal confirmation</span>
+              </div>
             </div>
           </Card>
-        )}
 
-        {/* CRON Job Management Section */}
-        <Card className="p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Automated Reminders</h3>
-              <p className="text-sm text-gray-600">Manage contract and payment reminders</p>
+          <Card className="p-6">
+            <div className="flex items-center mb-4">
+              <Clock className="h-6 w-6 text-orange-600 mr-3" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">H-1 Final Reminder</h3>
+                <p className="text-sm text-gray-600">1 day before contract expiry</p>
+              </div>
             </div>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Schedule:</span>
+                <span className="text-sm font-medium">Daily at 9:00 AM</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Sent Today:</span>
+                <span className="text-sm font-medium text-orange-600">{cronStatus.h1Count}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Purpose:</span>
+                <span className="text-sm font-medium">Final payment reminder</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Manual Actions */}
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Manual Actions</h3>
+              <p className="text-sm text-gray-600">Test and trigger reminder processes manually</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={triggerReminders}
+              disabled={loading}
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+            >
+              <MessageSquare className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Trigger Reminders</div>
+                <div className="text-xs opacity-75">Send all pending reminders now</div>
+              </div>
+            </Button>
+
             <Button
               onClick={async () => {
                 try {
                   setLoading(true);
-                  const response = await fetch('/api/cron/trigger', { method: 'POST' });
+                  const response = await fetch('/api/cron/test-h15', { method: 'POST' });
                   const result = await response.json();
-                  
-                  if (result.success) {
-                    alert(`Manual reminder job completed!\n\nH-15 Reminders: ${result.cronResult.summary?.h15Count || 0}\nH-1 Reminders: ${result.cronResult.summary?.h1Count || 0}\nTotal Sent: ${result.cronResult.summary?.successful || 0}`);
-                  } else {
-                    alert('Failed to trigger reminder job: ' + result.error);
-                  }
+                  alert(`H-15 Test Result:\n${JSON.stringify(result, null, 2)}`);
                 } catch (error) {
-                  alert('Error triggering reminder job: ' + error);
+                  alert('Error: ' + error);
                 } finally {
                   setLoading(false);
                 }
               }}
               variant="outline"
               disabled={loading}
+              className="h-auto p-4 flex flex-col items-center space-y-2"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Test Reminders
+              <Calendar className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Test H-15</div>
+                <div className="text-xs opacity-75">Test 15-day reminders</div>
+              </div>
+            </Button>
+
+            <Button
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  const response = await fetch('/api/cron/test-h1', { method: 'POST' });
+                  const result = await response.json();
+                  alert(`H-1 Test Result:\n${JSON.stringify(result, null, 2)}`);
+                } catch (error) {
+                  alert('Error: ' + error);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              variant="outline"
+              disabled={loading}
+              className="h-auto p-4 flex flex-col items-center space-y-2"
+            >
+              <Clock className="h-6 w-6" />
+              <div className="text-center">
+                <div className="font-medium">Test H-1</div>
+                <div className="text-xs opacity-75">Test 1-day reminders</div>
+              </div>
             </Button>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-sm font-medium text-blue-600">H-15 Reminders </div>
-              <div className="text-xs text-blue-500">Contract renewal confirmation</div>
-              <div className="text-lg font-bold text-blue-700 mt-1">Daily 9:00 AM</div>
+        </Card>
+
+        {/* System Information */}
+        <Card className="p-6 mt-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">System Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">How it Works</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Automated cron jobs run daily at 9:00 AM</li>
+                <li>• H-15: Sends reminders 15 days before contract expiry</li>
+                <li>• H-1: Sends final reminders 1 day before expiry</li>
+                <li>• Messages sent via WhatsApp using backend queue</li>
+                <li>• System tracks sent reminders to avoid duplicates</li>
+              </ul>
             </div>
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <div className="text-sm font-medium text-orange-600">H-1 Reminders</div>
-              <div className="text-xs text-orange-500">Final payment reminder</div>
-              <div className="text-lg font-bold text-orange-700 mt-1">Daily 9:00 AM</div>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="text-sm font-medium text-green-600">WhatsApp Status</div>
-              <div className="text-xs text-green-500">Auto-send via backend</div>
-              <div className="text-lg font-bold text-green-700 mt-1">Active</div>
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2">Configuration</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Backend: Bun.js with cron-manager</li>
+                <li>• Queue: Message queue for WhatsApp delivery</li>
+                <li>• Storage: Firebase for booking data</li>
+                <li>• Schedule: Configurable cron expressions</li>
+                <li>• Monitoring: Real-time status tracking</li>
+              </ul>
             </div>
           </div>
         </Card>
