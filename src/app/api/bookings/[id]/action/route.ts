@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBookingById, updateBooking } from '@/repositories/booking.repository';
-import { RoomRepository } from '@/repositories/room.repository';
-
-const roomRepository = new RoomRepository();
 
 export async function POST(
   request: NextRequest,
