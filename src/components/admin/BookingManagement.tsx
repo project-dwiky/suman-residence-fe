@@ -283,21 +283,62 @@ const BookingManagement: React.FC = () => {
     }
   };
 
-    const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE', file: File) => {
+  const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE', file: File) => {
     setUploadingFile(`${bookingId}-${documentType}`);
     
-    // Placeholder implementation - Isa akan kerjakan :D
     try {
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('File terlalu besar. Maksimal 10MB.');
+      }
+  
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Format file tidak didukung. Gunakan PDF, JPG, atau PNG.');
+      }
+  
+      // Upload file to MinIO
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!uploadResponse.ok) {
+        throw new Error('Gagal upload file ke storage');
+      }
+  
+      const uploadResult = await uploadResponse.json();
       
-      toast.success(`✨ Placeholder: File ${file.name} akan diupload untuk ${documentType}. Isa akan kerjakan fitur ini! 🚀`);
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload gagal');
+      }
+  
+      // Save document metadata to Firebase via admin booking service
+      const documentData = {
+        bookingId,
+        type: documentType,
+        fileName: file.name,
+        fileUrl: uploadResult.url
+      };
+  
+      const saveResult = await adminBookingService.uploadBookingDocument(documentData);
       
-      // For now, just refresh the bookings to simulate update
+      if (!saveResult.success) {
+        throw new Error(saveResult.error || 'Gagal menyimpan metadata dokumen');
+      }
+  
+      toast.success(`📄 ${getDocumentTypeLabel(documentType)} berhasil diupload!`);
+      
+      // Refresh bookings to show updated documents
       await fetchBookings();
+      
     } catch (error: any) {
-      console.error('Placeholder file upload:', error);
-      toast.error('📄 Fitur upload file sedang dalam pengembangan - Isa akan kerjakan! 💪');
+      console.error('Error uploading file:', error);
+      toast.error(error.message || 'Gagal upload file');
     } finally {
       setUploadingFile(null);
     }
@@ -338,7 +379,7 @@ const BookingManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -524,11 +565,8 @@ const BookingManagement: React.FC = () => {
 
                     {/* Document Management Section */}
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                      <h4 className="font-medium text-gray-900 mb-3">
                         Dokumen Booking
-                        <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
-                          Preview - Isa akan kerjakan 🚀
-                        </span>
                       </h4>
                       
                       {/* Existing Documents */}

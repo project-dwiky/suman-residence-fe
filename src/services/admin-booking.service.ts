@@ -76,6 +76,45 @@ export class AdminBookingService {
     }
   }
 
+  static async uploadBookingDocument(documentData: {
+    bookingId: string;
+    type: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE';
+    fileName: string;
+    fileUrl: string;
+    uploadedBy: string;
+  }): Promise<AdminBookingResponse> {
+    try {
+      const response = await fetch(`${BASE_URL}/admin/bookings/${documentData.bookingId}/documents`, {
+        method: 'POST',
+        headers: AdminBookingService.getHeaders(),
+        body: JSON.stringify({
+          type: documentData.type,
+          fileName: documentData.fileName,
+          fileUrl: documentData.fileUrl,
+          uploadedBy: documentData.uploadedBy
+        }),
+      });
+  
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save document');
+      }
+  
+      return {
+        success: true,
+        message: result.message || 'Document uploaded successfully',
+        booking: result.booking
+      };
+    } catch (error: any) {
+      console.error('Error uploading document:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to upload document'
+      };
+    }
+  }
+
   // Update booking details
   static async updateBooking(bookingId: string, updateData: any): Promise<AdminBookingResponse> {
     try {
