@@ -38,6 +38,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/qrcode`, {
         method: 'GET',
         headers: {
+          'x-api-key': process.env.API_SECRET_KEY || 'default-secret-key-for-development',
           'Content-Type': 'application/json'
         }
       });
@@ -62,6 +63,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/reset-connection`, {
         method: 'POST',
         headers: {
+          'x-api-key': process.env.API_SECRET_KEY || 'default-secret-key-for-development',
           'Content-Type': 'application/json'
         }
       });
@@ -87,6 +89,7 @@ export class WhatsAppService {
       const response = await fetch(`${WHATSAPP_API_URL}/whatsapp/send`, {
         method: 'POST',
         headers: {
+          'x-api-key': process.env.API_SECRET_KEY || 'default-secret-key-for-development',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
