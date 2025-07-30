@@ -1,7 +1,7 @@
 import { WhatsAppStatus, QRCodeResponse, SendMessageResponse } from '@/types/whatsapp';
 
 // Use local API routes that proxy to the backend
-const WHATSAPP_API_URL = '/api';
+const WHATSAPP_API_URL = process.env.WHATSAPP_API_URL || 'http://localhost:8080';
 
 /**
  * Service untuk mengelola fungsi-fungsi WhatsApp

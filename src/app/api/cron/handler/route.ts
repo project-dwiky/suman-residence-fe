@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     // Verify x-api-key authentication
     const apiKey = request.headers.get('x-api-key');
+    console.log(`here`);
     const expectedKey = process.env.WHATSAPP_API_KEY || 'default-secret-key-for-development';
     
     if (!apiKey || apiKey !== expectedKey) {

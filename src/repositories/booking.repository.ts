@@ -110,14 +110,15 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'createdAt
     const now = Timestamp.now();
     const docRef = await bookingsCollection.add({
       ...bookingData,
+      rentalStatus: 'PENDING',
       rentalPeriod: {
         ...bookingData.rentalPeriod,
-        startDate: Timestamp.fromDate(bookingData.rentalPeriod.startDate),
-        endDate: Timestamp.fromDate(bookingData.rentalPeriod.endDate),
+        startDate: Timestamp.fromDate(new Date(bookingData.rentalPeriod.startDate)),
+        endDate: Timestamp.fromDate(new Date(bookingData.rentalPeriod.endDate)),
       },
       documents: bookingData.documents?.map(doc => ({
         ...doc,
-        createdAt: Timestamp.fromDate(doc.createdAt),
+        createdAt: Timestamp.fromDate(new Date(doc.createdAt)),
       })) || [],
       createdAt: now,
       updatedAt: now
@@ -143,15 +144,15 @@ export async function updateBooking(id: string, updates: Partial<Omit<Booking, '
     if (updates.rentalPeriod) {
       updateData.rentalPeriod = {
         ...updates.rentalPeriod,
-        startDate: Timestamp.fromDate(updates.rentalPeriod.startDate),
-        endDate: Timestamp.fromDate(updates.rentalPeriod.endDate),
+        startDate: Timestamp.fromDate(new Date(updates.rentalPeriod.startDate)),
+        endDate: Timestamp.fromDate(new Date(updates.rentalPeriod.endDate)),
       };
     }
 
     if (updates.documents) {
       updateData.documents = updates.documents.map(doc => ({
         ...doc,
-        createdAt: Timestamp.fromDate(doc.createdAt),
+        createdAt: Timestamp.fromDate(new Date(doc.createdAt)),
       }));
     }
 
@@ -188,8 +189,10 @@ export async function getBookingsForNotification(): Promise<{
   try {
     // Get all approved bookings
     const bookings = await getAllBookings();
+    console.log(`Total bookings: ${bookings.length}`);
     const approvedBookings = bookings.filter(booking => booking.rentalStatus === 'APPROVED');
     
+    // Use Indonesia timezone (WIB = UTC+7)
     const now = new Date();
     const result = {
       h1: [] as Booking[],
@@ -199,42 +202,73 @@ export async function getBookingsForNotification(): Promise<{
     };
     
     for (const booking of approvedBookings) {
+      // Parse endDate and set to end of day in Indonesia timezone
       const endDate = new Date(booking.rentalPeriod.endDate);
+      endDate.setHours(23, 59, 59, 999); // End of day
+      
       const timeDiff = endDate.getTime() - now.getTime();
-      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      // Use Math.floor for proper day calculation (kos-kosan business logic)
+      const daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      
+      // 🔍 DEBUG: Let's see what's happening
+      console.log(`🔍 DEBUG Booking ${booking.id}:`, {
+        endDate: endDate.toISOString(),
+        now: now.toISOString(),
+        timeDiff: timeDiff,
+        daysRemaining: daysRemaining,
+        durationType: booking.rentalPeriod.durationType,
+        rentalStatus: booking.rentalStatus
+      });
       
       // Skip if already expired or more than 30 days remaining
       if (daysRemaining < 0 || daysRemaining > 30) {
+        console.log(`⏭️  Skipping booking ${booking.id}: daysRemaining=${daysRemaining}`);
         continue;
       }
       
-      // Business logic based on durationType
+      // Business logic based on durationType (exact match to avoid duplicate notifications)
       switch (booking.rentalPeriod.durationType) {
         case 'WEEKLY':
-          // Mingguan = H-1 (notify 1 day before)
+          // Mingguan = H-1 (notify exactly 1 day before)
+          console.log(`📅 WEEKLY check: daysRemaining=${daysRemaining}, need exactly 1`);
           if (daysRemaining === 1) {
+            console.log(`✅ Adding to H-1: ${booking.id}`);
             result.h1.push(booking);
+          } else {
+            console.log(`❌ Not H-1: daysRemaining=${daysRemaining}, need exactly 1`);
           }
           break;
           
         case 'MONTHLY':
-          // Bulanan = H-7 (notify 7 days before)
+          // Bulanan = H-7 (notify exactly 7 days before)
+          console.log(`📅 MONTHLY check: daysRemaining=${daysRemaining}, need exactly 7`);
           if (daysRemaining === 7) {
+            console.log(`✅ Adding to H-7: ${booking.id}`);
             result.h7.push(booking);
+          } else {
+            console.log(`❌ Not H-7: daysRemaining=${daysRemaining}, need exactly 7`);
           }
           break;
           
         case 'SEMESTER':
-          // Semester = H-15 (notify 15 days before)
+          // Semester = H-15 (notify exactly 15 days before)
+          console.log(`📅 SEMESTER check: daysRemaining=${daysRemaining}, need exactly 15`);
           if (daysRemaining === 15) {
+            console.log(`✅ Adding to H-15: ${booking.id}`);
             result.h15.push(booking);
+          } else {
+            console.log(`❌ Not H-15: daysRemaining=${daysRemaining}, need exactly 15`);
           }
           break;
           
         case 'YEARLY':
-          // Tahunan = H-30 (notify 30 days before)
+          // Tahunan = H-30 (notify exactly 30 days before)
+          console.log(`📅 YEARLY check: daysRemaining=${daysRemaining}, need exactly 30`);
           if (daysRemaining === 30) {
+            console.log(`✅ Adding to H-30: ${booking.id}`);
             result.h30.push(booking);
+          } else {
+            console.log(`❌ Not H-30: daysRemaining=${daysRemaining}, need exactly 30`);
           }
           break;
       }
