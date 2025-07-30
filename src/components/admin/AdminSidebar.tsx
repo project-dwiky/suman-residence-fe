@@ -10,22 +10,19 @@ export function AdminSidebar() {
 
   const menuItems = [
     {
-      name: "Dashboard",
+      name: "Cron",
       href: "/admin/dashboard",
-      icon: "🏠",
-      description: "Overview kamar & penyewa"
+      description: "Reminder automation"
     },
     {
-      name: "Kelola Booking",
+      name: "Booking Management",
       href: "/admin/dashboard/booking", 
-      icon: "📋",
-      description: "Permintaan booking baru"
+      description: "Manage booking requests"
     },
     {
       name: "WhatsApp",
       href: "/admin/dashboard/whatsapp",
-      icon: "💬",
-      description: "Pengaturan WhatsApp"
+      description: "WhatsApp settings"
     }
   ];
 
@@ -44,7 +41,7 @@ export function AdminSidebar() {
           onClick={() => setIsOpen(!isOpen)}
           className="bg-white p-2 rounded-md shadow-lg border"
         >
-          {isOpen ? "✕" : "☰"}
+          {isOpen ? 'Close' : 'Menu'}
         </button>
       </div>
 
@@ -91,7 +88,6 @@ export function AdminSidebar() {
                     }
                   `}
                 >
-                  <span className="text-xl">{item.icon}</span>
                   <div className="flex-1">
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-gray-500">{item.description}</div>

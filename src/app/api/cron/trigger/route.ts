@@ -2,17 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { type } = body; // 'h15' or 'h1'
-    
     // Proxy request to backend
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:8080';
-    const response = await fetch(`${backendUrl}/api/cron/trigger`, {
+    const response = await fetch(`${backendUrl}/cron/trigger`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-api-key': process.env.WHATSAPP_API_KEY || 'default-secret-key-for-development'
       },
-      body: JSON.stringify({ type })
     });
 
     if (!response.ok) {

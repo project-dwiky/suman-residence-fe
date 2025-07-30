@@ -325,7 +325,7 @@ const BookingManagement: React.FC = () => {
         fileUrl: uploadResult.url
       };
   
-      const saveResult = await adminBookingService.uploadBookingDocument(documentData);
+      const saveResult = await adminBookingService.uploadBookingDocument(documentData as any);
       
       if (!saveResult.success) {
         throw new Error(saveResult.error || 'Gagal menyimpan metadata dokumen');

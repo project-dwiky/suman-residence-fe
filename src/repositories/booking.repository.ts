@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase-admin';
-import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 
 export interface BookingDocument {
   id: string;
@@ -23,7 +23,7 @@ export interface BookingRoom {
 export interface BookingPeriod {
   startDate: Date;
   endDate: Date;
-  durationType: 'MONTHLY' | 'SEMESTER' | 'YEARLY';
+  durationType: 'WEEKLY' | 'MONTHLY' | 'SEMESTER' | 'YEARLY';
 }
 
 export interface Booking {
@@ -165,8 +165,92 @@ export async function updateBooking(id: string, updates: Partial<Omit<Booking, '
 export async function deleteBooking(id: string): Promise<void> {
   try {
     await bookingsCollection.doc(id).delete();
+    console.log(`Booking ${id} deleted successfully`);
   } catch (error) {
     console.error('Error deleting booking:', error);
-    throw new Error('Failed to delete booking');
+    throw error;
+  }
+}
+
+/**
+ * Get bookings that need notification based on business logic:
+ * - WEEKLY (Mingguan) = H-1 (1 day before expiry)
+ * - MONTHLY (Bulanan) = H-7 (7 days before expiry)
+ * - SEMESTER = H-15 (15 days before expiry) 
+ * - YEARLY (Tahunan) = H-30 (30 days before expiry)
+ */
+export async function getBookingsForNotification(): Promise<{
+  h1: Booking[];
+  h7: Booking[];
+  h15: Booking[];
+  h30: Booking[];
+}> {
+  try {
+    // Get all approved bookings
+    const bookings = await getAllBookings();
+    const approvedBookings = bookings.filter(booking => booking.rentalStatus === 'APPROVED');
+    
+    const now = new Date();
+    const result = {
+      h1: [] as Booking[],
+      h7: [] as Booking[],
+      h15: [] as Booking[],
+      h30: [] as Booking[]
+    };
+    
+    for (const booking of approvedBookings) {
+      const endDate = new Date(booking.rentalPeriod.endDate);
+      const timeDiff = endDate.getTime() - now.getTime();
+      const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      
+      // Skip if already expired or more than 30 days remaining
+      if (daysRemaining < 0 || daysRemaining > 30) {
+        continue;
+      }
+      
+      // Business logic based on durationType
+      switch (booking.rentalPeriod.durationType) {
+        case 'WEEKLY':
+          // Mingguan = H-1 (notify 1 day before)
+          if (daysRemaining === 1) {
+            result.h1.push(booking);
+          }
+          break;
+          
+        case 'MONTHLY':
+          // Bulanan = H-7 (notify 7 days before)
+          if (daysRemaining === 7) {
+            result.h7.push(booking);
+          }
+          break;
+          
+        case 'SEMESTER':
+          // Semester = H-15 (notify 15 days before)
+          if (daysRemaining === 15) {
+            result.h15.push(booking);
+          }
+          break;
+          
+        case 'YEARLY':
+          // Tahunan = H-30 (notify 30 days before)
+          if (daysRemaining === 30) {
+            result.h30.push(booking);
+          }
+          break;
+      }
+    }
+    
+    console.log('📋 Bookings for notification:', {
+      h1: result.h1.length,
+      h7: result.h7.length, 
+      h15: result.h15.length,
+      h30: result.h30.length
+    });
+    
+    return result;
+    
+  } catch (error) {
+    console.error('Error getting bookings for notification:', error);
+    throw error;
   }
 }
