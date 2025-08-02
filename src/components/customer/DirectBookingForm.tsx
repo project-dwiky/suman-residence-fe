@@ -263,7 +263,7 @@ Terima kasih!`;
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Booking Kamar</h2>
-              <p className="text-sm text-gray-600">{room.title} - {room.price}</p>
+              <p className="text-sm text-gray-600">{room.title}</p>
             </div>
             <button
               onClick={onClose}

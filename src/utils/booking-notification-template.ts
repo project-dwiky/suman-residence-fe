@@ -181,11 +181,35 @@ Thanks! 🙏
 Suman Residence Management`
 ];
 
+const DYNAMIC_TEMPLATES = [
+  (booking: Booking) => `📅 *CONTRACT REMINDER*
+
+Halo *{name}*! 👋
+
+Contract *${booking.rentalPeriod.durationType.toLowerCase()}* kamar Anda akan berakhir dalam *${Math.ceil((booking.rentalPeriod.endDate.getTime() - booking.rentalPeriod.startDate.getTime()) / (1000 * 60 * 60 * 24))} hari*:
+
+🏠 Kamar: *${booking.room.roomNumber}*
+📆 Expired: *${formatDate(booking.rentalPeriod.endDate)}*
+
+Masih ada waktu ${Math.ceil((booking.rentalPeriod.endDate.getTime() - booking.rentalPeriod.startDate.getTime()) / (1000 * 60 * 60 * 24))} hari untuk koordinasi renewal atau planning ke depan.
+
+📞 Contact: 0812-3456-7890
+🏡 Suman Residence`,
+
+];
+
+
 /**
  * Get random notification template based on notification type
  */
-export function getNotificationTemplate(type: 'h1' | 'h7' | 'h15' | 'h30', booking: Booking): string {
+export function getNotificationTemplate(type: 'h1' | 'h7' | 'h15' | 'h30', booking: Booking, isTriggerManual: boolean): string {
   let templates: ((booking: Booking) => string)[];
+
+  if (isTriggerManual) {
+    templates = DYNAMIC_TEMPLATES;
+    const message = templates[0](booking);
+    return message.replace('{name}', booking.contactInfo.name);
+  } 
   
   switch (type) {
     case 'h1':

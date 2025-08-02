@@ -37,7 +37,12 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Starting booking notification process...');
     
     // Get bookings that need notification
-    const notificationBookings = await getBookingsForNotification();
+    let notificationBookings;
+    if (source == "whatsapp-backend-manual-trigger") {
+      notificationBookings = await getBookingsForNotification(true);
+    } else {
+      notificationBookings = await getBookingsForNotification();
+    }
     
     console.log('📋 Notification bookings summary:');
     console.log(`  H-1: ${notificationBookings.h1.length} bookings`);
@@ -52,11 +57,13 @@ export async function POST(request: NextRequest) {
       h30: 0,
       total: 0
     };
+
+    let isTriggerManual = source == "whatsapp-backend-manual-trigger";
     
     // Process H-1 notifications (1 day before expiry)
     for (const booking of notificationBookings.h1) {
       try {
-        const message = getNotificationTemplate('h1', booking);
+        const message = getNotificationTemplate('h1', booking, isTriggerManual);
         console.log(`📩 H-1 message for ${booking.contactInfo.name} (Room ${booking.room.roomNumber}):`);
         console.log(message);
         
@@ -78,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Process H-7 notifications (7 days before expiry)
     for (const booking of notificationBookings.h7) {
       try {
-        const message = getNotificationTemplate('h7', booking);
+        const message = getNotificationTemplate('h7', booking, isTriggerManual);
         console.log(`📩 H-7 message for ${booking.contactInfo.name} (Room ${booking.room.roomNumber}):`);
         console.log(message);
         
@@ -100,7 +107,7 @@ export async function POST(request: NextRequest) {
     // Process H-15 notifications (15 days before expiry)
     for (const booking of notificationBookings.h15) {
       try {
-        const message = getNotificationTemplate('h15', booking);
+        const message = getNotificationTemplate('h15', booking, isTriggerManual);
         console.log(`📩 H-15 message for ${booking.contactInfo.name} (Room ${booking.room.roomNumber}):`);
         console.log(message);
         
@@ -122,7 +129,7 @@ export async function POST(request: NextRequest) {
     // Process H-30 notifications (30 days before expiry)
     for (const booking of notificationBookings.h30) {
       try {
-        const message = getNotificationTemplate('h30', booking);
+        const message = getNotificationTemplate('h30', booking, isTriggerManual);
         console.log(`📩 H-30 message for ${booking.contactInfo.name} (Room ${booking.room.roomNumber}):`);
         console.log(message);
         

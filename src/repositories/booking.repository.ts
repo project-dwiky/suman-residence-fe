@@ -180,7 +180,7 @@ export async function deleteBooking(id: string): Promise<void> {
  * - SEMESTER = H-15 (15 days before expiry) 
  * - YEARLY (Tahunan) = H-30 (30 days before expiry)
  */
-export async function getBookingsForNotification(): Promise<{
+export async function getBookingsForNotification(testTrigger: boolean = false): Promise<{
   h1: Booking[];
   h7: Booking[];
   h15: Booking[];
@@ -221,7 +221,7 @@ export async function getBookingsForNotification(): Promise<{
       });
       
       // Skip if already expired or more than 30 days remaining
-      if (daysRemaining < 0 || daysRemaining > 30) {
+      if ((daysRemaining < 0 || daysRemaining > 30) && !testTrigger) {
         console.log(`⏭️  Skipping booking ${booking.id}: daysRemaining=${daysRemaining}`);
         continue;
       }
@@ -229,6 +229,13 @@ export async function getBookingsForNotification(): Promise<{
       // Business logic based on durationType (exact match to avoid duplicate notifications)
       switch (booking.rentalPeriod.durationType) {
         case 'WEEKLY':
+          if (testTrigger) {
+            console.log(`✅ Adding to H-1: ${booking.id}`);
+            result.h1.push(booking);
+            break;
+          }
+          
+
           // Mingguan = H-1 (notify exactly 1 day before)
           console.log(`📅 WEEKLY check: daysRemaining=${daysRemaining}, need exactly 1`);
           if (daysRemaining === 1) {
@@ -240,6 +247,12 @@ export async function getBookingsForNotification(): Promise<{
           break;
           
         case 'MONTHLY':
+          if (testTrigger) {
+            console.log(`✅ Adding to H-7: ${booking.id}`);
+            result.h7.push(booking);
+            break;
+          }
+
           // Bulanan = H-7 (notify exactly 7 days before)
           console.log(`📅 MONTHLY check: daysRemaining=${daysRemaining}, need exactly 7`);
           if (daysRemaining === 7) {
@@ -251,6 +264,12 @@ export async function getBookingsForNotification(): Promise<{
           break;
           
         case 'SEMESTER':
+          if (testTrigger) {
+            console.log(`✅ Adding to H-15: ${booking.id}`);
+            result.h15.push(booking);
+            break;
+          }
+
           // Semester = H-15 (notify exactly 15 days before)
           console.log(`📅 SEMESTER check: daysRemaining=${daysRemaining}, need exactly 15`);
           if (daysRemaining === 15) {
@@ -262,6 +281,12 @@ export async function getBookingsForNotification(): Promise<{
           break;
           
         case 'YEARLY':
+          if (testTrigger) {
+            console.log(`✅ Adding to H-30: ${booking.id}`);
+            result.h30.push(booking);
+            break;
+          }
+
           // Tahunan = H-30 (notify exactly 30 days before)
           console.log(`📅 YEARLY check: daysRemaining=${daysRemaining}, need exactly 30`);
           if (daysRemaining === 30) {
