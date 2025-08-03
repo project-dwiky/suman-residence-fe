@@ -52,13 +52,40 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ rentalData }) => {
     try {
       setDownloadStatus(prev => ({ ...prev, [document.id]: 'loading' }));
       
-      // Open document in new tab for viewing
-      if (document.fileUrl) {
-        window.open(document.fileUrl, '_blank');
-        setDownloadStatus(prev => ({ ...prev, [document.id]: 'success' }));
-      } else {
+      if (!document.fileUrl) {
         throw new Error('Document URL not available');
       }
+
+      // Fetch the file as blob to avoid popup blockers
+      const response = await fetch(document.fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch document: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element for download
+      const link = window.document.createElement('a');
+      link.href = blobUrl;
+      
+      // Set the download filename
+      const fileName = document.fileName || `document-${document.id}.${getFileExtension(blob.type)}`;
+      link.download = fileName;
+      
+      // Append to body (required for Firefox)
+      window.document.body.appendChild(link);
+      
+      // Trigger download
+      link.click();
+      
+      // Clean up
+      window.document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      
+      setDownloadStatus(prev => ({ ...prev, [document.id]: 'success' }));
       
       // Reset status after 2 seconds
       setTimeout(() => {
@@ -66,13 +93,27 @@ const DocumentsSection: React.FC<DocumentsSectionProps> = ({ rentalData }) => {
       }, 2000);
     } catch (error) {
       setDownloadStatus(prev => ({ ...prev, [document.id]: 'error' }));
-      console.error("Error opening document:", error);
+      console.error("Error downloading document:", error);
       
       // Reset status after 2 seconds
       setTimeout(() => {
         setDownloadStatus(prev => ({ ...prev, [document.id]: 'idle' }));
       }, 2000);
     }
+  };
+
+  // Helper function to get file extension from MIME type
+  const getFileExtension = (mimeType: string): string => {
+    const mimeToExt: Record<string, string> = {
+      'application/pdf': 'pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+      'application/msword': 'doc',
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'text/plain': 'txt',
+    };
+    return mimeToExt[mimeType] || 'file';
   };
 
   // Animation variants

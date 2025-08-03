@@ -1,0 +1,67 @@
+=========================================================
+                     INVOICE TEMPLATE SAMPLE
+=========================================================
+
+This is a sample template structure. To create the actual invoice template:
+
+1. Create a new Microsoft Word document
+2. Copy the content below into Word
+3. Format it as desired (fonts, colors, company logo, etc.)
+4. Save as "invoice-template.docx" in this folder
+
+=========================================================
+
+                    {companyName}
+                   {companyAddress}
+                  Phone: {companyPhone}
+
+                        INVOICE
+
+Invoice Number: {invoiceNumber}
+Date: {invoiceDate}
+
+---------------------------------------------------------
+
+BILL TO:
+{guestName}
+
+---------------------------------------------------------
+
+BOOKING DETAILS:
+Booking ID: {bookingId}
+Booking Date: {bookDate}
+
+---------------------------------------------------------
+
+SERVICES:
+Description: {description}
+Quantity: {quantity}
+Unit Price: {priceIdr}
+
+---------------------------------------------------------
+
+TOTAL AMOUNT: {totalPrice}
+
+---------------------------------------------------------
+
+Thank you for choosing {companyName}!
+
+For any questions, please contact us at {companyPhone}
+
+=========================================================
+
+TEMPLATE VARIABLES USED:
+- {companyName} = Company name
+- {companyAddress} = Company address  
+- {companyPhone} = Company phone
+- {invoiceNumber} = Auto-generated invoice number
+- {invoiceDate} = Current date
+- {guestName} = Customer name
+- {bookingId} = Booking ID
+- {bookDate} = Booking date (formatted)
+- {description} = Service description
+- {quantity} = Quantity/amount
+- {priceIdr} = Unit price (formatted)
+- {totalPrice} = Total amount (formatted)
+
+Remember: Replace this text file with a proper .docx file!

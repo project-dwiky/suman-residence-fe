@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner';
 import { formatDate } from '../user-dashboard/utils/dateUtils';
 import { adminBookingService } from '@/services/admin-booking.service';
+import InvoiceGeneratorModal from './InvoiceGeneratorModal';
 
 interface BookingDocument {
   id: string;
@@ -72,6 +73,7 @@ const BookingManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
+  const [showInvoiceModal, setShowInvoiceModal] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -293,9 +295,9 @@ const BookingManagement: React.FC = () => {
       }
   
       // Validate file type
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       if (!allowedTypes.includes(file.type)) {
-        throw new Error('Format file tidak didukung. Gunakan PDF, JPG, atau PNG.');
+        throw new Error('Format file tidak didukung. Gunakan PDF, JPG, PNG, atau DOCX.');
       }
   
       // Upload file to MinIO
@@ -345,6 +347,12 @@ const BookingManagement: React.FC = () => {
   };
 
   const handleFileSelect = (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE') => {
+    // Special handling for INVOICE - show modal instead of file picker
+    if (documentType === 'INVOICE') {
+      setShowInvoiceModal(bookingId);
+      return;
+    }
+    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.jpg,.jpeg,.png';
@@ -355,6 +363,73 @@ const BookingManagement: React.FC = () => {
       }
     };
     input.click();
+  };
+
+  const handleInvoiceGenerated = async (bookingId: string, file: File) => {
+    try {
+      // Use the existing handleFileUpload function for the generated invoice
+      await handleFileUpload(bookingId, 'INVOICE', file);
+    } catch (error: any) {
+      console.error('Error uploading generated invoice:', error);
+      toast.error(error.message || 'Gagal upload invoice yang dibuat');
+    }
+  };
+
+  const handleDocumentDownload = async (document: any) => {
+    try {
+      if (!document.fileUrl) {
+        toast.error('Document URL not available');
+        return;
+      }
+
+      // Fetch the file as blob to avoid popup blockers
+      const response = await fetch(document.fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch document: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element for download
+      const link = window.document.createElement('a');
+      link.href = blobUrl;
+      
+      // Set the download filename
+      const fileName = document.fileName || `document-${document.id}.${getFileExtension(blob.type)}`;
+      link.download = fileName;
+      
+      // Append to body (required for Firefox)
+      window.document.body.appendChild(link);
+      
+      // Trigger download
+      link.click();
+      
+      // Clean up
+      window.document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      
+      toast.success('Document downloaded successfully');
+    } catch (error: any) {
+      console.error("Error downloading document:", error);
+      toast.error(error.message || 'Failed to download document');
+    }
+  };
+
+  // Helper function to get file extension from MIME type
+  const getFileExtension = (mimeType: string): string => {
+    const mimeToExt: Record<string, string> = {
+      'application/pdf': 'pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+      'application/msword': 'doc',
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'text/plain': 'txt',
+    };
+    return mimeToExt[mimeType] || 'file';
   };
 
   const getDocumentTypeLabel = (type: string) => {
@@ -583,7 +658,7 @@ const BookingManagement: React.FC = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => window.open(doc.fileUrl, '_blank')}
+                                  onClick={() => handleDocumentDownload(doc)}
                                 >
                                   <Eye className="w-3 h-3" />
                                 </Button>
@@ -636,7 +711,7 @@ const BookingManagement: React.FC = () => {
                           className="text-xs"
                         >
                           <Upload className="w-3 h-3 mr-1" />
-                          {uploadingFile === `${booking.id}-INVOICE` ? 'Uploading...' : 'Upload Invoice'}
+                          {uploadingFile === `${booking.id}-INVOICE` ? 'Uploading...' : 'Generate Invoice'}
                         </Button>
                       </div>
                     </div>
@@ -675,6 +750,19 @@ const BookingManagement: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Invoice Generator Modal */}
+      {showInvoiceModal && (
+        <InvoiceGeneratorModal
+          bookingId={showInvoiceModal}
+          initialData={{
+            guestName: bookings.find(b => b.id === showInvoiceModal)?.contactInfo?.name || '',
+            description: 'Sewa Kamar Kost - ' + (bookings.find(b => b.id === showInvoiceModal)?.room.roomNumber || ''),
+          }}
+          onClose={() => setShowInvoiceModal(null)}
+          onInvoiceGenerated={handleInvoiceGenerated}
+        />
+      )}
     </div>
   );
 };

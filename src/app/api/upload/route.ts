@@ -42,9 +42,14 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Upload to MinIO
+    // Upload to MinIO with proper headers for downloads
     await minioClient.putObject(BUCKET_NAME, fileName, buffer, buffer.length, {
       'Content-Type': file.type,
+      'Content-Disposition': `attachment; filename="${file.name}"`,
+      'Cache-Control': 'max-age=31536000', // 1 year cache
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Accept',
     });
 
     // Generate public URL
