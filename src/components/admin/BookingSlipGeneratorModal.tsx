@@ -10,58 +10,39 @@ import { toast } from "sonner";
 import Docxtemplater from "docxtemplater";
 import PizZip from "pizzip";
 
-interface InvoiceData {
+interface BookingSlipData {
     guestName: string;
+    renterPhoneNumber: string;
+    roomNumber: string;
     startDate: string;
     endDate: string;
-    description: string;
-    quantity: number;
-    priceIdr: number;
-    totalPrice: number;
-    dpPrice: number;
-    unpaidPrice: number;
-    finalTotal: number;
+    durasiSewa: string;
+    rentPriceIdr: number;
 }
 
-interface InvoiceGeneratorModalProps {
+interface BookingSlipGeneratorModalProps {
     bookingId: string;
-    initialData?: Partial<InvoiceData>;
+    initialData?: Partial<BookingSlipData>;
     onClose: () => void;
-    onInvoiceGenerated: (bookingId: string, file: File) => void;
+    onBookingSlipGenerated: (bookingId: string, file: File) => void;
 }
 
-export default function InvoiceGeneratorModal({
+export default function BookingSlipGeneratorModal({
     bookingId,
     initialData,
     onClose,
-    onInvoiceGenerated,
-}: InvoiceGeneratorModalProps) {
+    onBookingSlipGenerated,
+}: BookingSlipGeneratorModalProps) {
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState<InvoiceData>({
+    const [formData, setFormData] = useState<BookingSlipData>({
         guestName: initialData?.guestName || "",
+        renterPhoneNumber: initialData?.renterPhoneNumber || "",
+        roomNumber: initialData?.roomNumber || "",
         startDate: initialData?.startDate || new Date().toISOString().split("T")[0],
         endDate: initialData?.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 30 days from now
-        description: initialData?.description || "Sewa Kamar Kost",
-        quantity: initialData?.quantity || 1,
-        priceIdr: initialData?.priceIdr || 0,
-        totalPrice: initialData?.totalPrice || 0,
-        dpPrice: initialData?.dpPrice || 0,
-        unpaidPrice: initialData?.unpaidPrice || 0,
-        finalTotal: initialData?.finalTotal || 0,
+        durasiSewa: initialData?.durasiSewa || "1 Bulan",
+        rentPriceIdr: initialData?.rentPriceIdr || 0,
     });
-
-    // Calculate total price, unpaid price, and final total automatically
-    React.useEffect(() => {
-        const total = formData.quantity * formData.priceIdr;
-        const unpaid = total - formData.dpPrice;
-        const finalTotal = Math.max(0, unpaid); // Ensure final total is not negative
-        setFormData((prev) => ({ 
-            ...prev, 
-            totalPrice: total,
-            unpaidPrice: Math.max(0, unpaid), // Ensure unpaid price is not negative
-            finalTotal: finalTotal
-        }));
-    }, [formData.quantity, formData.priceIdr, formData.dpPrice]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -70,12 +51,7 @@ export default function InvoiceGeneratorModal({
         setFormData((prev) => ({
             ...prev,
             [name]:
-                name === "quantity" ||
-                name === "priceIdr" ||
-                name === "totalPrice" ||
-                name === "dpPrice" ||
-                name === "unpaidPrice" ||
-                name === "finalTotal"
+                name === "rentPriceIdr"
                     ? Number(value) || 0
                     : value,
         }));
@@ -99,10 +75,22 @@ export default function InvoiceGeneratorModal({
         }).format(date);
     };
 
+    const getMonthInRoman = (dateString: string): string => {
+        const date = new Date(dateString);
+        const month = date.getMonth() + 1; // getMonth() returns 0-11
+        const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+        return romanNumerals[month - 1];
+    };
+
+    const getYear = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.getFullYear().toString();
+    };
+
     const loadTemplateFile = async (): Promise<ArrayBuffer> => {
         try {
             // Try to load template from public folder
-            const response = await fetch("/templates/invoice-template.docx");
+            const response = await fetch("/templates/booking-slip-template.docx");
             if (!response.ok) {
                 throw new Error("Template file not found");
             }
@@ -110,13 +98,13 @@ export default function InvoiceGeneratorModal({
         } catch (error) {
             // If template doesn't exist, create a basic one
             toast.error(
-                "Template tidak ditemukan. Silakan upload template invoice ke folder /public/templates/invoice-template.docx"
+                "Template tidak ditemukan. Silakan upload template booking slip ke folder /public/templates/booking-slip-template.docx"
             );
             throw error;
         }
     };
 
-    const generateInvoice = async () => {
+    const generateBookingSlip = async () => {
         try {
             setLoading(true);
 
@@ -132,40 +120,34 @@ export default function InvoiceGeneratorModal({
                 linebreaks: true,
             });
 
+            // Generate contract number
+            const noRent = `SR-${bookingId.substring(0, 8)}-${Date.now()}`;
+
             // Prepare data for template
             const templateData = {
-                // Invoice header
-                invoiceNumber: `INV-${bookingId.substring(0, 8)}-${Date.now()}`,
+                // Contract information
+                noRent: noRent,
+                monthInRomanNumber: getMonthInRoman(formData.startDate),
+                year: getYear(formData.startDate),
                 
-                // Guest information
+                // Guest and rental information
                 guestName: formData.guestName,
+                renterPhoneNumber: formData.renterPhoneNumber,
+                roomNumber: formData.roomNumber,
                 
-                // Booking dates
+                // Rental period
                 startDate: formatDateIndonesian(formData.startDate),
                 endDate: formatDateIndonesian(formData.endDate),
-                bookDate: formatDateIndonesian(formData.startDate), // For backward compatibility
-                bookDateRaw: formData.startDate,
+                startDateRaw: formData.startDate,
+                endDateRaw: formData.endDate,
+                durasiSewa: formData.durasiSewa,
                 
-                // Service details
-                description: formData.description,
-                quantity: formData.quantity,
+                // Pricing
+                rentPriceIdr: formatCurrency(formData.rentPriceIdr),
+                rentPriceIdrRaw: formData.rentPriceIdr,
                 
-                // Pricing (formatted for display)
-                priceIdr: formatCurrency(formData.priceIdr),
-                totalPrice: formatCurrency(formData.totalPrice),
-                dpPrice: formatCurrency(formData.dpPrice),
-                unpaidPrice: formatCurrency(formData.unpaidPrice),
-                finalTotal: formatCurrency(formData.finalTotal),
-                
-                // Raw numbers (for calculations if needed)
-                priceIdrRaw: formData.priceIdr,
-                totalPriceRaw: formData.totalPrice,
-                dpPriceRaw: formData.dpPrice,
-                unpaidPriceRaw: formData.unpaidPrice,
-                finalTotalRaw: formData.finalTotal,
-                
-                // Invoice metadata
-                invoiceDate: formatDateIndonesian(new Date().toISOString()),
+                // Contract metadata
+                contractDate: formatDateIndonesian(new Date().toISOString()),
                 bookingId: bookingId,
                 
                 // Company information
@@ -190,7 +172,7 @@ export default function InvoiceGeneratorModal({
             });
 
             // Create file object
-            const fileName = `invoice-${bookingId.substring(
+            const fileName = `booking-slip-${bookingId.substring(
                 0,
                 8
             )}-${Date.now()}.docx`;
@@ -199,13 +181,13 @@ export default function InvoiceGeneratorModal({
             });
 
             // Call the parent component's handler
-            onInvoiceGenerated(bookingId, file);
+            onBookingSlipGenerated(bookingId, file);
 
-            toast.success("Invoice berhasil dibuat!");
+            toast.success("Booking slip berhasil dibuat!");
             onClose();
         } catch (error: any) {
-            console.error("Error generating invoice:", error);
-            toast.error(error.message || "Gagal membuat invoice");
+            console.error("Error generating booking slip:", error);
+            toast.error(error.message || "Gagal membuat booking slip");
         } finally {
             setLoading(false);
         }
@@ -216,7 +198,17 @@ export default function InvoiceGeneratorModal({
 
         // Validate required fields
         if (!formData.guestName.trim()) {
-            toast.error("Nama tamu harus diisi");
+            toast.error("Nama penyewa harus diisi");
+            return;
+        }
+
+        if (!formData.renterPhoneNumber.trim()) {
+            toast.error("Nomor telepon penyewa harus diisi");
+            return;
+        }
+
+        if (!formData.roomNumber.trim()) {
+            toast.error("Nomor kamar harus diisi");
             return;
         }
 
@@ -235,32 +227,17 @@ export default function InvoiceGeneratorModal({
             return;
         }
 
-        if (!formData.description.trim()) {
-            toast.error("Deskripsi harus diisi");
+        if (!formData.durasiSewa.trim()) {
+            toast.error("Durasi sewa harus diisi");
             return;
         }
 
-        if (formData.quantity <= 0) {
-            toast.error("Jumlah harus lebih dari 0");
+        if (formData.rentPriceIdr <= 0) {
+            toast.error("Harga sewa harus lebih dari 0");
             return;
         }
 
-        if (formData.priceIdr <= 0) {
-            toast.error("Harga harus lebih dari 0");
-            return;
-        }
-
-        if (formData.dpPrice < 0) {
-            toast.error("DP tidak boleh negatif");
-            return;
-        }
-
-        if (formData.dpPrice > formData.totalPrice) {
-            toast.error("DP tidak boleh lebih besar dari total harga");
-            return;
-        }
-
-        generateInvoice();
+        generateBookingSlip();
     };
 
     return (
@@ -271,7 +248,7 @@ export default function InvoiceGeneratorModal({
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900">
-                                Generate Invoice
+                                Generate Booking Slip
                             </h2>
                             <p className="text-sm text-gray-600">
                                 Booking ID: {bookingId.substring(0, 8)}...
@@ -290,14 +267,44 @@ export default function InvoiceGeneratorModal({
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Guest Name */}
                         <div>
-                            <Label htmlFor="guestName">Nama Tamu *</Label>
+                            <Label htmlFor="guestName">Nama Penyewa *</Label>
                             <Input
                                 id="guestName"
                                 name="guestName"
                                 type="text"
                                 value={formData.guestName}
                                 onChange={handleInputChange}
-                                placeholder="Masukkan nama tamu"
+                                placeholder="Masukkan nama penyewa"
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+
+                        {/* Renter Phone Number */}
+                        <div>
+                            <Label htmlFor="renterPhoneNumber">Nomor Telepon Penyewa *</Label>
+                            <Input
+                                id="renterPhoneNumber"
+                                name="renterPhoneNumber"
+                                type="tel"
+                                value={formData.renterPhoneNumber}
+                                onChange={handleInputChange}
+                                placeholder="Masukkan nomor telepon (contoh: 08123456789)"
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+
+                        {/* Room Number */}
+                        <div>
+                            <Label htmlFor="roomNumber">Nomor Kamar *</Label>
+                            <Input
+                                id="roomNumber"
+                                name="roomNumber"
+                                type="text"
+                                value={formData.roomNumber}
+                                onChange={handleInputChange}
+                                placeholder="Masukkan nomor kamar (contoh: A1, B2)"
                                 required
                                 disabled={loading}
                             />
@@ -306,7 +313,7 @@ export default function InvoiceGeneratorModal({
                         {/* Start Date and End Date */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="startDate">Tanggal Mulai *</Label>
+                                <Label htmlFor="startDate">Tanggal Mulai Sewa *</Label>
                                 <Input
                                     id="startDate"
                                     name="startDate"
@@ -318,7 +325,7 @@ export default function InvoiceGeneratorModal({
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="endDate">Tanggal Berakhir *</Label>
+                                <Label htmlFor="endDate">Tanggal Berakhir Sewa *</Label>
                                 <Input
                                     id="endDate"
                                     name="endDate"
@@ -331,50 +338,33 @@ export default function InvoiceGeneratorModal({
                             </div>
                         </div>
 
-                        {/* Description */}
-                        <div>
-                            <Label htmlFor="description">Deskripsi *</Label>
-                            <Textarea
-                                id="description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleInputChange}
-                                placeholder="Masukkan deskripsi layanan"
-                                rows={3}
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-
+                        {/* Duration and Rent Price */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Quantity */}
                             <div>
-                                <Label htmlFor="quantity">Jumlah *</Label>
+                                <Label htmlFor="durasiSewa">Durasi Sewa *</Label>
                                 <Input
-                                    id="quantity"
-                                    name="quantity"
-                                    type="number"
-                                    min="1"
-                                    value={formData.quantity}
+                                    id="durasiSewa"
+                                    name="durasiSewa"
+                                    type="text"
+                                    value={formData.durasiSewa}
                                     onChange={handleInputChange}
-                                    placeholder="1"
+                                    placeholder="1 Bulan, 6 Bulan, 1 Tahun"
                                     required
                                     disabled={loading}
                                 />
                             </div>
 
-                            {/* Price IDR */}
                             <div>
-                                <Label htmlFor="priceIdr">
-                                    Harga per Item (IDR) *
+                                <Label htmlFor="rentPriceIdr">
+                                    Harga Sewa (IDR) *
                                 </Label>
                                 <Input
-                                    id="priceIdr"
-                                    name="priceIdr"
+                                    id="rentPriceIdr"
+                                    name="rentPriceIdr"
                                     type="number"
                                     min="0"
                                     step="1000"
-                                    value={formData.priceIdr}
+                                    value={formData.rentPriceIdr}
                                     onChange={handleInputChange}
                                     placeholder="500000"
                                     required
@@ -383,40 +373,33 @@ export default function InvoiceGeneratorModal({
                             </div>
                         </div>
 
-                        {/* Down Payment */}
-                        <div>
-                            <Label htmlFor="dpPrice">DP/Uang Muka (IDR)</Label>
-                            <Input
-                                id="dpPrice"
-                                name="dpPrice"
-                                type="number"
-                                min="0"
-                                step="1000"
-                                value={formData.dpPrice}
-                                onChange={handleInputChange}
-                                placeholder="0"
-                                disabled={loading}
-                            />
-                        </div>
-
                         {/* Summary */}
                         <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
                             <div className="flex justify-between text-sm">
-                                <span>Total Harga:</span>
-                                <span className="font-medium">{formatCurrency(formData.totalPrice)}</span>
+                                <span>Nama Penyewa:</span>
+                                <span className="font-medium">{formData.guestName || '-'}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span>DP/Uang Muka:</span>
-                                <span className="font-medium text-orange-600">{formatCurrency(formData.dpPrice)}</span>
+                                <span>Kamar:</span>
+                                <span className="font-medium">{formData.roomNumber || '-'}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span>Sisa Pembayaran:</span>
-                                <span className="font-medium text-red-600">{formatCurrency(formData.unpaidPrice)}</span>
+                                <span>Durasi Sewa:</span>
+                                <span className="font-medium">{formData.durasiSewa}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span>Periode:</span>
+                                <span className="font-medium">
+                                    {formData.startDate && formData.endDate 
+                                        ? `${formatDateIndonesian(formData.startDate)} - ${formatDateIndonesian(formData.endDate)}`
+                                        : '-'
+                                    }
+                                </span>
                             </div>
                             <div className="border-t pt-2">
                                 <div className="flex justify-between">
-                                    <span className="font-semibold">TOTAL YANG HARUS DIBAYAR:</span>
-                                    <span className="text-2xl font-bold text-green-600">{formatCurrency(formData.finalTotal)}</span>
+                                    <span className="font-semibold">HARGA SEWA:</span>
+                                    <span className="text-2xl font-bold text-green-600">{formatCurrency(formData.rentPriceIdr)}</span>
                                 </div>
                             </div>
                         </div>
@@ -427,26 +410,26 @@ export default function InvoiceGeneratorModal({
                                 <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
                                 <div className="text-sm text-blue-700">
                                     <p className="font-medium mb-1">
-                                        Template Invoice:
+                                        Template Booking Slip:
                                     </p>
                                     <ul className="space-y-1 text-xs">
                                         <li>
                                             • Pastikan file template tersedia
-                                            di: /public/templates/invoice-template.docx
+                                            di: /public/templates/booking-slip-template.docx
                                         </li>
                                         <li>
-                                            • Variabel tersedia: {`{invoiceNumber}, {guestName}, {startDate}, {endDate}, {description}, {quantity}, {priceIdr}, {totalPrice}, {dpPrice}, {unpaidPrice}, {finalTotal}`}
+                                            • Variabel tersedia: {`{noRent}, {monthInRomanNumber}, {year}, {guestName}, {renterPhoneNumber}, {roomNumber}, {startDate}, {endDate}, {durasiSewa}, {rentPriceIdr}`}
                                         </li>
                                         <li>
                                             • Template akan diisi dengan data
                                             yang Anda masukkan
                                         </li>
                                         <li>
-                                            • File invoice akan dibuat dengan
+                                            • File booking slip akan dibuat dengan
                                             format .docx
                                         </li>
                                         <li>
-                                            • Invoice akan otomatis diupload ke
+                                            • Booking slip akan otomatis diupload ke
                                             sistem setelah dibuat
                                         </li>
                                     </ul>
@@ -473,12 +456,12 @@ export default function InvoiceGeneratorModal({
                                 {loading ? (
                                     <>
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Membuat Invoice...
+                                        Membuat Booking Slip...
                                     </>
                                 ) : (
                                     <>
                                         <FileText className="w-4 h-4 mr-2" />
-                                        Buat Invoice
+                                        Buat Booking Slip
                                     </>
                                 )}
                             </Button>

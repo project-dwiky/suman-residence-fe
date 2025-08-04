@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import Docxtemplater from "docxtemplater";
 import PizZip from "pizzip";
 
-interface InvoiceData {
+interface ReceiptData {
     guestName: string;
     startDate: string;
     endDate: string;
@@ -18,26 +18,26 @@ interface InvoiceData {
     quantity: number;
     priceIdr: number;
     totalPrice: number;
-    dpPrice: number;
+    paidPrice: number;
     unpaidPrice: number;
     finalTotal: number;
 }
 
-interface InvoiceGeneratorModalProps {
+interface ReceiptGeneratorModalProps {
     bookingId: string;
-    initialData?: Partial<InvoiceData>;
+    initialData?: Partial<ReceiptData>;
     onClose: () => void;
-    onInvoiceGenerated: (bookingId: string, file: File) => void;
+    onReceiptGenerated: (bookingId: string, file: File) => void;
 }
 
-export default function InvoiceGeneratorModal({
+export default function ReceiptGeneratorModal({
     bookingId,
     initialData,
     onClose,
-    onInvoiceGenerated,
-}: InvoiceGeneratorModalProps) {
+    onReceiptGenerated,
+}: ReceiptGeneratorModalProps) {
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState<InvoiceData>({
+    const [formData, setFormData] = useState<ReceiptData>({
         guestName: initialData?.guestName || "",
         startDate: initialData?.startDate || new Date().toISOString().split("T")[0],
         endDate: initialData?.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 30 days from now
@@ -45,7 +45,7 @@ export default function InvoiceGeneratorModal({
         quantity: initialData?.quantity || 1,
         priceIdr: initialData?.priceIdr || 0,
         totalPrice: initialData?.totalPrice || 0,
-        dpPrice: initialData?.dpPrice || 0,
+        paidPrice: initialData?.paidPrice || 0,
         unpaidPrice: initialData?.unpaidPrice || 0,
         finalTotal: initialData?.finalTotal || 0,
     });
@@ -53,7 +53,7 @@ export default function InvoiceGeneratorModal({
     // Calculate total price, unpaid price, and final total automatically
     React.useEffect(() => {
         const total = formData.quantity * formData.priceIdr;
-        const unpaid = total - formData.dpPrice;
+        const unpaid = total - formData.paidPrice;
         const finalTotal = Math.max(0, unpaid); // Ensure final total is not negative
         setFormData((prev) => ({ 
             ...prev, 
@@ -61,7 +61,7 @@ export default function InvoiceGeneratorModal({
             unpaidPrice: Math.max(0, unpaid), // Ensure unpaid price is not negative
             finalTotal: finalTotal
         }));
-    }, [formData.quantity, formData.priceIdr, formData.dpPrice]);
+    }, [formData.quantity, formData.priceIdr, formData.paidPrice]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -73,7 +73,7 @@ export default function InvoiceGeneratorModal({
                 name === "quantity" ||
                 name === "priceIdr" ||
                 name === "totalPrice" ||
-                name === "dpPrice" ||
+                name === "paidPrice" ||
                 name === "unpaidPrice" ||
                 name === "finalTotal"
                     ? Number(value) || 0
@@ -102,7 +102,7 @@ export default function InvoiceGeneratorModal({
     const loadTemplateFile = async (): Promise<ArrayBuffer> => {
         try {
             // Try to load template from public folder
-            const response = await fetch("/templates/invoice-template.docx");
+            const response = await fetch("/templates/receipt-template.docx");
             if (!response.ok) {
                 throw new Error("Template file not found");
             }
@@ -110,13 +110,13 @@ export default function InvoiceGeneratorModal({
         } catch (error) {
             // If template doesn't exist, create a basic one
             toast.error(
-                "Template tidak ditemukan. Silakan upload template invoice ke folder /public/templates/invoice-template.docx"
+                "Template tidak ditemukan. Silakan upload template receipt ke folder /public/templates/receipt-template.docx"
             );
             throw error;
         }
     };
 
-    const generateInvoice = async () => {
+    const generateReceipt = async () => {
         try {
             setLoading(true);
 
@@ -134,8 +134,8 @@ export default function InvoiceGeneratorModal({
 
             // Prepare data for template
             const templateData = {
-                // Invoice header
-                invoiceNumber: `INV-${bookingId.substring(0, 8)}-${Date.now()}`,
+                // Receipt header
+                receiptNumber: `RCP-${bookingId.substring(0, 8)}-${Date.now()}`,
                 
                 // Guest information
                 guestName: formData.guestName,
@@ -153,19 +153,19 @@ export default function InvoiceGeneratorModal({
                 // Pricing (formatted for display)
                 priceIdr: formatCurrency(formData.priceIdr),
                 totalPrice: formatCurrency(formData.totalPrice),
-                dpPrice: formatCurrency(formData.dpPrice),
+                paidPrice: formatCurrency(formData.paidPrice),
                 unpaidPrice: formatCurrency(formData.unpaidPrice),
                 finalTotal: formatCurrency(formData.finalTotal),
                 
                 // Raw numbers (for calculations if needed)
                 priceIdrRaw: formData.priceIdr,
                 totalPriceRaw: formData.totalPrice,
-                dpPriceRaw: formData.dpPrice,
+                paidPriceRaw: formData.paidPrice,
                 unpaidPriceRaw: formData.unpaidPrice,
                 finalTotalRaw: formData.finalTotal,
                 
-                // Invoice metadata
-                invoiceDate: formatDateIndonesian(new Date().toISOString()),
+                // Receipt metadata
+                receiptDate: formatDateIndonesian(new Date().toISOString()),
                 bookingId: bookingId,
                 
                 // Company information
@@ -190,7 +190,7 @@ export default function InvoiceGeneratorModal({
             });
 
             // Create file object
-            const fileName = `invoice-${bookingId.substring(
+            const fileName = `receipt-${bookingId.substring(
                 0,
                 8
             )}-${Date.now()}.docx`;
@@ -199,13 +199,13 @@ export default function InvoiceGeneratorModal({
             });
 
             // Call the parent component's handler
-            onInvoiceGenerated(bookingId, file);
+            onReceiptGenerated(bookingId, file);
 
-            toast.success("Invoice berhasil dibuat!");
+            toast.success("Receipt berhasil dibuat!");
             onClose();
         } catch (error: any) {
-            console.error("Error generating invoice:", error);
-            toast.error(error.message || "Gagal membuat invoice");
+            console.error("Error generating receipt:", error);
+            toast.error(error.message || "Gagal membuat receipt");
         } finally {
             setLoading(false);
         }
@@ -250,17 +250,17 @@ export default function InvoiceGeneratorModal({
             return;
         }
 
-        if (formData.dpPrice < 0) {
-            toast.error("DP tidak boleh negatif");
+        if (formData.paidPrice < 0) {
+            toast.error("Jumlah pembayaran tidak boleh negatif");
             return;
         }
 
-        if (formData.dpPrice > formData.totalPrice) {
-            toast.error("DP tidak boleh lebih besar dari total harga");
+        if (formData.paidPrice > formData.totalPrice) {
+            toast.error("Jumlah pembayaran tidak boleh lebih besar dari total harga");
             return;
         }
 
-        generateInvoice();
+        generateReceipt();
     };
 
     return (
@@ -271,7 +271,7 @@ export default function InvoiceGeneratorModal({
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900">
-                                Generate Invoice
+                                Generate Receipt
                             </h2>
                             <p className="text-sm text-gray-600">
                                 Booking ID: {bookingId.substring(0, 8)}...
@@ -383,18 +383,19 @@ export default function InvoiceGeneratorModal({
                             </div>
                         </div>
 
-                        {/* Down Payment */}
+                        {/* Paid Amount */}
                         <div>
-                            <Label htmlFor="dpPrice">DP/Uang Muka (IDR)</Label>
+                            <Label htmlFor="paidPrice">Jumlah Dibayar (IDR) *</Label>
                             <Input
-                                id="dpPrice"
-                                name="dpPrice"
+                                id="paidPrice"
+                                name="paidPrice"
                                 type="number"
                                 min="0"
                                 step="1000"
-                                value={formData.dpPrice}
+                                value={formData.paidPrice}
                                 onChange={handleInputChange}
                                 placeholder="0"
+                                required
                                 disabled={loading}
                             />
                         </div>
@@ -406,8 +407,8 @@ export default function InvoiceGeneratorModal({
                                 <span className="font-medium">{formatCurrency(formData.totalPrice)}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span>DP/Uang Muka:</span>
-                                <span className="font-medium text-orange-600">{formatCurrency(formData.dpPrice)}</span>
+                                <span>Jumlah Dibayar:</span>
+                                <span className="font-medium text-green-600">{formatCurrency(formData.paidPrice)}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span>Sisa Pembayaran:</span>
@@ -415,8 +416,8 @@ export default function InvoiceGeneratorModal({
                             </div>
                             <div className="border-t pt-2">
                                 <div className="flex justify-between">
-                                    <span className="font-semibold">TOTAL YANG HARUS DIBAYAR:</span>
-                                    <span className="text-2xl font-bold text-green-600">{formatCurrency(formData.finalTotal)}</span>
+                                    <span className="font-semibold">SISA YANG HARUS DIBAYAR:</span>
+                                    <span className="text-2xl font-bold text-orange-600">{formatCurrency(formData.finalTotal)}</span>
                                 </div>
                             </div>
                         </div>
@@ -427,26 +428,26 @@ export default function InvoiceGeneratorModal({
                                 <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
                                 <div className="text-sm text-blue-700">
                                     <p className="font-medium mb-1">
-                                        Template Invoice:
+                                        Template Receipt:
                                     </p>
                                     <ul className="space-y-1 text-xs">
                                         <li>
                                             • Pastikan file template tersedia
-                                            di: /public/templates/invoice-template.docx
+                                            di: /public/templates/receipt-template.docx
                                         </li>
                                         <li>
-                                            • Variabel tersedia: {`{invoiceNumber}, {guestName}, {startDate}, {endDate}, {description}, {quantity}, {priceIdr}, {totalPrice}, {dpPrice}, {unpaidPrice}, {finalTotal}`}
+                                            • Variabel tersedia: {`{receiptNumber}, {guestName}, {startDate}, {endDate}, {description}, {quantity}, {priceIdr}, {totalPrice}, {paidPrice}, {unpaidPrice}, {finalTotal}`}
                                         </li>
                                         <li>
                                             • Template akan diisi dengan data
                                             yang Anda masukkan
                                         </li>
                                         <li>
-                                            • File invoice akan dibuat dengan
+                                            • File receipt akan dibuat dengan
                                             format .docx
                                         </li>
                                         <li>
-                                            • Invoice akan otomatis diupload ke
+                                            • Receipt akan otomatis diupload ke
                                             sistem setelah dibuat
                                         </li>
                                     </ul>
@@ -473,12 +474,12 @@ export default function InvoiceGeneratorModal({
                                 {loading ? (
                                     <>
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Membuat Invoice...
+                                        Membuat Receipt...
                                     </>
                                 ) : (
                                     <>
                                         <FileText className="w-4 h-4 mr-2" />
-                                        Buat Invoice
+                                        Buat Receipt
                                     </>
                                 )}
                             </Button>

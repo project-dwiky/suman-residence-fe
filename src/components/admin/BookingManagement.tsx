@@ -26,6 +26,8 @@ import { toast } from 'sonner';
 import { formatDate } from '../user-dashboard/utils/dateUtils';
 import { adminBookingService } from '@/services/admin-booking.service';
 import InvoiceGeneratorModal from './InvoiceGeneratorModal';
+import ReceiptGeneratorModal from './ReceiptGeneratorModal';
+import BookingSlipGeneratorModal from './BookingSlipGeneratorModal';
 
 interface BookingDocument {
   id: string;
@@ -74,6 +76,8 @@ const BookingManagement: React.FC = () => {
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
   const [showInvoiceModal, setShowInvoiceModal] = useState<string | null>(null);
+  const [showReceiptModal, setShowReceiptModal] = useState<string | null>(null);
+  const [showBookingSlipModal, setShowBookingSlipModal] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -353,6 +357,18 @@ const BookingManagement: React.FC = () => {
       return;
     }
     
+    // Special handling for RECEIPT - show modal instead of file picker
+    if (documentType === 'RECEIPT') {
+      setShowReceiptModal(bookingId);
+      return;
+    }
+    
+    // Special handling for BOOKING_SLIP - show modal instead of file picker
+    if (documentType === 'BOOKING_SLIP') {
+      setShowBookingSlipModal(bookingId);
+      return;
+    }
+    
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.jpg,.jpeg,.png';
@@ -372,6 +388,26 @@ const BookingManagement: React.FC = () => {
     } catch (error: any) {
       console.error('Error uploading generated invoice:', error);
       toast.error(error.message || 'Gagal upload invoice yang dibuat');
+    }
+  };
+
+  const handleReceiptGenerated = async (bookingId: string, file: File) => {
+    try {
+      // Use the existing handleFileUpload function for the generated receipt
+      await handleFileUpload(bookingId, 'RECEIPT', file);
+    } catch (error: any) {
+      console.error('Error uploading generated receipt:', error);
+      toast.error(error.message || 'Gagal upload receipt yang dibuat');
+    }
+  };
+
+  const handleBookingSlipGenerated = async (bookingId: string, file: File) => {
+    try {
+      // Use the existing handleFileUpload function for the generated booking slip
+      await handleFileUpload(bookingId, 'BOOKING_SLIP', file);
+    } catch (error: any) {
+      console.error('Error uploading generated booking slip:', error);
+      toast.error(error.message || 'Gagal upload booking slip yang dibuat');
     }
   };
 
@@ -678,7 +714,7 @@ const BookingManagement: React.FC = () => {
                           className="text-xs"
                         >
                           <Upload className="w-3 h-3 mr-1" />
-                          {uploadingFile === `${booking.id}-BOOKING_SLIP` ? 'Uploading...' : 'Upload Booking Slip'}
+                          {uploadingFile === `${booking.id}-BOOKING_SLIP` ? 'Uploading...' : 'Generate Booking Slip'}
                         </Button>
                         
                         <Button
@@ -689,7 +725,7 @@ const BookingManagement: React.FC = () => {
                           className="text-xs"
                         >
                           <Upload className="w-3 h-3 mr-1" />
-                          {uploadingFile === `${booking.id}-RECEIPT` ? 'Uploading...' : 'Upload Receipt'}
+                          {uploadingFile === `${booking.id}-RECEIPT` ? 'Uploading...' : 'Generate Receipt'}
                         </Button>
                         
                         <Button
@@ -761,6 +797,33 @@ const BookingManagement: React.FC = () => {
           }}
           onClose={() => setShowInvoiceModal(null)}
           onInvoiceGenerated={handleInvoiceGenerated}
+        />
+      )}
+
+      {/* Receipt Generator Modal */}
+      {showReceiptModal && (
+        <ReceiptGeneratorModal
+          bookingId={showReceiptModal}
+          initialData={{
+            guestName: bookings.find(b => b.id === showReceiptModal)?.contactInfo?.name || '',
+            description: 'Sewa Kamar Kost - ' + (bookings.find(b => b.id === showReceiptModal)?.room.roomNumber || ''),
+          }}
+          onClose={() => setShowReceiptModal(null)}
+          onReceiptGenerated={handleReceiptGenerated}
+        />
+      )}
+
+      {/* Booking Slip Generator Modal */}
+      {showBookingSlipModal && (
+        <BookingSlipGeneratorModal
+          bookingId={showBookingSlipModal}
+          initialData={{
+            guestName: bookings.find(b => b.id === showBookingSlipModal)?.contactInfo?.name || '',
+            renterPhoneNumber: bookings.find(b => b.id === showBookingSlipModal)?.contactInfo?.phone || '',
+            roomNumber: bookings.find(b => b.id === showBookingSlipModal)?.room.roomNumber || '',
+          }}
+          onClose={() => setShowBookingSlipModal(null)}
+          onBookingSlipGenerated={handleBookingSlipGenerated}
         />
       )}
     </div>
