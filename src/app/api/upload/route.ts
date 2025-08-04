@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
       'Access-Control-Allow-Headers': 'Content-Type, Accept',
     });
 
-    // Generate public URL
-    const publicUrl = `${process.env.MINIO_USE_SSL === 'true' ? 'https' : 'http'}://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${BUCKET_NAME}/${fileName}`;
+    // Generate public URL through our download proxy
+    const publicUrl = `/api/download/${BUCKET_NAME}/${fileName}`;
 
     return NextResponse.json({
       success: true,
