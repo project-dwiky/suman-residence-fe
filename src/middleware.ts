@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 const PROTECTED_PATHS = [
   '/dashboard', 
   '/profile',
-  '/kamar',
 ];
 
 // Paths that require admin role

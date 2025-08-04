@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Footer from "../core/Footer";
 import { Button } from "@/components/ui/button";
 import DirectBookingForm from "@/components/customer/DirectBookingForm";
@@ -31,6 +32,7 @@ interface RoomDetailProps {
 
 const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
     const t = getRoomDetailTranslation(language);
+    const router = useRouter();
 
     // Get room data from static translations
     const room = getStaticRoomById(roomId, language);
@@ -38,8 +40,28 @@ const RoomDetail = ({ roomId, language }: RoomDetailProps) => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [showAllPhotos, setShowAllPhotos] = useState(false);
 
-    const handleBookingClick = () => {
-        setShowBooking(true);
+    const handleBookingClick = async () => {
+        try {
+            // Check if user is authenticated
+            const response = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                // User is authenticated, show booking form
+                setShowBooking(true);
+            } else {
+                // User is not authenticated, redirect to login with current room URL
+                const currentRoomUrl = `/kamar/${roomId}`;
+                router.push(`/auth/login?redirectTo=${encodeURIComponent(currentRoomUrl)}&message=${encodeURIComponent('Silakan login terlebih dahulu untuk melakukan booking')}`);
+            }
+        } catch (error) {
+            console.error('Error checking authentication:', error);
+            // On error, redirect to login as well
+            const currentRoomUrl = `/kamar/${roomId}`;
+            router.push(`/auth/login?redirectTo=${encodeURIComponent(currentRoomUrl)}&message=${encodeURIComponent('Silakan login terlebih dahulu untuk melakukan booking')}`);
+        }
     };
 
     if (!room) {
