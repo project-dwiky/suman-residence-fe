@@ -108,7 +108,7 @@ export const facilityEn = {
         period: "For academic period",
         benefits: [
           "Special discount",
-          "Lower deposit requirement",
+          "Parking priority",
           "Extension priority",
           "All facilities included"
         ]
@@ -118,7 +118,7 @@ export const facilityEn = {
         period: "Best value",
         benefits: [
           "Lowest monthly price",
-          "Guaranteed room availability",
+          "Parking priority",
           "Room selection priority",
           "All facilities included"
         ]

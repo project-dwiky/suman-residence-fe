@@ -110,7 +110,7 @@ export const facilityId: FacilityTranslationKeys = {
         period: "Untuk periode akademik",
         benefits: [
           "Diskon khusus",
-          "Pengajuan deposit lebih rendah",
+          "Prioritas parkir",
           "Prioritas perpanjangan",
           "Semua fasilitas termasuk"
         ]
@@ -120,7 +120,7 @@ export const facilityId: FacilityTranslationKeys = {
         period: "Value terbaik",
         benefits: [
           "Harga terendah per bulan",
-          "Terjamin ketersediaan kamar",
+          "Prioritas parkir",
           "Prioritas pemilihan kamar",
           "Semua fasilitas termasuk"
         ]

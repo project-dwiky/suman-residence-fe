@@ -129,7 +129,7 @@ export const roomDetailEn = {
   facilities: {
     included: ["Free Water Supply", "Free WiFi", "Free Parking"],
     excluded: ["Prepaid electricity per room"],
-    additional: ["Pick-up and delivery laundry service (paid)"],
+    additional: ["Pick-up and delivery laundry service (paid)", "Monthly garbage fee"],
     shared: ["Void Lounge", "Shared Kitchen", "Drying Area", "Balcony", "Parking (Car & Motorcycle)"]
   },
 

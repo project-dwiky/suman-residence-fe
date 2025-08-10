@@ -131,7 +131,7 @@ export const roomDetailId: RoomDetailTranslationKeys = {
   facilities: {
     included: ["Free Air PDAM", "Free WiFi", "Free Parkir"],
     excluded: ["Listrik prabayar per kamar"],
-    additional: ["Laundry antar jemput tersedia (berbayar)"],
+    additional: ["Laundry antar jemput tersedia (berbayar)", "Iuran sampah bulanan"],
     shared: ["Void Lounge", "Dapur Bersama", "Area Jemuran", "Balkon", "Parkiran (Mobil & Motor)"]
   },
 
