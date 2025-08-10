@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { 
   Phone, 
   User, 
   Mail, 
-  Calendar, 
+  Calendar,
   MessageCircle,
   X,
   CheckCircle,
@@ -46,8 +47,8 @@ export default function DirectBookingForm({ room, language = 'id', onClose }: Di
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    startDate: "",
-    endDate: "",
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
     durationType: "MONTHLY" as "WEEKLY" | "MONTHLY" | "SEMESTER" | "YEARLY",
     message: ""
   });
@@ -108,7 +109,7 @@ export default function DirectBookingForm({ room, language = 'id', onClose }: Di
     }
     
     // Validate required fields
-    if (!formData.name || !formData.phone || !formData.startDate || !formData.endDate) {
+    if (!formData.name || !formData.phone || !formData.startDate) {
       toast.error("Mohon lengkapi semua field yang wajib diisi");
       return;
     }
@@ -120,20 +121,21 @@ export default function DirectBookingForm({ room, language = 'id', onClose }: Di
       return;
     }
 
-    // Validate dates
-    const startDate = new Date(formData.startDate);
-    const endDate = new Date(formData.endDate);
+    // Validate start date
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (startDate < today) {
+    if (formData.startDate && formData.startDate < today) {
       toast.error("Tanggal mulai tidak boleh kurang dari hari ini");
       return;
     }
 
-    if (endDate <= startDate) {
-      toast.error("Tanggal berakhir harus setelah tanggal mulai");
-      return;
+    // Auto-calculate end date if not already calculated
+    if (!formData.endDate && formData.startDate) {
+      setFormData(prev => ({
+        ...prev,
+        endDate: calculateEndDate(prev.startDate, prev.durationType)
+      }));
     }
 
     setLoading(true);
@@ -152,8 +154,8 @@ export default function DirectBookingForm({ room, language = 'id', onClose }: Di
           images: room.images || []
         },
         rentalPeriod: {
-          startDate: formData.startDate,
-          endDate: formData.endDate,
+          startDate: formData.startDate?.toISOString().split('T')[0] || '',
+          endDate: formData.endDate?.toISOString().split('T')[0] || '',
           durationType: formData.durationType
         },
         contactInfo: {
@@ -224,17 +226,66 @@ Terima kasih!`;
     }
   };
 
+  // Function to calculate end date based on start date and duration type
+  const calculateEndDate = (startDate: Date | undefined, durationType: string): Date | undefined => {
+    if (!startDate) return undefined;
+    
+    const end = new Date(startDate);
+    
+    switch (durationType) {
+      case 'WEEKLY':
+        end.setDate(startDate.getDate() + 7);
+        break;
+      case 'MONTHLY':
+        end.setDate(startDate.getDate() + 30); // Exactly 30 days
+        break;
+      case 'SEMESTER':
+        end.setDate(startDate.getDate() + (30 * 6)); // 6 months = 180 days
+        break;
+      case 'YEARLY':
+        end.setDate(startDate.getDate() + 365); // Exactly 365 days
+        break;
+      default:
+        end.setDate(startDate.getDate() + 30); // Default to 30 days
+    }
+    
+    return end;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+    const { name, value } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setFormData(prev => {
+      const newFormData = {
+        ...prev,
+        startDate: date,
+        endDate: calculateEndDate(date, prev.durationType)
+      };
+      
+      return newFormData;
     });
   };
 
   const handleSelectChange = (value: string) => {
-    setFormData({
-      ...formData,
-      durationType: value as "WEEKLY" | "MONTHLY" | "SEMESTER" | "YEARLY"
+    setFormData(prev => {
+      const newFormData = {
+        ...prev,
+        durationType: value as "WEEKLY" | "MONTHLY" | "SEMESTER" | "YEARLY"
+      };
+      
+      // Auto-calculate end date when duration type changes
+      if (prev.startDate) {
+        newFormData.endDate = calculateEndDate(prev.startDate, value);
+      }
+      
+      return newFormData;
     });
   };
 
@@ -345,6 +396,7 @@ Terima kasih!`;
                       placeholder="Masukkan nama lengkap"
                       required
                       disabled={loading}
+                      className="mt-2"
                     />
                   </div>
                   
@@ -359,6 +411,7 @@ Terima kasih!`;
                       placeholder="081234567890"
                       required
                       disabled={loading}
+                      className="mt-2"
                     />
                   </div>
                 </div>
@@ -371,7 +424,7 @@ Terima kasih!`;
                     type="email"
                     value={currentUser.email}
                     disabled
-                    className="bg-gray-50 text-gray-600"
+                    className="mt-2 bg-gray-50 text-gray-600"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Email ini diambil dari akun Anda dan tidak dapat diubah di form ini
@@ -389,7 +442,7 @@ Terima kasih!`;
                 <div>
                   <Label htmlFor="durationType">Jenis Sewa</Label>
                   <Select value={formData.durationType} onValueChange={handleSelectChange} disabled={loading}>
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -405,6 +458,11 @@ Terima kasih!`;
                     <p className="text-sm text-blue-800 font-medium">
                       Durasi Sewa: {getDurationLabel(formData.durationType)}
                     </p>
+                    {formData.startDate && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Tanggal berakhir akan otomatis dihitung: {formData.endDate ? formData.endDate.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Pilih tanggal mulai'}
+                      </p>
+                    )}
                     <p className="text-xs text-blue-600 mt-1">
                       * Harga akan dikonfirmasi oleh admin setelah permintaan booking disetujui.
                     </p>
@@ -414,30 +472,33 @@ Terima kasih!`;
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="startDate">Tanggal Mulai *</Label>
-                    <Input
-                      id="startDate"
-                      name="startDate"
-                      type="date"
-                      value={formData.startDate}
-                      onChange={handleInputChange}
-                      required
-                      disabled={loading}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
+                    <div className="mt-2">
+                      <DatePicker
+                        date={formData.startDate}
+                        onSelect={handleDateChange}
+                        placeholder="Pilih tanggal mulai"
+                        disabled={loading}
+                        minDate={new Date()}
+                      />
+                    </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="endDate">Tanggal Berakhir *</Label>
-                    <Input
-                      id="endDate"
-                      name="endDate"
-                      type="date"
-                      value={formData.endDate}
-                      onChange={handleInputChange}
-                      required
-                      disabled={loading}
-                      min={formData.startDate || new Date().toISOString().split('T')[0]}
-                    />
+                    <Label htmlFor="endDate">Tanggal Berakhir (Otomatis)</Label>
+                    <div className="relative mt-2">
+                      <DatePicker
+                        date={formData.endDate}
+                        onSelect={() => {}} // No-op since it's read-only
+                        placeholder="Akan dihitung otomatis"
+                        disabled={true}
+                        className="bg-gray-50 text-gray-700 cursor-not-allowed"
+                      />
+                    </div>
+                    {formData.startDate && formData.endDate && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Durasi: {Math.ceil((formData.endDate.getTime() - formData.startDate.getTime()) / (1000 * 60 * 60 * 24))} hari
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -459,6 +520,7 @@ Terima kasih!`;
                     placeholder="Tulis pesan atau permintaan khusus..."
                     rows={3}
                     disabled={loading}
+                    className="mt-2"
                   />
                 </div>
               </div>

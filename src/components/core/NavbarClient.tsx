@@ -456,12 +456,11 @@ const NavbarClient = ({ user, navLinks, language }: NavbarClientProps) => {
                                     </Button>
                                 </Link>
                             </div>
-                            <Button
-                                onClick={scrollToCTA}
-                                className="bg-primary text-white hover:bg-primary/90 rounded-full w-full transition-all duration-300 hover:shadow-md"
-                            >
-                                <span>Book Now</span>
-                            </Button>
+                            <Link href="/kamar">
+                                <Button className="bg-primary text-white hover:bg-primary/90 rounded-full w-full transition-all duration-300 hover:shadow-md">
+                                    <span>Book Now</span>
+                                </Button>
+                            </Link>
                         </>
                     )}
                 </div>
