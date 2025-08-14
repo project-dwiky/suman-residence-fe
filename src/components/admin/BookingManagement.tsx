@@ -4,13 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   Clock, 
   Phone, 
   Mail, 
   User, 
   Calendar,
-  MapPin,
   CheckCircle,
   XCircle,
   MessageCircle,
@@ -20,7 +22,11 @@ import {
   RefreshCw,
   Upload,
   File,
-  FileText
+  FileText,
+  Edit2,
+  Save,
+  X,
+  DollarSign
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '../user-dashboard/utils/dateUtils';
@@ -61,6 +67,10 @@ interface Booking {
     endDate: string;
     durationType: 'WEEKLY' | 'MONTHLY' | 'SEMESTER' | 'YEARLY';
   };
+  pricing?: {
+    amount: number;
+    currency: string;
+  };
   documents: BookingDocument[];
   notes?: string;
   createdAt: string;
@@ -78,6 +88,17 @@ const BookingManagement: React.FC = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState<string | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState<string | null>(null);
   const [showBookingSlipModal, setShowBookingSlipModal] = useState<string | null>(null);
+  
+  // Inline editing state
+  const [editingBooking, setEditingBooking] = useState<string | null>(null);
+  const [editedValues, setEditedValues] = useState<{
+    roomNumber?: string;
+    roomType?: string;
+    startDate?: Date;
+    endDate?: Date;
+    durationType?: 'WEEKLY' | 'MONTHLY' | 'SEMESTER' | 'YEARLY';
+    price?: number;
+  }>({});
 
   useEffect(() => {
     fetchBookings();
@@ -286,6 +307,132 @@ const BookingManagement: React.FC = () => {
       case 'SEMESTER': return 'Semester';
       case 'YEARLY': return 'Tahunan';
       default: return durationType;
+    }
+  };
+
+  // Calculate end date based on start date and duration type
+  const calculateEndDate = (startDate: Date, durationType: string): Date => {
+    const end = new Date(startDate);
+    
+    switch (durationType) {
+      case 'WEEKLY':
+        end.setDate(startDate.getDate() + 7);
+        break;
+      case 'MONTHLY':
+        end.setDate(startDate.getDate() + 30); // Exactly 30 days
+        break;
+      case 'SEMESTER':
+        end.setDate(startDate.getDate() + (30 * 6)); // 6 months = 180 days
+        break;
+      case 'YEARLY':
+        end.setDate(startDate.getDate() + 365); // Exactly 365 days
+        break;
+      default:
+        end.setDate(startDate.getDate() + 30); // Default to 30 days
+    }
+    
+    return end;
+  };
+
+  // Handle inline editing
+  const handleStartEdit = (booking: Booking) => {
+    setEditingBooking(booking.id);
+    setEditedValues({
+      roomNumber: booking.room.roomNumber,
+      roomType: booking.room.type,
+      startDate: new Date(booking.rentalPeriod.startDate),
+      endDate: new Date(booking.rentalPeriod.endDate),
+      durationType: booking.rentalPeriod.durationType,
+      price: booking.pricing?.amount || 0
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBooking(null);
+    setEditedValues({});
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    setEditedValues(prev => {
+      const newValues = { ...prev, [field]: value };
+      
+      // Auto-calculate end date when start date or duration changes
+      if (field === 'startDate' || field === 'durationType') {
+        const startDate = field === 'startDate' ? value : prev.startDate;
+        const durationType = field === 'durationType' ? value : prev.durationType;
+        
+        if (startDate && durationType) {
+          newValues.endDate = calculateEndDate(startDate, durationType);
+        }
+      }
+      
+      return newValues;
+    });
+  };
+
+  const handleSaveEdit = async (bookingId: string) => {
+    try {
+      setActionLoading(prev => ({ ...prev, [`save-${bookingId}`]: true }));
+      
+      // Prepare update data
+      const updateData = {
+        room: {
+          roomNumber: editedValues.roomNumber,
+          type: editedValues.roomType
+        },
+        rentalPeriod: {
+          startDate: editedValues.startDate?.toISOString().split('T')[0],
+          endDate: editedValues.endDate?.toISOString().split('T')[0],
+          durationType: editedValues.durationType
+        },
+        pricing: {
+          amount: editedValues.price || 0,
+          currency: 'IDR'
+        }
+      };
+      
+      // Call API to update booking
+      const result = await adminBookingService.updateBooking(bookingId, updateData);
+      
+      if (result.success) {
+        // Update local state with the response
+        setBookings(prevBookings => 
+          prevBookings.map(booking => 
+            booking.id === bookingId 
+              ? {
+                  ...booking,
+                  room: {
+                    ...booking.room,
+                    roomNumber: editedValues.roomNumber || booking.room.roomNumber,
+                    type: editedValues.roomType || booking.room.type
+                  },
+                  rentalPeriod: {
+                    ...booking.rentalPeriod,
+                    startDate: editedValues.startDate?.toISOString().split('T')[0] || booking.rentalPeriod.startDate,
+                    endDate: editedValues.endDate?.toISOString().split('T')[0] || booking.rentalPeriod.endDate,
+                    durationType: editedValues.durationType || booking.rentalPeriod.durationType
+                  },
+                  pricing: {
+                    amount: editedValues.price || booking.pricing?.amount || 0,
+                    currency: 'IDR'
+                  }
+                }
+              : booking
+          )
+        );
+        
+        setEditingBooking(null);
+        setEditedValues({});
+        toast.success('Booking berhasil diupdate!');
+      } else {
+        throw new Error(result.error || 'Failed to update booking');
+      }
+      
+    } catch (error: any) {
+      console.error('Error updating booking:', error);
+      toast.error(error.message || 'Gagal mengupdate booking');
+    } finally {
+      setActionLoading(prev => ({ ...prev, [`save-${bookingId}`]: false }));
     }
   };
 
@@ -619,7 +766,7 @@ const BookingManagement: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       {/* Customer Info */}
                       <div className="space-y-2">
                         <h4 className="font-medium text-gray-900">Customer</h4>
@@ -644,25 +791,118 @@ const BookingManagement: React.FC = () => {
                         <h4 className="font-medium text-gray-900">Kamar</h4>
                         <div className="space-y-1 text-sm">
                           <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            <span>{highlightSearchTerm(booking.room.roomNumber, searchQuery)}</span>
+                            <span className="text-gray-600">No. Kamar:</span>
+                            {editingBooking === booking.id ? (
+                              <Input
+                                value={editedValues.roomNumber || ''}
+                                onChange={(e) => handleFieldChange('roomNumber', e.target.value)}
+                                className="h-6 text-xs flex-1"
+                                placeholder="Contoh: A1, B2, etc"
+                              />
+                            ) : (
+                              <span className={`font-medium ${booking.room.roomNumber === 'Belum diset' ? 'text-orange-600' : ''}`}>
+                                {highlightSearchTerm(booking.room.roomNumber, searchQuery)}
+                              </span>
+                            )}
                           </div>
-                          <div>Tipe: {booking.room.type}</div>
-                          <div>Ukuran: {booking.room.size}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600">Tipe:</span>
+                            {editingBooking === booking.id ? (
+                              <Input
+                                value={editedValues.roomType || ''}
+                                onChange={(e) => handleFieldChange('roomType', e.target.value)}
+                                className="h-6 text-xs flex-1"
+                                placeholder="Tipe kamar"
+                              />
+                            ) : (
+                              <span>{booking.room.type}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Rental Period */}
                       <div className="space-y-2">
                         <h4 className="font-medium text-gray-900">Periode Sewa</h4>
-                        <div className="space-y-1 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span>
-                              {formatDate(booking.rentalPeriod.startDate)} - {formatDate(booking.rentalPeriod.endDate)}
-                            </span>
-                          </div>
-                          <div>Durasi: {getDurationLabel(booking.rentalPeriod.durationType)}</div>
+                        <div className="space-y-2 text-sm">
+                          {editingBooking === booking.id ? (
+                            <>
+                              <div className="space-y-1">
+                                <label className="text-xs text-gray-600">Tanggal Mulai:</label>
+                                <DatePicker
+                                  date={editedValues.startDate}
+                                  onSelect={(date) => handleFieldChange('startDate', date)}
+                                  placeholder="Pilih tanggal mulai"
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-xs text-gray-600">Durasi:</label>
+                                <Select 
+                                  value={editedValues.durationType} 
+                                  onValueChange={(value) => handleFieldChange('durationType', value)}
+                                >
+                                  <SelectTrigger className="h-6 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="WEEKLY">Mingguan</SelectItem>
+                                    <SelectItem value="MONTHLY">Bulanan</SelectItem>
+                                    <SelectItem value="SEMESTER">Semester</SelectItem>
+                                    <SelectItem value="YEARLY">Tahunan</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-xs text-gray-600">Tanggal Berakhir (otomatis):</label>
+                                <DatePicker
+                                  date={editedValues.endDate}
+                                  onSelect={() => {}} // Read-only
+                                  placeholder="Dihitung otomatis"
+                                  disabled={true}
+                                  className="h-6 text-xs bg-gray-50"
+                                />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                                <span>
+                                  {formatDate(booking.rentalPeriod.startDate)} - {formatDate(booking.rentalPeriod.endDate)}
+                                </span>
+                              </div>
+                              <div>Durasi: {getDurationLabel(booking.rentalPeriod.durationType)}</div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Pricing Info */}
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900">Harga</h4>
+                        <div className="space-y-2 text-sm">
+                          {editingBooking === booking.id ? (
+                            <div className="space-y-1">
+                              <label className="text-xs text-gray-600">Harga Sewa (IDR):</label>
+                              <Input
+                                type="number"
+                                value={editedValues.price || ''}
+                                onChange={(e) => handleFieldChange('price', parseFloat(e.target.value) || 0)}
+                                className="h-6 text-xs"
+                                placeholder="Masukkan harga (contoh: 1500000)"
+                                min="0"
+                                step="50000"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-gray-400" />
+                              <span className={`font-medium ${(booking.pricing?.amount || 0) > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                                {(booking.pricing?.amount || 0) > 0 ? formatPrice(booking.pricing?.amount || 0) : 'Belum diset'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -755,30 +995,67 @@ const BookingManagement: React.FC = () => {
 
                   {/* Actions */}
                   <div className="flex flex-col gap-2 ml-4">
-                    {getActionButtons(booking)}
-                    
-                    {booking.contactInfo?.whatsapp && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleWhatsAppContact(booking)}
-                        className="text-green-600 border-green-600 hover:bg-green-50"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        WhatsApp
-                      </Button>
+                    {editingBooking === booking.id ? (
+                      // Edit mode buttons
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSaveEdit(booking.id)}
+                          disabled={actionLoading[`save-${booking.id}`]}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <Save className="w-4 h-4 mr-1" />
+                          {actionLoading[`save-${booking.id}`] ? 'Menyimpan...' : 'Simpan'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelEdit}
+                          className="text-gray-600 border-gray-600 hover:bg-gray-50"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Batal
+                        </Button>
+                      </>
+                    ) : (
+                      // Normal mode buttons
+                      <>
+                        {getActionButtons(booking)}
+                        
+                        {booking.contactInfo?.whatsapp && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleWhatsAppContact(booking)}
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                          >
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            WhatsApp
+                          </Button>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleStartEdit(booking)}
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit2 className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          disabled={actionLoading[booking.id]}
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Hapus
+                        </Button>
+                      </>
                     )}
-                    
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDeleteBooking(booking.id)}
-                      disabled={actionLoading[booking.id]}
-                      className="text-red-600 border-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Hapus
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -794,6 +1071,9 @@ const BookingManagement: React.FC = () => {
           initialData={{
             guestName: bookings.find(b => b.id === showInvoiceModal)?.contactInfo?.name || '',
             description: 'Sewa Kamar Kost - ' + (bookings.find(b => b.id === showInvoiceModal)?.room.roomNumber || ''),
+            startDate: bookings.find(b => b.id === showInvoiceModal)?.rentalPeriod?.startDate || '',
+            endDate: bookings.find(b => b.id === showInvoiceModal)?.rentalPeriod?.endDate || '',
+            priceIdr: bookings.find(b => b.id === showInvoiceModal)?.pricing?.amount || 0,
           }}
           onClose={() => setShowInvoiceModal(null)}
           onInvoiceGenerated={handleInvoiceGenerated}
@@ -807,6 +1087,9 @@ const BookingManagement: React.FC = () => {
           initialData={{
             guestName: bookings.find(b => b.id === showReceiptModal)?.contactInfo?.name || '',
             description: 'Sewa Kamar Kost - ' + (bookings.find(b => b.id === showReceiptModal)?.room.roomNumber || ''),
+            startDate: bookings.find(b => b.id === showReceiptModal)?.rentalPeriod?.startDate || '',
+            endDate: bookings.find(b => b.id === showReceiptModal)?.rentalPeriod?.endDate || '',
+            priceIdr: bookings.find(b => b.id === showReceiptModal)?.pricing?.amount || 0,
           }}
           onClose={() => setShowReceiptModal(null)}
           onReceiptGenerated={handleReceiptGenerated}
@@ -820,7 +1103,7 @@ const BookingManagement: React.FC = () => {
           initialData={{
             guestName: bookings.find(b => b.id === showBookingSlipModal)?.contactInfo?.name || '',
             renterPhoneNumber: bookings.find(b => b.id === showBookingSlipModal)?.contactInfo?.phone || '',
-            roomNumber: bookings.find(b => b.id === showBookingSlipModal)?.room.roomNumber || '',
+            roomNumber: bookings.find(b => b.id === showBookingSlipModal)?.room.roomNumber === 'Belum diset' ? '' : bookings.find(b => b.id === showBookingSlipModal)?.room.roomNumber || '',
           }}
           onClose={() => setShowBookingSlipModal(null)}
           onBookingSlipGenerated={handleBookingSlipGenerated}

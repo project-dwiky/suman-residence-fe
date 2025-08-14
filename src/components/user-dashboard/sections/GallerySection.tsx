@@ -4,46 +4,57 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { RentalData } from '../types';
-import { getRoomMainImage } from '@/utils/static-room-data';
+import { getRoomMainImage, getStaticRoomByType } from '@/utils/static-room-data';
+import { Language } from '@/translations';
 
 interface GallerySectionProps {
   rentalData: RentalData;
 }
 
 const GallerySection: React.FC<GallerySectionProps> = ({ rentalData }) => {
-  // Safely handle imagesGallery that might be undefined or not an array
-  const imageGallery = rentalData.room?.imagesGallery;
+  // Get static room data based on room type
+  const staticRoom = getStaticRoomByType(rentalData.room.type, 'id' as Language);
   
-  // Helper function to get fallback image based on room type
-  const getFallbackImage = (): string => {
-    try {
-      if (rentalData.room.type === 'A') {
-        const imageUrl = getRoomMainImage('A', 'id');
-        return imageUrl || '/galeri/kamar_A/h1.JPG';
-      } else if (rentalData.room.type === 'B') {
-        const imageUrl = getRoomMainImage('B', 'id');
-        return imageUrl || '/galeri/kamar_B/1.png';
-      }
-      // Default to Type A image
-      const imageUrl = getRoomMainImage('A', 'id');
-      return imageUrl || '/galeri/kamar_A/h1.JPG';
-    } catch (error) {
-      console.error('Error getting fallback image:', error);
-      return '/galeri/kamar_A/h1.JPG'; // Hard fallback
+  // Helper function to get images from static room data first, then fallback
+  const getImages = () => {
+    // Priority 1: Use static room images based on type
+    if (staticRoom && staticRoom.images && staticRoom.images.length > 0) {
+      return staticRoom.images.map(url => ({
+        url,
+        alt: `Kamar ${rentalData.room.roomNumber} - ${staticRoom.title}`
+      }));
     }
-  };
-  
-  const images = (Array.isArray(imageGallery) && imageGallery.length > 0) 
-    ? imageGallery
+    
+    // Priority 2: Use database images if available
+    const imageGallery = rentalData.room?.imagesGallery;
+    if (Array.isArray(imageGallery) && imageGallery.length > 0) {
+      return imageGallery
         .filter(url => url && url.trim() !== '') // Filter out empty URLs
         .map(url => ({
           url,
           alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}`
-        }))
-    : [{ 
-        url: getFallbackImage(), 
-        alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` 
-      }];
+        }));
+    }
+    
+    // Priority 3: Fallback to main image based on room type
+    try {
+      if (rentalData.room.type === 'A') {
+        const imageUrl = getRoomMainImage('A', 'id');
+        return [{ url: imageUrl || '/galeri/kamar_A/h1.JPG', alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` }];
+      } else if (rentalData.room.type === 'B') {
+        const imageUrl = getRoomMainImage('B', 'id');
+        return [{ url: imageUrl || '/galeri/kamar_B/1.png', alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` }];
+      }
+      // Default to Type A image
+      const imageUrl = getRoomMainImage('A', 'id');
+      return [{ url: imageUrl || '/galeri/kamar_A/h1.JPG', alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` }];
+    } catch (error) {
+      console.error('Error getting fallback image:', error);
+      return [{ url: '/galeri/kamar_A/h1.JPG', alt: `Kamar ${rentalData.room.roomNumber} - ${rentalData.room.type}` }];
+    }
+  };
+  
+  const images = getImages();
 
   // Ensure we always have at least one valid image
   const validImages = images.length > 0 ? images : [{ 

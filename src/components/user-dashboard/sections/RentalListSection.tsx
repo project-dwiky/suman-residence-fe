@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Language } from '@/translations';
-import { getRoomMainImage } from '@/utils/static-room-data';
+import { getRoomMainImage, getStaticRoomByType } from '@/utils/static-room-data';
 
 interface RentalListSectionProps {
   rentalDataList: RentalData[];
@@ -23,11 +23,18 @@ const RentalListSection: React.FC<RentalListSectionProps> = ({ rentalDataList, l
   
   // Helper function to get room image based on room type
   const getRoomImage = (room: any): string => {
+    // Priority 1: Use static room images based on type
+    const staticRoom = getStaticRoomByType(room.type, 'id' as Language);
+    if (staticRoom && staticRoom.images && staticRoom.images.length > 0) {
+      return staticRoom.images[0];
+    }
+    
+    // Priority 2: Use database images if available
     if (room.imagesGallery && room.imagesGallery.length > 0) {
       return room.imagesGallery[0];
     }
     
-    // Fallback to static room images based on room type
+    // Priority 3: Fallback to main image based on room type
     if (room.type === 'A') {
       return getRoomMainImage('A', 'id');
     } else if (room.type === 'B') {

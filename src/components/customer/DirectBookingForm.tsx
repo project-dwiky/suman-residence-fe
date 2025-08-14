@@ -146,7 +146,7 @@ export default function DirectBookingForm({ room, language = 'id', onClose }: Di
         room: {
           id: room.id,
           name: room.title,
-          roomNumber: room.title,
+          roomNumber: 'Belum diset',
           type: room.type || 'Standard',
           size: room.size || 'Standard',
           description: room.description || '',

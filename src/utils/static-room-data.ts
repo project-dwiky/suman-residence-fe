@@ -212,6 +212,15 @@ export const getStaticRoomById = (
     return rooms.find((room) => room.id === roomId) || null;
 };
 
+// Helper function to get room data by type (A or B)
+export const getStaticRoomByType = (
+    roomType: string,
+    language: Language
+): StaticRoom | null => {
+    const rooms = getStaticRoomData(language);
+    return rooms.find((room) => room.type === roomType) || null;
+};
+
 // Helper function to get room data for Kamar page
 export const getKamarRoomData = (language: Language) => {
     const staticRooms = getStaticRoomData(language);
