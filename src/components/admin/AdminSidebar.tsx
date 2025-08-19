@@ -22,6 +22,11 @@ export function AdminSidebar() {
       description: "Manage booking requests"
     },
     {
+      name: "Cashflow",
+      href: "/admin/dashboard/cashflow",
+      description: "Financial tracking"
+    },
+    {
       name: "WhatsApp",
       href: "/admin/dashboard/whatsapp",
       description: "WhatsApp settings"
