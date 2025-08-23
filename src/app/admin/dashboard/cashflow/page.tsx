@@ -55,6 +55,8 @@ import {
 } from "@/services/support-cost.service";
 import { SupportCostModal } from "@/components/admin/SupportCostModal";
 import { toast } from "sonner";
+import { adminBookingService } from "@/services/admin-booking.service";
+import { Booking, BookingDocument } from "@/components/admin/types";
 
 // Using CashflowEntry and CashflowStats from service
 
@@ -116,6 +118,13 @@ export default function CashflowPage() {
         useState<SupportCost | null>(null);
     const [isSupportCostModalOpen, setIsSupportCostModalOpen] = useState(false);
 
+    // Booking Receipts state
+    const [bookingReceipts, setBookingReceipts] = useState<{
+        booking: Booking;
+        receipt: BookingDocument;
+    }[]>([]);
+    const [bookingReceiptsLoading, setBookingReceiptsLoading] = useState(false);
+
     const [activeSection, setActiveSection] = useState<
         "income" | "fixed-costs" | "variable-costs" | "support-costs"
     >("income");
@@ -136,6 +145,8 @@ export default function CashflowPage() {
                         partialPayments: 0,
                     }
                 );
+
+                console.log(result.entries);
             } else {
                 toast.error(result.error || "Failed to fetch cashflow data");
             }
@@ -203,11 +214,40 @@ export default function CashflowPage() {
         }
     };
 
+    const fetchBookingReceipts = async () => {
+        try {
+            setBookingReceiptsLoading(true);
+            const result = await adminBookingService.getAllBookings();
+            
+            if (result.success && result.bookings) {
+                const receipts = result.bookings
+                    .filter(booking => 
+                        booking.documents && 
+                        booking.documents.some((doc: BookingDocument) => doc.type === 'RECEIPT')
+                    )
+                    .map(booking => {
+                        const receipt = booking.documents.find((doc: BookingDocument) => doc.type === 'RECEIPT')!;
+                        return { booking, receipt };
+                    });
+                
+                setBookingReceipts(receipts);
+            } else {
+                toast.error(result.error || "Failed to fetch booking receipts");
+            }
+        } catch (error) {
+            console.error("Error fetching booking receipts:", error);
+            toast.error("Failed to fetch booking receipts");
+        } finally {
+            setBookingReceiptsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchCashflowData();
         fetchFixedCosts();
         fetchVariableCosts();
         fetchSupportCosts();
+        fetchBookingReceipts();
     }, []);
 
     // Filter entries based on active filter
@@ -387,6 +427,7 @@ export default function CashflowPage() {
         fetchFixedCosts();
         fetchVariableCosts();
         fetchSupportCosts();
+        fetchBookingReceipts();
     };
 
     const formatCurrency = CashflowService.formatCurrency;
@@ -459,6 +500,16 @@ export default function CashflowPage() {
             console.error("Error formatting date:", error);
             return "-";
         }
+    };
+
+    // Function to get receipt for a booking entry
+    const getReceiptForEntry = (entry: CashflowEntry) => {
+        const matchingReceipt = bookingReceipts.find(({ booking }) => 
+            booking.id === entry.id
+        );
+
+        console.log(matchingReceipt);
+        return matchingReceipt?.receipt;
     };
 
     return (
@@ -541,6 +592,7 @@ export default function CashflowPage() {
                     <Headphones className="h-4 w-4 mr-2" />
                     Support
                 </Button>
+
             </div>
 
             {/* Summary Cards - Always Visible */}
@@ -795,128 +847,132 @@ export default function CashflowPage() {
                                     : "Try changing the filter to see more entries"}
                             </p>
                         </div>
-              ) : (
-                  <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                            <span className="text-lg font-semibold text-gray-900">Financial Tracking</span>
-                            <span className="text-sm font-normal text-gray-500">
-                                Showing {filteredEntries.length} of {entries.length} entries
-                            </span>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {loading ? (
-                        <div className="flex items-center justify-center p-8">
-                          <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
-                          <span className="ml-2 text-gray-600">
-                            Loading cashflow data...
-                          </span>
-                        </div>
-                      ) : filteredEntries.length === 0 ? (
-                        <div className="text-center p-8 text-gray-500">
-                          <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                          <p>No entries found for the selected filter</p>
-                          <p className="text-sm">
-                            {entries.length === 0
-                              ? "Approved bookings will appear here automatically"
-                              : "Try changing the filter to see more entries"}
-                          </p>
-                        </div>
-                      ) : (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Content</TableHead>
-                              <TableHead>Harga</TableHead>
-                              <TableHead>Dibayar</TableHead>
-                              <TableHead>Sisa</TableHead>
-                              <TableHead>Direction</TableHead>
-                              <TableHead>1st Payment</TableHead>
-                              <TableHead>2nd Payment</TableHead>
-                              <TableHead>Room</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {filteredEntries.map((entry) => (
-                              <TableRow key={entry.id}>
-                                <TableCell>
-                                  {getStatusBadge(entry.status)}
-                                </TableCell>
-                                <TableCell>
-                                  <div>
-                                    <div className="font-medium text-gray-900">
-                                      {entry.content}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {entry.checkIn} -{" "}
-                                      {entry.checkOut}
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="font-medium text-gray-900">
-                                  {formatCurrency(entry.harga)}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="font-medium text-green-600">
-                                    {formatCurrency(entry.dibayar)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div
-                                    className={`font-medium ${entry.sisa > 0
-                                        ? "text-red-600"
-                                        : "text-green-600"
-                                      }`}
-                                  >
-                                    {formatCurrency(entry.sisa)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {getPaymentStatusBadge(
-                                    entry.paymentStatus
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-gray-600">
-                                  {formatDate(
-                                    entry.tanggal1stPayment
-                                  )}
-                                </TableCell>
-                                <TableCell className="text-gray-600">
-                                  {formatDate(
-                                    entry.tanggal2ndPayment
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center">
-                                    <Home className="h-4 w-4 text-gray-400 mr-1" />
-                                    <span className="text-sm text-gray-600">
-                                      {entry.roomNumber} (
-                                      {entry.roomType})
+                    ) : (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center justify-between">
+                                    <span className="text-lg font-semibold text-gray-900">Financial Tracking</span>
+                                    <span className="text-sm font-normal text-gray-500">
+                                        Showing {filteredEntries.length} of {entries.length} entries
                                     </span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() =>
-                                      handleEditEntry(entry)
-                                    }
-                                    className="h-8 px-2"
-                                  >
-                                    <Edit className="h-3 w-3 mr-1" />
-                                    Edit
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>)}
-                        </CardContent>
-                      </Card>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Content</TableHead>
+                                            <TableHead>Harga</TableHead>
+                                            <TableHead>Dibayar</TableHead>
+                                            <TableHead>Sisa</TableHead>
+                                            <TableHead>Direction</TableHead>
+                                            <TableHead>1st Payment</TableHead>
+                                            <TableHead>2nd Payment</TableHead>
+                                            <TableHead>Room</TableHead>
+                                            <TableHead>Receipt</TableHead>
+                                            <TableHead>Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredEntries.map((entry) => (
+                                            <TableRow key={entry.id}>
+                                                <TableCell>
+                                                    {getStatusBadge(entry.status)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div>
+                                                        <div className="font-medium text-gray-900">
+                                                            {entry.content}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {entry.checkIn} -{" "}
+                                                            {entry.checkOut}
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="font-medium text-gray-900">
+                                                    {formatCurrency(entry.harga)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="font-medium text-green-600">
+                                                        {formatCurrency(entry.dibayar)}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div
+                                                        className={`font-medium ${entry.sisa > 0
+                                                            ? "text-red-600"
+                                                            : "text-green-600"
+                                                            }`}
+                                                    >
+                                                        {formatCurrency(entry.sisa)}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getPaymentStatusBadge(
+                                                        entry.paymentStatus
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-gray-600">
+                                                    {formatDate(
+                                                        entry.tanggal1stPayment
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-gray-600">
+                                                    {formatDate(
+                                                        entry.tanggal2ndPayment
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center">
+                                                        <Home className="h-4 w-4 text-gray-400 mr-1" />
+                                                        <span className="text-sm text-gray-600">
+                                                            {entry.roomNumber} (
+                                                            {entry.roomType})
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(() => {
+                                                        const receipt = getReceiptForEntry(entry);
+                                                        return receipt ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <FileText className="h-4 w-4 text-green-600" />
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => window.open(receipt.fileUrl, '_blank')}
+                                                                    className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
+                                                                >
+                                                                    <Eye className="h-3 w-3 mr-1" />
+                                                                    View
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-400 text-sm">No receipt</span>
+                                                        );
+                                                    })()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            handleEditEntry(entry)
+                                                        }
+                                                        className="h-8 px-2"
+                                                    >
+                                                        <Edit className="h-3 w-3 mr-1" />
+                                                        Edit
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
                     )}
                 </>
             ) : activeSection === "fixed-costs" ? (
@@ -1157,7 +1213,7 @@ export default function CashflowPage() {
                         )}
                     </CardContent>
                 </Card>
-            ) : (
+            ) : activeSection === "support-costs" ? (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
@@ -1276,6 +1332,9 @@ export default function CashflowPage() {
                         )}
                     </CardContent>
                 </Card>
+
+            ) : (
+                <></>
             )}
 
             {/* Edit Modals */}
@@ -1307,5 +1366,6 @@ export default function CashflowPage() {
                 onSave={handleSaveSupportCost}
             />
         </div>
+        
     );
 }
