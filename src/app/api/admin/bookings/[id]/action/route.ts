@@ -10,11 +10,11 @@ export async function POST(
     const { action } = await request.json();
     const resolvedParams = await params;
 
-    if (!['approve', 'reject', 'cancel'].includes(action)) {
+    if (!['approve', 'reject', 'cancel', 'reactivate'].includes(action)) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid action. Must be approve, reject, or cancel' 
+          error: 'Invalid action. Must be approve, reject, cancel, or reactivate' 
         },
         { status: 400 }
       );
@@ -44,11 +44,24 @@ export async function POST(
       case 'cancel':
         newRentalStatus = 'CANCEL';
         break;
+      case 'reactivate':
+        // Only allow reactivation if currently CANCEL
+        if (booking.rentalStatus !== 'CANCEL') {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: 'Can only reactivate cancelled bookings' 
+            },
+            { status: 400 }
+          );
+        }
+        newRentalStatus = 'PENDING';
+        break;
       default:
         return NextResponse.json(
           { 
             success: false, 
-            error: 'Invalid action. Only approve, reject, or cancel allowed.' 
+            error: 'Invalid action. Only approve, reject, cancel, or reactivate allowed.' 
           },
           { status: 400 }
         );
@@ -63,9 +76,28 @@ export async function POST(
     // Fetch updated booking
     const updatedBooking = await getBookingById(resolvedParams.id);
 
+    // Generate appropriate success message
+    let successMessage: string;
+    switch (action) {
+      case 'approve':
+        successMessage = 'Booking approved successfully';
+        break;
+      case 'reject':
+        successMessage = 'Booking rejected successfully';
+        break;
+      case 'cancel':
+        successMessage = 'Booking cancelled successfully';
+        break;
+      case 'reactivate':
+        successMessage = 'Booking reactivated successfully';
+        break;
+      default:
+        successMessage = 'Booking updated successfully';
+    }
+
     return NextResponse.json({ 
       success: true, 
-      message: `Booking ${action}d successfully`,
+      message: successMessage,
       booking: updatedBooking
     });
   } catch (error) {

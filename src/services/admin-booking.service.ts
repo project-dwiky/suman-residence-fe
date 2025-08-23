@@ -44,10 +44,10 @@ export class AdminBookingService {
     }
   }
 
-  // Approve, reject, or cancel a booking - simplified actions
+  // Approve, reject, cancel, or reactivate a booking - simplified actions
   static async updateBookingStatus(
     bookingId: string, 
-    action: 'approve' | 'reject' | 'cancel'
+    action: 'approve' | 'reject' | 'cancel' | 'reactivate'
   ): Promise<AdminBookingResponse> {
     try {
       const response = await fetch(`${BASE_URL}/admin/bookings/${bookingId}/action`, {
@@ -258,6 +258,108 @@ wa.me/6281234567890
     const whatsappUrl = `https://wa.me/+${phoneNumber}?text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
+  }
+
+  // Continue booking by creating a new booking with same details but extended dates
+  static async continueBooking(originalBooking: any): Promise<AdminBookingResponse> {
+    
+    try {
+      // Validate required fields
+      if (!originalBooking.rentalPeriod?.startDate || !originalBooking.rentalPeriod?.endDate || !originalBooking.rentalPeriod?.durationType) {
+        throw new Error('Invalid booking data: missing rental period information');
+      }
+
+      if (!originalBooking.userId || !originalBooking.room?.roomNumber) {
+        throw new Error('Invalid booking data: missing user or room information');
+      }
+
+      // Calculate new start date (end date of original booking)
+      const originalEndDate = new Date(originalBooking.rentalPeriod.endDate);
+      const newStartDate = new Date(originalEndDate);
+      
+      // Ensure we're working with valid dates
+      if (isNaN(newStartDate.getTime())) {
+        throw new Error('Invalid end date in original booking');
+      }
+      
+      // Calculate new end date based on duration type
+      let newEndDate = new Date(newStartDate);
+      switch (originalBooking.rentalPeriod.durationType) {
+        case 'WEEKLY':
+          newEndDate.setDate(newStartDate.getDate() + 7);
+          break;
+        case 'MONTHLY':
+          newEndDate.setDate(newStartDate.getDate() + 30);
+          break;
+        case 'SEMESTER':
+          newEndDate.setDate(newStartDate.getDate() + (30 * 6));
+          break;
+        case 'YEARLY':
+          newEndDate.setDate(newStartDate.getDate() + 365);
+          break;
+        default:
+          newEndDate.setDate(newStartDate.getDate() + 30);
+      }
+
+      // Validate new end date
+      if (isNaN(newEndDate.getTime())) {
+        throw new Error('Failed to calculate new end date');
+      }
+
+      // Prepare new booking data
+      const newBookingData = {
+        userId: originalBooking.userId,
+        room: {
+          roomNumber: originalBooking.room.roomNumber,
+          type: originalBooking.room.type,
+        },
+        contactInfo: originalBooking.contactInfo,
+        rentalPeriod: {
+          startDate: newStartDate,
+          endDate: newEndDate,
+          durationType: originalBooking.rentalPeriod.durationType
+        },
+        pricing: {
+          amount: originalBooking.pricing?.amount || 0,
+          currency: originalBooking.pricing?.currency || 'IDR',
+          paidAmount: 0 // Reset paid amount for new booking
+        },
+        notes: `Lanjutan dari booking ${originalBooking.id} - ${originalBooking.rentalPeriod.startDate} s/d ${originalBooking.rentalPeriod.endDate}`,
+        rentalStatus: 'PENDING' // Start as pending for admin approval
+      };
+
+      console.log('🔄 Creating continuation booking:', {
+        originalId: originalBooking.id,
+        newStartDate: newStartDate.toISOString(),
+        newEndDate: newEndDate.toISOString(),
+        durationType: originalBooking.rentalPeriod.durationType
+      });
+
+      // Create new booking via API
+      const response = await fetch(`${BASE_URL}/bookings`, {
+        method: 'POST',
+        headers: AdminBookingService.getHeaders(),
+        body: JSON.stringify(newBookingData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || result.message || 'Failed to continue booking');
+      }
+
+      return {
+        success: true,
+        booking: result.booking,
+        message: `Booking berhasil dilanjutkan dengan ID: ${result.bookingId}`
+      };
+    } catch (error: any) {
+      console.error('Error continuing booking:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to continue booking'
+      };
+    }
   }
 }
 

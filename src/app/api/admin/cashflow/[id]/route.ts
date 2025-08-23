@@ -46,22 +46,16 @@ export async function PUT(
       );
     }
 
-    // Get booking price (read-only from booking data)
-    const totalPrice = (booking as any).pricing?.amount || 0;
+    // Get current pricing information
+    const currentPricing = (booking as any).pricing || {};
+    const totalPrice = currentPricing.amount || 0;
     const remainingAmount = Math.max(0, totalPrice - dibayar);
 
-    // Update booking with payment information
-    // Note: We're storing payment info in a custom field since the original booking model doesn't have these fields
+    // Update booking with payment information using the new pricing.paidAmount field
     const updateData = {
-      // Store payment tracking in a nested object
-      paymentTracking: {
-        totalPrice: totalPrice,
-        amountPaid: dibayar,
-        remainingAmount: remainingAmount,
-        paymentStatus: paymentStatus,
-        lastPaymentDate: new Date().toISOString(),
-        secondPaymentDate: tanggal2ndPayment || null,
-        updatedAt: new Date().toISOString()
+      pricing: {
+        ...currentPricing,
+        paidAmount: dibayar
       },
       updatedAt: new Date()
     };

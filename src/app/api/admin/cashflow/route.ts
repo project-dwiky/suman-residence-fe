@@ -11,15 +11,24 @@ export async function GET(request: NextRequest) {
     
     // Transform bookings into cashflow entries
     const entries = approvedBookings.map(booking => {
-      // Check if booking has payment tracking data
-      const paymentTracking = (booking as any).paymentTracking;
+      // Get booking price and paid amount from pricing field
+      const pricing = (booking as any).pricing;
+      const actualPrice = pricing?.amount || 0;
+      const paidAmount = pricing?.paidAmount || 0;
       
-      // Get booking price from pricing.amount field only (read-only)
-      const actualPrice = (booking as any).pricing?.amount || 0;
-      
-      let dibayar = paymentTracking?.amountPaid || 0;
+      let dibayar = paidAmount;
       let sisa = actualPrice - dibayar;
-      let paymentStatus = paymentTracking?.paymentStatus || 'Not Paid';
+      
+      // Determine payment status based on paid amount
+      let paymentStatus: "Not Paid" | "Partial" | "Paid";
+      if (dibayar === 0) {
+        paymentStatus = 'Not Paid';
+      } else if (dibayar >= actualPrice) {
+        paymentStatus = 'Paid';
+      } else {
+        paymentStatus = 'Partial';
+      }
+      
       let status: "Income" | "Pending" = paymentStatus === 'Paid' ? "Income" : "Pending";
 
       return {
@@ -32,7 +41,7 @@ export async function GET(request: NextRequest) {
         tanggal1stPayment: booking.rentalPeriod?.startDate 
           ? new Date(booking.rentalPeriod.startDate).toISOString().split('T')[0]
           : '-',
-        tanggal2ndPayment: paymentTracking?.secondPaymentDate || '-',
+        tanggal2ndPayment: '-', // Can be updated later if needed
         roomNumber: booking.room?.roomNumber || 'N/A',
         roomType: booking.room?.type || 'N/A',
         checkIn: booking.rentalPeriod?.startDate 

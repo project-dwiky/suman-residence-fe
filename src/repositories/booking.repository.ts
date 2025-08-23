@@ -32,6 +32,11 @@ export interface Booking {
   room: BookingRoom;
   rentalStatus: 'PENDING' | 'APPROVED' | 'CANCEL';
   rentalPeriod: BookingPeriod;
+  pricing?: {
+    amount: number;
+    currency: string;
+    paidAmount?: number;
+  };
   documents: BookingDocument[];
   notes?: string;
   createdAt: Date;
