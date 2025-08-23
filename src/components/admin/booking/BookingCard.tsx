@@ -368,13 +368,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
               </div>
             </div>
 
-            {booking.notes && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-1">Catatan</h4>
-                <p className="text-sm text-gray-600">{booking.notes}</p>
-              </div>
-            )}
-
             {/* Document Management Section */}
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <h4 className="font-medium text-gray-900 mb-3">

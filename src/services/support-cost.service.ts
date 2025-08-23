@@ -6,8 +6,12 @@ export interface SupportCost {
   caption: string; // Description/title
   harga: number; // Amount
   tanggal: string; // Date (YYYY-MM-DD)
-  createdAt: Date | string | any;
-  updatedAt: Date | string | any;
+  receiptFile?: {
+    url: string;
+    fileName: string;
+  };
+  createdAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
+  updatedAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
 }
 
 export interface SupportCostResponse {
@@ -67,6 +71,10 @@ export class SupportCostService {
     caption: string;
     harga: number;
     tanggal: string;
+    receiptFile?: {
+      url: string;
+      fileName: string;
+    };
   }): Promise<SupportCostResponse> {
     try {
       const response = await fetch(`${BASE_URL}/api/admin/support-costs`, {
@@ -103,6 +111,10 @@ export class SupportCostService {
       caption: string;
       harga: number;
       tanggal: string;
+      receiptFile?: {
+        url: string;
+        fileName: string;
+      };
     }
   ): Promise<SupportCostResponse> {
     try {

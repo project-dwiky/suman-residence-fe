@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Save, Plus, Edit } from "lucide-react";
 import { FixedCost, FixedCostService } from "@/services/fixed-cost.service";
+import { FileUpload } from "@/components/ui/file-upload";
 import { toast } from "sonner";
 
 interface FixedCostModalProps {
@@ -25,6 +26,10 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
     harga: 0,
     tanggal: new Date().toISOString().split('T')[0] // Today's date
   });
+  const [receiptFile, setReceiptFile] = useState<{
+    url: string;
+    fileName: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const isEditing = !!fixedCost;
 
@@ -37,6 +42,13 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
         harga: fixedCost.harga,
         tanggal: fixedCost.tanggal
       });
+      // Set receipt file if exists
+      if (fixedCost.receiptFile) {
+        setReceiptFile({
+          url: fixedCost.receiptFile.url,
+          fileName: fixedCost.receiptFile.fileName
+        });
+      }
     } else {
       // Creating new fixed cost
       setFormData({
@@ -45,6 +57,7 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
         harga: 0,
         tanggal: new Date().toISOString().split('T')[0]
       });
+      setReceiptFile(null);
     }
   }, [fixedCost]);
 
@@ -53,6 +66,42 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
       ...prev,
       [field]: field === 'harga' ? Number(value) : value
     }));
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal upload file ke storage');
+      }
+
+      const uploadResult = await response.json();
+      
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload gagal');
+      }
+
+      setReceiptFile({
+        url: uploadResult.url,
+        fileName: file.name
+      });
+
+      return { success: true, url: uploadResult.url };
+    } catch (error: any) {
+      console.error('Error uploading file:', error);
+      return { success: false, error: error.message || 'Gagal upload file' };
+    }
+  };
+
+  const handleFileRemove = () => {
+    setReceiptFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,13 +126,22 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
     try {
       setLoading(true);
       
+      // Prepare data with receipt file
+      const submitData = {
+        ...formData,
+        receiptFile: receiptFile ? {
+          url: receiptFile.url,
+          fileName: receiptFile.fileName
+        } : undefined
+      };
+      
       let result;
       if (isEditing && fixedCost) {
         // Update existing fixed cost
-        result = await FixedCostService.updateFixedCost(fixedCost.id, formData);
+        result = await FixedCostService.updateFixedCost(fixedCost.id, submitData);
       } else {
         // Create new fixed cost
-        result = await FixedCostService.createFixedCost(formData);
+        result = await FixedCostService.createFixedCost(submitData);
       }
 
       if (result.success) {
@@ -222,6 +280,23 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
               </div>
             </div>
 
+            {/* Receipt Upload */}
+            <div>
+              <FileUpload
+                label="Proof of Payment Receipt (Optional)"
+                onFileUpload={handleFileUpload}
+                onFileRemove={handleFileRemove}
+                currentFileUrl={receiptFile?.url}
+                currentFileName={receiptFile?.fileName}
+                accept=".pdf,.jpg,.jpeg,.png,.docx"
+                maxSize={10}
+                disabled={loading}
+              />
+              <div className="text-sm text-gray-500 mt-1">
+                Upload receipt, invoice, or proof of payment for this expense
+              </div>
+            </div>
+
             {/* Preview Card */}
             <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
               <h4 className="font-medium text-gray-900 mb-2">Preview</h4>
@@ -244,6 +319,12 @@ export function FixedCostModal({ fixedCost, isOpen, onClose, onSave }: FixedCost
                   <span className="text-gray-600">Status:</span>
                   <div>{getStatusBadge(formData.status)}</div>
                 </div>
+                {receiptFile && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Receipt:</span>
+                    <span className="font-medium text-green-600">{receiptFile.fileName}</span>
+                  </div>
+                )}
               </div>
             </div>
 

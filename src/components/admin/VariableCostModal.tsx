@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Save, Plus, Edit } from "lucide-react";
 import { VariableCost, VariableCostService } from "@/services/variable-cost.service";
+import { FileUpload } from "@/components/ui/file-upload";
 import { toast } from "sonner";
 
 interface VariableCostModalProps {
@@ -25,6 +26,10 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
     harga: 0,
     tanggal: new Date().toISOString().split('T')[0] // Today's date
   });
+  const [receiptFile, setReceiptFile] = useState<{
+    url: string;
+    fileName: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const isEditing = !!variableCost;
 
@@ -37,6 +42,13 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
         harga: variableCost.harga,
         tanggal: variableCost.tanggal
       });
+      // Set receipt file if exists
+      if (variableCost.receiptFile) {
+        setReceiptFile({
+          url: variableCost.receiptFile.url,
+          fileName: variableCost.receiptFile.fileName
+        });
+      }
     } else {
       // Creating new variable cost
       setFormData({
@@ -45,6 +57,7 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
         harga: 0,
         tanggal: new Date().toISOString().split('T')[0]
       });
+      setReceiptFile(null);
     }
   }, [variableCost]);
 
@@ -53,6 +66,42 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
       ...prev,
       [field]: field === 'harga' ? Number(value) : value
     }));
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal upload file ke storage');
+      }
+
+      const uploadResult = await response.json();
+      
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload gagal');
+      }
+
+      setReceiptFile({
+        url: uploadResult.url,
+        fileName: file.name
+      });
+
+      return { success: true, url: uploadResult.url };
+    } catch (error: any) {
+      console.error('Error uploading file:', error);
+      return { success: false, error: error.message || 'Gagal upload file' };
+    }
+  };
+
+  const handleFileRemove = () => {
+    setReceiptFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,13 +126,22 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
     try {
       setLoading(true);
       
+      // Prepare data with receipt file
+      const submitData = {
+        ...formData,
+        receiptFile: receiptFile ? {
+          url: receiptFile.url,
+          fileName: receiptFile.fileName
+        } : undefined
+      };
+      
       let result;
       if (isEditing && variableCost) {
         // Update existing variable cost
-        result = await VariableCostService.updateVariableCost(variableCost.id, formData);
+        result = await VariableCostService.updateVariableCost(variableCost.id, submitData);
       } else {
         // Create new variable cost
-        result = await VariableCostService.createVariableCost(formData);
+        result = await VariableCostService.createVariableCost(submitData);
       }
 
       if (result.success) {
@@ -222,8 +280,25 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
               </div>
             </div>
 
+            {/* Receipt Upload */}
+            <div>
+              <FileUpload
+                label="Proof of Payment Receipt (Optional)"
+                onFileUpload={handleFileUpload}
+                onFileRemove={handleFileRemove}
+                currentFileUrl={receiptFile?.url}
+                currentFileName={receiptFile?.fileName}
+                accept=".pdf,.jpg,.jpeg,.png,.docx"
+                maxSize={10}
+                disabled={loading}
+              />
+              <div className="text-sm text-gray-500 mt-1">
+                Upload receipt, invoice, or proof of payment for this expense
+              </div>
+            </div>
+
             {/* Preview Card */}
-            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-purple-500">
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
               <h4 className="font-medium text-gray-900 mb-2">Preview</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -244,6 +319,12 @@ export function VariableCostModal({ variableCost, isOpen, onClose, onSave }: Var
                   <span className="text-gray-600">Status:</span>
                   <div>{getStatusBadge(formData.status)}</div>
                 </div>
+                {receiptFile && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Receipt:</span>
+                    <span className="font-medium text-green-600">{receiptFile.fileName}</span>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -18,6 +18,8 @@ import {
     CreditCard,
     ShoppingCart,
     Headphones,
+    FileText,
+    Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -952,6 +954,7 @@ export default function CashflowPage() {
                                         <TableHead>Description</TableHead>
                                         <TableHead>Amount</TableHead>
                                         <TableHead>Date</TableHead>
+                                        <TableHead>Receipt</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -979,6 +982,24 @@ export default function CashflowPage() {
                                             </TableCell>
                                             <TableCell className="text-gray-600">
                                                 {formatDate(cost.tanggal)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {cost.receiptFile ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <FileText className="h-4 w-4 text-green-600" />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
+                                                        >
+                                                            <Eye className="h-3 w-3 mr-1" />
+                                                            View
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2">
@@ -1052,6 +1073,7 @@ export default function CashflowPage() {
                                         <TableHead>Description</TableHead>
                                         <TableHead>Amount</TableHead>
                                         <TableHead>Date</TableHead>
+                                        <TableHead>Receipt</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -1079,6 +1101,24 @@ export default function CashflowPage() {
                                             </TableCell>
                                             <TableCell className="text-gray-600">
                                                 {formatDate(cost.tanggal)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {cost.receiptFile ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <FileText className="h-4 w-4 text-green-600" />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
+                                                        >
+                                                            <Eye className="h-3 w-3 mr-1" />
+                                                            View
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2">
@@ -1152,6 +1192,7 @@ export default function CashflowPage() {
                                         <TableHead>Description</TableHead>
                                         <TableHead>Amount</TableHead>
                                         <TableHead>Date</TableHead>
+                                        <TableHead>Receipt</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -1179,6 +1220,24 @@ export default function CashflowPage() {
                                             </TableCell>
                                             <TableCell className="text-gray-600">
                                                 {formatDate(cost.tanggal)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {cost.receiptFile ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <FileText className="h-4 w-4 text-green-600" />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
+                                                        >
+                                                            <Eye className="h-3 w-3 mr-1" />
+                                                            View
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-2">

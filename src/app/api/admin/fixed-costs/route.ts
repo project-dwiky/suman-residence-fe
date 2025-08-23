@@ -8,6 +8,10 @@ export interface FixedCost {
   caption: string; // Description/title
   harga: number; // Amount
   tanggal: string; // Date (YYYY-MM-DD)
+  receiptFile?: {
+    url: string;
+    fileName: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new fixed cost
 export async function POST(request: NextRequest) {
   try {
-    const { status, caption, harga, tanggal } = await request.json();
+    const { status, caption, harga, tanggal, receiptFile } = await request.json();
 
     // Validation
     if (!caption || !caption.trim()) {
@@ -87,6 +91,7 @@ export async function POST(request: NextRequest) {
       caption: caption.trim(),
       harga: Number(harga),
       tanggal,
+      receiptFile: receiptFile || null,
       createdAt: now,
       updatedAt: now
     });

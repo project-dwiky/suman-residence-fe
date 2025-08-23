@@ -6,6 +6,10 @@ export interface FixedCost {
   caption: string; // Description/title
   harga: number; // Amount
   tanggal: string; // Date (YYYY-MM-DD)
+  receiptFile?: {
+    url: string;
+    fileName: string;
+  };
   createdAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
   updatedAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
 }
@@ -67,6 +71,10 @@ export class FixedCostService {
     caption: string;
     harga: number;
     tanggal: string;
+    receiptFile?: {
+      url: string;
+      fileName: string;
+    };
   }): Promise<FixedCostResponse> {
     try {
       const response = await fetch(`${BASE_URL}/api/admin/fixed-costs`, {
@@ -103,6 +111,10 @@ export class FixedCostService {
       caption: string;
       harga: number;
       tanggal: string;
+      receiptFile?: {
+        url: string;
+        fileName: string;
+      };
     }
   ): Promise<FixedCostResponse> {
     try {

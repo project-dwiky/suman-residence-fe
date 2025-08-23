@@ -6,8 +6,12 @@ export interface VariableCost {
   caption: string; // Description/title
   harga: number; // Amount
   tanggal: string; // Date (YYYY-MM-DD)
-  createdAt: Date | string | any;
-  updatedAt: Date | string | any;
+  receiptFile?: {
+    url: string;
+    fileName: string;
+  };
+  createdAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
+  updatedAt: Date | string | any; // Can be Date, string, or Firestore Timestamp
 }
 
 export interface VariableCostResponse {
@@ -67,6 +71,10 @@ export class VariableCostService {
     caption: string;
     harga: number;
     tanggal: string;
+    receiptFile?: {
+      url: string;
+      fileName: string;
+    };
   }): Promise<VariableCostResponse> {
     try {
       const response = await fetch(`${BASE_URL}/api/admin/variable-costs`, {
@@ -103,6 +111,10 @@ export class VariableCostService {
       caption: string;
       harga: number;
       tanggal: string;
+      receiptFile?: {
+        url: string;
+        fileName: string;
+      };
     }
   ): Promise<VariableCostResponse> {
     try {

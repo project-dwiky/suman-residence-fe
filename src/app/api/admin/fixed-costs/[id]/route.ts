@@ -10,7 +10,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { status, caption, harga, tanggal } = await request.json();
+    const { status, caption, harga, tanggal, receiptFile } = await request.json();
     const resolvedParams = await params;
     const fixedCostId = resolvedParams.id;
 
@@ -60,6 +60,7 @@ export async function PUT(
       caption: caption.trim(),
       harga: Number(harga),
       tanggal,
+      receiptFile: receiptFile || null,
       updatedAt: Timestamp.now()
     });
 
