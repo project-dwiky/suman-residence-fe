@@ -218,7 +218,11 @@ export const getStaticRoomByType = (
     language: Language
 ): StaticRoom | null => {
     const rooms = getStaticRoomData(language);
-    return rooms.find((room) => room.type === roomType) || null;
+    
+    // Normalize room type to handle different formats
+    const normalizedType = roomType.toUpperCase().replace(/[^AB]/g, '');
+    
+    return rooms.find((room) => room.type === normalizedType) || null;
 };
 
 // Helper function to get room data for Kamar page

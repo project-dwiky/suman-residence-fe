@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 
 export interface BookingDocument {
   id: string;
-  type: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE';
+  type: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE' | 'BUKTI_TF';
   fileName: string;
   fileUrl: string;
   createdAt: Date;

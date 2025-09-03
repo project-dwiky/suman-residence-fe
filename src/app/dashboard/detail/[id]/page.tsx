@@ -11,6 +11,7 @@ interface DetailPageProps {
 
 export default async function RentalDetailView({ params }: DetailPageProps) {
   const { id } = await params;
+  console.log(id);
   
   return (
     <>

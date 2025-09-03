@@ -22,7 +22,9 @@ export enum DocumentType {
   BOOKING_SLIP = 'BOOKING_SLIP',  // Booking slip (if DP paid)
   RECEIPT = 'RECEIPT',            // Receipt + SOP (if fully paid)
   SOP = 'SOP',                    // SOP document
-  INVOICE = 'INVOICE',            // Invoice (if unpaid)
+  INVOICE = 'INVOICE',
+  BUKTI_TF = 'BUKTI_TF',
+  // Invoice (if unpaid)
 }
 
 // Room information type - simplified, removed price tracking

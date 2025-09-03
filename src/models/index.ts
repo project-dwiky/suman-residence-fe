@@ -23,7 +23,7 @@ export interface Room {
 
 export interface BookingDocument {
   id: string;
-  type: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE';
+  type: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE' | 'BUKTI_TF' ;
   fileName: string;
   fileUrl: string;
   uploadedAt: Date;

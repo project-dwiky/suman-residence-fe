@@ -274,7 +274,7 @@ const BookingManagement: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE', file: File) => {
+  const handleFileUpload = async (bookingId: string, documentType: 'BOOKING_SLIP' | 'RECEIPT' | 'SOP' | 'INVOICE' | 'BUKTI_TF', file: File) => {
     setUploadingFile(`${bookingId}-${documentType}`);
     
     try {
@@ -329,7 +329,7 @@ const BookingManagement: React.FC = () => {
     }
   };
 
-  const handleFileSelect = (bookingId: string, documentType: 'SOP') => {
+  const handleFileSelect = (bookingId: string, documentType: 'SOP' | 'BUKTI_TF') => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.jpg,.jpeg,.png,.docx';

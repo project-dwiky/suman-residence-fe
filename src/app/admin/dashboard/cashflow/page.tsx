@@ -119,10 +119,12 @@ export default function CashflowPage() {
     const [isSupportCostModalOpen, setIsSupportCostModalOpen] = useState(false);
 
     // Booking Receipts state
-    const [bookingReceipts, setBookingReceipts] = useState<{
-        booking: Booking;
-        receipt: BookingDocument;
-    }[]>([]);
+    const [bookingReceipts, setBookingReceipts] = useState<
+        {
+            booking: Booking;
+            receipt: BookingDocument[];
+        }[]
+    >([]);
     const [bookingReceiptsLoading, setBookingReceiptsLoading] = useState(false);
 
     const [activeSection, setActiveSection] = useState<
@@ -218,18 +220,17 @@ export default function CashflowPage() {
         try {
             setBookingReceiptsLoading(true);
             const result = await adminBookingService.getAllBookings();
-            
+
             if (result.success && result.bookings) {
                 const receipts = result.bookings
-                    .filter(booking => 
-                        booking.documents && 
-                        booking.documents.some((doc: BookingDocument) => doc.type === 'RECEIPT')
-                    )
-                    .map(booking => {
-                        const receipt = booking.documents.find((doc: BookingDocument) => doc.type === 'RECEIPT')!;
-                        return { booking, receipt };
-                    });
-                
+                    .map((booking: Booking) => {
+                        const receipt = (booking.documents ?? []).filter(
+                            (doc: BookingDocument) => doc.type === "BUKTI_TF"
+                        );
+                        return { booking, receipt }; // receipt is an array
+                    })
+                    .filter((item) => item.receipt.length > 0);
+
                 setBookingReceipts(receipts);
             } else {
                 toast.error(result.error || "Failed to fetch booking receipts");
@@ -504,12 +505,15 @@ export default function CashflowPage() {
 
     // Function to get receipt for a booking entry
     const getReceiptForEntry = (entry: CashflowEntry) => {
-        const matchingReceipt = bookingReceipts.find(({ booking }) => 
-            booking.id === entry.id
+        const matchingReceipt = bookingReceipts.find(
+            ({ booking }) => booking.id === entry.id
         );
 
-        console.log(matchingReceipt);
-        return matchingReceipt?.receipt;
+        if (!matchingReceipt) {
+            return [];
+        } else {
+            return matchingReceipt.receipt;
+        }
     };
 
     return (
@@ -592,7 +596,6 @@ export default function CashflowPage() {
                     <Headphones className="h-4 w-4 mr-2" />
                     Support
                 </Button>
-
             </div>
 
             {/* Summary Cards - Always Visible */}
@@ -851,9 +854,12 @@ export default function CashflowPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">
-                                    <span className="text-lg font-semibold text-gray-900">Financial Tracking</span>
+                                    <span className="text-lg font-semibold text-gray-900">
+                                        Financial Tracking
+                                    </span>
                                     <span className="text-sm font-normal text-gray-500">
-                                        Showing {filteredEntries.length} of {entries.length} entries
+                                        Showing {filteredEntries.length} of{" "}
+                                        {entries.length} entries
                                     </span>
                                 </CardTitle>
                             </CardHeader>
@@ -870,7 +876,7 @@ export default function CashflowPage() {
                                             <TableHead>1st Payment</TableHead>
                                             <TableHead>2nd Payment</TableHead>
                                             <TableHead>Room</TableHead>
-                                            <TableHead>Receipt</TableHead>
+                                            <TableHead>Bukti TF</TableHead>
                                             <TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -878,7 +884,9 @@ export default function CashflowPage() {
                                         {filteredEntries.map((entry) => (
                                             <TableRow key={entry.id}>
                                                 <TableCell>
-                                                    {getStatusBadge(entry.status)}
+                                                    {getStatusBadge(
+                                                        entry.status
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>
@@ -892,21 +900,28 @@ export default function CashflowPage() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="font-medium text-gray-900">
-                                                    {formatCurrency(entry.harga)}
+                                                    {formatCurrency(
+                                                        entry.harga
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="font-medium text-green-600">
-                                                        {formatCurrency(entry.dibayar)}
+                                                        {formatCurrency(
+                                                            entry.dibayar
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div
-                                                        className={`font-medium ${entry.sisa > 0
-                                                            ? "text-red-600"
-                                                            : "text-green-600"
-                                                            }`}
+                                                        className={`font-medium ${
+                                                            entry.sisa > 0
+                                                                ? "text-red-600"
+                                                                : "text-green-600"
+                                                        }`}
                                                     >
-                                                        {formatCurrency(entry.sisa)}
+                                                        {formatCurrency(
+                                                            entry.sisa
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
@@ -933,24 +948,42 @@ export default function CashflowPage() {
                                                         </span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="flex flex-col gap-2">
                                                     {(() => {
-                                                        const receipt = getReceiptForEntry(entry);
-                                                        return receipt ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <FileText className="h-4 w-4 text-green-600" />
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={() => window.open(receipt.fileUrl, '_blank')}
-                                                                    className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
-                                                                >
-                                                                    <Eye className="h-3 w-3 mr-1" />
-                                                                    View
-                                                                </Button>
-                                                            </div>
+                                                        const receipt =
+                                                            getReceiptForEntry(
+                                                                entry
+                                                            );
+                                                        return receipt.length >
+                                                            0 ? (
+                                                            receipt.map(
+                                                                (doc) => (
+                                                                    <div
+                                                                        key={
+                                                                            doc.id
+                                                                        }
+                                                                    >
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            onClick={() =>
+                                                                                window.open(
+                                                                                    doc.fileUrl,
+                                                                                    "_blank"
+                                                                                )
+                                                                            }
+                                                                            className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
+                                                                        >
+                                                                            <Eye className="h-3 w-3 mr-1" />
+                                                                            View
+                                                                        </Button>
+                                                                    </div>
+                                                                )
+                                                            )
                                                         ) : (
-                                                            <span className="text-gray-400 text-sm">No receipt</span>
+                                                            <span className="text-gray-400 text-sm">
+                                                                No Bukti TF
+                                                            </span>
                                                         );
                                                     })()}
                                                 </TableCell>
@@ -959,7 +992,9 @@ export default function CashflowPage() {
                                                         size="sm"
                                                         variant="outline"
                                                         onClick={() =>
-                                                            handleEditEntry(entry)
+                                                            handleEditEntry(
+                                                                entry
+                                                            )
                                                         }
                                                         className="h-8 px-2"
                                                     >
@@ -1046,7 +1081,13 @@ export default function CashflowPage() {
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            onClick={() =>
+                                                                window.open(
+                                                                    cost.receiptFile!
+                                                                        .url,
+                                                                    "_blank"
+                                                                )
+                                                            }
                                                             className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
                                                         >
                                                             <Eye className="h-3 w-3 mr-1" />
@@ -1054,7 +1095,9 @@ export default function CashflowPage() {
                                                         </Button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                    <span className="text-gray-400 text-sm">
+                                                        No receipt
+                                                    </span>
                                                 )}
                                             </TableCell>
                                             <TableCell>
@@ -1165,7 +1208,13 @@ export default function CashflowPage() {
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            onClick={() =>
+                                                                window.open(
+                                                                    cost.receiptFile!
+                                                                        .url,
+                                                                    "_blank"
+                                                                )
+                                                            }
                                                             className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
                                                         >
                                                             <Eye className="h-3 w-3 mr-1" />
@@ -1173,7 +1222,9 @@ export default function CashflowPage() {
                                                         </Button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                    <span className="text-gray-400 text-sm">
+                                                        No receipt
+                                                    </span>
                                                 )}
                                             </TableCell>
                                             <TableCell>
@@ -1284,7 +1335,13 @@ export default function CashflowPage() {
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => window.open(cost.receiptFile!.url, '_blank')}
+                                                            onClick={() =>
+                                                                window.open(
+                                                                    cost.receiptFile!
+                                                                        .url,
+                                                                    "_blank"
+                                                                )
+                                                            }
                                                             className="h-7 px-2 text-green-600 border-green-600 hover:bg-green-50"
                                                         >
                                                             <Eye className="h-3 w-3 mr-1" />
@@ -1292,7 +1349,9 @@ export default function CashflowPage() {
                                                         </Button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-gray-400 text-sm">No receipt</span>
+                                                    <span className="text-gray-400 text-sm">
+                                                        No receipt
+                                                    </span>
                                                 )}
                                             </TableCell>
                                             <TableCell>
@@ -1332,7 +1391,6 @@ export default function CashflowPage() {
                         )}
                     </CardContent>
                 </Card>
-
             ) : (
                 <></>
             )}
@@ -1366,6 +1424,5 @@ export default function CashflowPage() {
                 onSave={handleSaveSupportCost}
             />
         </div>
-        
     );
 }

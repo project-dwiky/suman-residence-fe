@@ -46,7 +46,7 @@ interface BookingCardProps {
   onSaveEdit: (bookingId: string) => void;
   onCancelEdit: () => void;
   onDeleteBooking: (bookingId: string) => void;
-  onFileSelect: (bookingId: string, documentType: 'SOP') => void;
+  onFileSelect: (bookingId: string, documentType: 'SOP' | 'BUKTI_TF') => void;
   onGenerateAllDocuments: (bookingId: string) => void;
   onDocumentDownload: (document: BookingDocument) => void;
   onContinueBooking: (booking: Booking) => void;
@@ -399,7 +399,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
               )}
 
               {/* Document Generation Buttons */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <Button
                   size="sm"
                   variant="default"
@@ -420,6 +420,17 @@ const BookingCard: React.FC<BookingCardProps> = ({
                 >
                   <Upload className="w-3 h-3 mr-1" />
                   {uploadingFile === `${booking.id}-SOP` ? 'Uploading...' : 'Upload SOP'}
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onFileSelect(booking.id, 'BUKTI_TF')}
+                  disabled={uploadingFile === `${booking.id}-BUKTI_TF`}
+                  className="text-xs"
+                >
+                  <Upload className="w-3 h-3 mr-1" />
+                  {uploadingFile === `${booking.id}-BUKTI_TF` ? 'Uploading...' : 'Upload Bukti TF'}
                 </Button>
               </div>
 
