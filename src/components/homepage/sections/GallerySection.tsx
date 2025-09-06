@@ -40,7 +40,7 @@ const GallerySection = ({ language }: GallerySectionProps) => {
         },
         {
             id: 4,
-            url: "/galeri/kamar_B/1.png",
+            url: "/galeri/トイレ.jpg",
             title: t.gallery.items.bathroom.title,
             description: t.gallery.items.bathroom.description,
             category: t.gallery.categories.bathroom,
